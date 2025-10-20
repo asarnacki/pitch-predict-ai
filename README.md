@@ -50,7 +50,7 @@ The application focuses on delivering one core value: objective, data-based matc
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone git@github.com:asarnacki/pitch-predict-ai.git
 cd pitch-predict-ai
 ```
 
@@ -73,7 +73,7 @@ FOOTBALL_DATA_API_KEY=your_football_data_api_key
 npm run dev
 ```
 
-5. Open your browser and navigate to `http://localhost:4321`
+5. Open your browser and navigate to `http://localhost:3000`
 
 ## Available Scripts
 
