@@ -6,7 +6,7 @@
 ```bash
 npm run dev
 ```
-Powinien działać na: `http://localhost:4321`
+Powinien działać na: `http://localhost:3000`
 
 ### 2. Upewnij się że Supabase działa
 ```bash
