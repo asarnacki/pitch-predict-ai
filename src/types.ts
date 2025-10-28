@@ -143,6 +143,15 @@ export interface UpdatePredictionDTO {
 }
 
 /**
+ * Represents a generic cache entry with a Time-To-Live (TTL)
+ */
+export interface CacheEntry<T> {
+  data: T
+  timestamp: number // a timestamp in milliseconds when the data was stored.
+  ttl: number // TTL in milliseconds
+}
+
+/**
  * Pagination metadata for list endpoints
  */
 export interface PaginationMetadata {
