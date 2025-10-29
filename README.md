@@ -106,6 +106,36 @@ npm run dev
 - Background result updates
 - Prediction grouping/bundling
 
+## 📚 Project Documentation
+
+Comprehensive documentation is available in the `.ai/` folder:
+
+- **`prd.md`** - Product Requirements Document (features, user stories, success metrics)
+- **`tech-stack.md`** - Technology stack justification and analysis
+- **`db-plan.md`** - Database schema, RLS policies, indexes
+- **`api-plan.md`** - REST API specification (9 endpoints)
+- **`implementation-plan.md`** - Detailed implementation guide with code examples (2,888 lines)
+- **`postman-testing-guide.md`** - API testing instructions
+- **`fullstack-architect-guide.md`** - AI agent usage guide
+
+**Start Here:** Read `implementation-plan.md` for step-by-step implementation guidance.
+
+### 📝 Session Summaries (Progress Tracking)
+
+Development progress is tracked in `.summaries/` folder:
+
+- **`session-summary.md`** - First session (Endpoint 1: GET /api/profile) ✅
+- **`session-summary-part2.md`** - Second session (Endpoints 2-3: matches, generate) ✅
+- **`session-summary-part3.md`** - Third session (Endpoints 4-5: prediction get and save) ✅
+- **`session-summary-template.md`** - Template for new summaries
+
+**Why Session Summaries?**
+- 🔄 Context continuity between coding sessions
+- 📊 Progress tracking (currently **5/9 endpoints** completed)
+- 🐛 Problems encountered and solutions
+- 📖 Learning from previous sessions
+- ✅ Test results and verification
+
 ## Project Status
 
 🚧 **In Development** - This project is currently in active development as an MVP.

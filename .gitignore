@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 #summaries
 .summaries/
+
+#claude 
+.claude/
