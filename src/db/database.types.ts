@@ -44,6 +44,7 @@ export type Database = {
           id: number
           league: string
           match_date: string
+          match_id: string | null
           note: string | null
           prediction_result: Json
           user_id: string
@@ -57,6 +58,7 @@ export type Database = {
           id?: number
           league: string
           match_date: string
+          match_id?: string | null
           note?: string | null
           prediction_result: Json
           user_id: string
@@ -70,6 +72,7 @@ export type Database = {
           id?: number
           league?: string
           match_date?: string
+          match_id?: string | null
           note?: string | null
           prediction_result?: Json
           user_id?: string

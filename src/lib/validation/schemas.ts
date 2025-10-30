@@ -40,6 +40,7 @@ export const createPredictionBodySchema = z.object({
     .max(BUSINESS_RULES.MAX_NOTE_LENGTH, `Note must not exceed ${BUSINESS_RULES.MAX_NOTE_LENGTH} characters`)
     .optional()
     .nullable(),
+  match_id: z.string().min(1).optional().nullable(),
 })
 
 // GET /api/predictions
@@ -49,4 +50,14 @@ export const getPredictionsQuerySchema = z.object({
   sort: z.enum(['created_at', 'match_date']).nullish().default('created_at'),
   order: z.enum(['asc', 'desc']).nullish().default('desc'),
   league: z.string().nullish(),
+})
+
+// GET /api/predictions/:id
+export const predictionIdParamSchema = z.object({
+  id: z.coerce.number().int().positive({ message: 'Prediction ID must be a positive integer' }),
+})
+
+// PATCH /api/predictions/:id
+export const updatePredictionBodySchema = z.object({
+  note: z.string().max(BUSINESS_RULES.MAX_NOTE_LENGTH, `Note must not exceed ${BUSINESS_RULES.MAX_NOTE_LENGTH} characters`).nullable().nullish(),
 })
