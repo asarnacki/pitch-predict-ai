@@ -29,8 +29,8 @@ export type ProfileDTO = Tables<'profiles'>
  */
 export interface MatchDTO {
   id: string
-  home_team: string
-  away_team: string
+  home_team: Team
+  away_team: Team
   match_date: string // ISO 8601 timestamp
   league: string
   status: string // e.g., "SCHEDULED", "FINISHED"
@@ -228,6 +228,15 @@ export const LEAGUE_NAMES = {
 } as const
 
 /**
+ * Supported league names to codes
+ */
+export const LEAGUE_NAME_TO_CODE: Record<string, string> = {
+  'Premier League': LEAGUE_CODES.PREMIER_LEAGUE,
+  'La Liga': LEAGUE_CODES.LA_LIGA,
+  'Bundesliga': LEAGUE_CODES.BUNDESLIGA,
+}
+
+/**
  * Business logic constants
  */
 export const BUSINESS_RULES = {
@@ -286,3 +295,11 @@ export function isValidLeagueName(
   return Object.values(LEAGUE_NAMES).includes(value as any)
 }
 
+/*
+ * Not stored in database - fetched from football-data.org
+ */
+export interface Team {
+  id: number
+  name: string
+  logo: string
+}
