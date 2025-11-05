@@ -41,8 +41,16 @@ export async function fetchUpcomingMatches(
       .slice(0, limit)
       .map((match: any) => ({
         id: match.id.toString(),
-        home_team: match.homeTeam.name,
-        away_team: match.awayTeam.name,
+        home_team: {
+          id: match.homeTeam.id,
+          name: match.homeTeam.name,
+          logo: match.homeTeam.crest,
+        },
+        away_team: {
+          id: match.awayTeam.id,
+          name: match.awayTeam.name,
+          logo: match.awayTeam.crest,
+        },
         match_date: match.utcDate,
         league: leagueCodeToName[leagueCode] || leagueCode,
         status: match.status,
