@@ -1,8 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { PredictionPanel } from "../components/PredictionPanel";
+import { Toaster } from "../components/ui/sonner";
 ---
 
 <Layout>
   <PredictionPanel client:load />
+  <Toaster client:load />
 </Layout>
