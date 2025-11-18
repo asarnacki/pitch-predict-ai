@@ -47,6 +47,7 @@ export type Database = {
           match_id: string | null
           note: string | null
           prediction_result: Json
+          user_choice: string | null
           user_id: string
         }
         Insert: {
@@ -61,6 +62,7 @@ export type Database = {
           match_id?: string | null
           note?: string | null
           prediction_result: Json
+          user_choice?: string | null
           user_id: string
         }
         Update: {
@@ -75,6 +77,7 @@ export type Database = {
           match_id?: string | null
           note?: string | null
           prediction_result?: Json
+          user_choice?: string | null
           user_id?: string
         }
         Relationships: [

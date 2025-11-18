@@ -35,6 +35,7 @@ export const createPredictionBodySchema = z.object({
       },
       { message: 'Probabilities must sum to approximately 1.0' }
     ),
+  user_choice: z.enum(['home', 'draw', 'away']).optional().nullable(),
   note: z
     .string()
     .max(BUSINESS_RULES.MAX_NOTE_LENGTH, `Note must not exceed ${BUSINESS_RULES.MAX_NOTE_LENGTH} characters`)

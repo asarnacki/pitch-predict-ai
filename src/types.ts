@@ -68,6 +68,11 @@ export interface PredictionProbabilities {
   away: number // 0-1, probability of away win
 }
 
+/**
+ * User's prediction choice - which team they think will win
+ */
+export type UserChoice = 'home' | 'draw' | 'away'
+
 // ============================================================================
 // AI PREDICTION DTOs
 // ============================================================================
