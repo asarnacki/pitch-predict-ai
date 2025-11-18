@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Accordion } from '@/components/ui/accordion'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MatchCard } from './MatchCard'
-import type { MatchDTO } from '@/types'
+import type { MatchDTO, UserChoice } from '@/types'
 import type { PredictionState } from './hooks/usePredictionPanel'
 
 interface MatchListProps {
@@ -10,7 +10,7 @@ interface MatchListProps {
   isLoading: boolean
   predictionsState: Record<string, PredictionState>
   onGeneratePrediction: (match: MatchDTO) => void
-  onSavePrediction: (matchId: string, note: string | null) => void
+  onSavePrediction: (matchId: string, note: string | null, userChoice: UserChoice | null) => void
 }
 
 export function MatchList({

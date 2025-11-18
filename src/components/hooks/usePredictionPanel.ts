@@ -8,6 +8,7 @@ import type {
   GeneratePredictionRequestDTO,
   CreatePredictionDTO,
   PredictionDTO,
+  UserChoice,
 } from '@/types'
 import { LEAGUE_CODES } from '@/types'
 import { getLeagueCodeFromName } from '@/lib/utils'
@@ -161,7 +162,7 @@ export function usePredictionPanel() {
 
   // Save prediction (for authenticated users)
   const savePrediction = useCallback(
-    async (matchId: string, note: string | null) => {
+    async (matchId: string, note: string | null, userChoice: UserChoice | null) => {
       const prediction = state.predictions[matchId]
 
       if (!prediction || !prediction.data) {
@@ -188,6 +189,7 @@ export function usePredictionPanel() {
           league: prediction.data.league,
           match_date: prediction.data.match_date,
           prediction_result: prediction.data.prediction,
+          user_choice: userChoice || null,
           note: note || null,
         }
 
