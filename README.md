@@ -131,19 +131,46 @@ Development progress is tracked in `.summaries/` folder:
 - **`session-summary-part5.md`** - Sesja 5: Frontend – Panel Predykcji (UI) ✅
 - **`session-summary-part6.md`** - Sesja 6: Podpięcie Panelu w `index.astro` + integracje ✅
 - **`session-summary-part7.md`** - Sesja 7: UX polish + dokumentacja ✅
-- **`session-summary-part8.md`** - Sesja 8: Dark/Light Mode + UI Refactor (RWD) ✅
+- **`session-summary-part8.md`** - Sesja 8: Frontend – Auth UI (login, register, reset) ✅
+- **`session-summary-part9.md`** - Sesja 9: Auth Backend (middleware + 5 API endpoints) ✅
+- **`session-summary-part10.md`** - Sesja 10: User Choice + Saved Predictions View ✅
+- **`session-summary-part11.md`** - Sesja 11: UX/UI Polish & Coupon Redesign ✅ (1 bug)
 - **`session-summary-template.md`** - Template for new summaries
 
 **Why Session Summaries?**
 - 🔄 Context continuity between coding sessions
-- 📊 Progress tracking (currently **9/9 endpoints** + UI with Dark Mode & RWD)
+- 📊 Progress tracking (currently **14/14 endpoints** + Full-Stack Auth + Interactive UI + UX Polish)
 - 🐛 Problems encountered and solutions
 - 📖 Learning from previous sessions
 - ✅ Test results and verification
 
 ## Project Status
 
-🚧 **In Development** - MVP backend complete (9/9 endpoints), frontend with Dark/Light Mode & responsive design.
+🚀 **MVP Nearly Complete** - Full-stack authentication, interactive predictions, saved predictions view.
+
+### Implementation Progress
+
+#### ✅ Backend Complete
+- **Core API**: 9/9 endpoints (profile, matches, predictions CRUD, AI generation)
+- **Authentication**: 5/5 endpoints (login, register, logout, password reset/update)
+- **Middleware**: Cookie-based session management + route protection
+- **Database**: PostgreSQL with user_choice field for prediction tracking
+
+#### ✅ Frontend Complete
+- **Prediction Panel**: Interactive AI predictions with user choice selection
+- **Authentication UI**: Login, register, password reset pages
+- **Saved Predictions**: View, filter, and manage saved predictions (/predictions page)
+- **Navigation**: UserNav with auth state + "Zapisane" button
+- **Theming**: Dark/Light mode toggle
+- **Responsive**: Mobile-first design (360px - 1440px+)
+
+#### 🔜 MVP Polish
+- Loading states for async operations
+- Custom delete confirmation dialogs
+- Polish translations for user_choice labels
+- Filter by league dropdown
+- Edit note inline feature
+- Verify match result feature (US-010)
 
 ### Key Metrics
 - **Authentication Stability**: Target 100% successful login/registration operations

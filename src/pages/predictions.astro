@@ -1,0 +1,31 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { SavedPredictionsList } from "../components/SavedPredictionsList";
+import { Toaster } from "../components/ui/sonner";
+
+// This page is protected by middleware (src/middleware/index.ts)
+// If user is not authenticated, they will be redirected to /login
+const user = Astro.locals.user;
+
+if (!user) {
+  return Astro.redirect('/login');
+}
+---
+
+<Layout title="Zapisane Predykcje - PitchPredict AI">
+  <div class="min-h-screen bg-background">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 max-w-7xl">
+      <header class="mb-8 sm:mb-12 space-y-2">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
+          Twoje Predykcje
+        </h1>
+        <p class="text-base sm:text-lg text-muted-foreground">
+          Przeglądaj swoje zapisane predykcje meczów
+        </p>
+      </header>
+
+      <SavedPredictionsList client:load />
+    </div>
+  </div>
+  <Toaster client:load />
+</Layout>

@@ -1,15 +1,11 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { LogIn, UserPlus, LogOut, User } from 'lucide-react'
+import { LogIn, UserPlus, LogOut, User as UserIcon, Bookmark } from 'lucide-react'
 import { toast } from 'sonner'
-
-interface User {
-  id: string
-  email: string
-}
+import type { User } from '@supabase/supabase-js'
 
 interface UserNavProps {
-  user?: User
+  user: User | null
 }
 
 export function UserNav({ user }: UserNavProps) {
@@ -69,11 +65,22 @@ export function UserNav({ user }: UserNavProps) {
     )
   }
 
-  // If user is logged in, show user info and logout button
+  // If user is logged in, show user info, predictions link, and logout button
   return (
-    <nav className="flex items-center gap-2 sm:gap-4">
+    <nav className="flex items-center gap-2 sm:gap-3">
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild
+        className="text-xs sm:text-sm"
+      >
+        <a href="/predictions">
+          <Bookmark className="sm:mr-2 size-4" />
+          <span className="hidden sm:inline">Zapisane</span>
+        </a>
+      </Button>
       <div className="flex items-center gap-2 px-3 py-1.5 bg-accent/50 rounded-md">
-        <User className="size-4 text-muted-foreground" />
+        <UserIcon className="size-4 text-muted-foreground" />
         <span className="text-xs sm:text-sm font-medium truncate max-w-[100px] sm:max-w-[150px]">
           {user.email}
         </span>

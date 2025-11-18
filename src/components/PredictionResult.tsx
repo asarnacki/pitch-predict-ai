@@ -1,13 +1,14 @@
+import { useState } from 'react'
 import { Spinner } from './Spinner'
 import { BarChart } from './BarChart'
 import { SavePredictionForm } from './SavePredictionForm'
-import type { MatchDTO } from '@/types'
+import type { MatchDTO, UserChoice } from '@/types'
 import type { PredictionState } from './hooks/usePredictionPanel'
 
 interface PredictionResultProps {
   match: MatchDTO
   predictionState?: PredictionState
-  onSave: (matchId: string, note: string | null) => void
+  onSave: (matchId: string, note: string | null, userChoice: UserChoice | null) => void
 }
 
 export function PredictionResult({
@@ -15,6 +16,13 @@ export function PredictionResult({
   predictionState,
   onSave,
 }: PredictionResultProps) {
+  const [userChoice, setUserChoice] = useState<UserChoice | null>(null)
+
+  // Toggle behavior: clicking the same bar deselects it
+  const handleChoiceSelect = (choice: UserChoice) => {
+    setUserChoice((prev) => (prev === choice ? null : choice))
+  }
+
   if (!predictionState || predictionState.status === 'idle') {
     return (
       <div className="py-8 text-center">
@@ -69,13 +77,19 @@ export function PredictionResult({
     return (
       <div className="space-y-6">
         <div>
-          <h4 className="text-base sm:text-lg font-semibold mb-4">
+          <h4 className="text-base sm:text-lg font-semibold mb-2">
             Predykcja AI
           </h4>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+            Kliknij na słupek, aby wybrać swoją predykcję (opcjonalnie)
+          </p>
           <BarChart
             prediction={prediction}
             homeTeam={home_team}
             awayTeam={away_team}
+            interactive={true}
+            selectedChoice={userChoice}
+            onChoiceSelect={handleChoiceSelect}
           />
         </div>
 
@@ -83,11 +97,14 @@ export function PredictionResult({
           Wygenerowano: {formattedGeneratedDate}
         </div>
 
-        {/* TODO: Check if user is authenticated before showing this form */}
-        {/* For now, we'll show it always - authentication will be added later */}
+        {/* Save form is always shown. If user is not authenticated, */}
+        {/* the backend API will return 401 and an error will be displayed. */}
+        {/* For better UX, we could pass user prop from Astro.locals and show */}
+        {/* "Login to save" message instead of the form for unauthenticated users. */}
         <SavePredictionForm
           matchId={match.id}
           saveStatus={predictionState.saveStatus}
+          userChoice={userChoice}
           onSave={onSave}
         />
       </div>

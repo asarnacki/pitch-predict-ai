@@ -3,17 +3,20 @@ import { toast } from 'sonner'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { BUSINESS_RULES } from '@/types'
+import type { UserChoice } from '@/types'
 import type { PredictionState } from './hooks/usePredictionPanel'
 
 interface SavePredictionFormProps {
   matchId: string
   saveStatus: PredictionState['saveStatus']
-  onSave: (matchId: string, note: string | null) => void
+  userChoice: UserChoice | null
+  onSave: (matchId: string, note: string | null, userChoice: UserChoice | null) => void
 }
 
 export function SavePredictionForm({
   matchId,
   saveStatus,
+  userChoice,
   onSave,
 }: SavePredictionFormProps) {
   const [note, setNote] = useState('')
@@ -31,7 +34,7 @@ export function SavePredictionForm({
   }, [saveStatus, prevSaveStatus])
 
   const handleSave = () => {
-    onSave(matchId, note.trim() || null)
+    onSave(matchId, note.trim() || null, userChoice)
   }
 
   const isSaving = saveStatus === 'saving'

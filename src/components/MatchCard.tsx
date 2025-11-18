@@ -4,13 +4,13 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion'
 import { PredictionResult } from './PredictionResult'
-import type { MatchDTO } from '@/types'
+import type { MatchDTO, UserChoice } from '@/types'
 import type { PredictionState } from './hooks/usePredictionPanel'
 
 interface MatchCardProps {
   match: MatchDTO
   predictionState?: PredictionState
-  onSavePrediction: (matchId: string, note: string | null) => void
+  onSavePrediction: (matchId: string, note: string | null, userChoice: UserChoice | null) => void
 }
 
 export function MatchCard({
