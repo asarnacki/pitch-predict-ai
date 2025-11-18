@@ -9,9 +9,8 @@ interface Props {
 
 const { title = "PitchPredict AI" } = Astro.props;
 
-// TODO: When middleware is implemented, get user from Astro.locals
-// const user = Astro.locals.user;
-const user = null; // Mock for now
+// Get user from middleware (set by src/middleware/index.ts)
+const user = Astro.locals.user ?? null;
 ---
 
 <!doctype html>
