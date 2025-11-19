@@ -13,7 +13,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Trash2, ChevronLeft, ChevronRight, CheckCircle2, TrendingUp } from 'lucide-react'
+import {
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
+  TrendingUp,
+  Home,
+  Minus,
+  Plane,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import type {
   PredictionDTO,
@@ -163,142 +172,144 @@ export function SavedPredictionsList() {
     return Math.round(predictionResult.away * 100)
   }
 
+  // Render funkcja dla kart predykcji
+  const renderPredictionCard = (
+    prediction: PredictionDTO,
+    predictionResult: PredictionProbabilities | null
+  ) => {
+    const matchDate = new Date(prediction.match_date)
+    const formattedDate = matchDate.toLocaleDateString('pl-PL', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
+    const formattedTime = matchDate.toLocaleTimeString('pl-PL', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+
+    const createdDate = new Date(prediction.created_at)
+    const formattedCreatedDate = createdDate.toLocaleDateString('pl-PL', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
+
+    const userChoicePercentage = getUserChoicePercentage(prediction, predictionResult)
+
+    return (
+      <div
+        key={prediction.id}
+        className="border rounded-lg bg-card transition-all duration-150 hover:shadow-md"
+      >
+        <div className="px-4 py-3 border-b bg-accent/5">
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <Badge variant="secondary" className="text-xs font-medium">
+              {prediction.league}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDeleteClick(prediction)}
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-150 flex-shrink-0"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="font-semibold text-sm sm:text-base">
+            {prediction.home_team} vs {prediction.away_team}
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">
+            {formattedDate} {formattedTime}
+          </div>
+        </div>
+
+        <div className="p-4 space-y-3">
+          {prediction.user_choice ? (
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                  Twój wybór
+                </div>
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="font-bold text-base text-primary">
+                    {getUserChoiceLabel(prediction)}
+                  </span>
+                  {predictionResult && (
+                    <Badge variant="secondary" className="text-xs font-medium">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      AI: {userChoicePercentage}%
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground italic">Brak wybranej predykcji</div>
+          )}
+
+          {predictionResult && (
+            <div className="pt-3 border-t space-y-2">
+              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Predykcja AI
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="text-center p-2.5 rounded bg-muted/50 space-y-1">
+                  <Home className="h-4 w-4 mx-auto text-muted-foreground" />
+                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">
+                    Gospodarz
+                  </div>
+                  <div className="font-bold text-sm">
+                    {Math.round(predictionResult.home * 100)}%
+                  </div>
+                </div>
+                <div className="text-center p-2.5 rounded bg-muted/50 space-y-1">
+                  <Minus className="h-4 w-4 mx-auto text-muted-foreground" />
+                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">
+                    Remis
+                  </div>
+                  <div className="font-bold text-sm">
+                    {Math.round(predictionResult.draw * 100)}%
+                  </div>
+                </div>
+                <div className="text-center p-2.5 rounded bg-muted/50 space-y-1">
+                  <Plane className="h-4 w-4 mx-auto text-muted-foreground" />
+                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">
+                    Gość
+                  </div>
+                  <div className="font-bold text-sm">
+                    {Math.round(predictionResult.away * 100)}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {prediction.note && (
+            <div className="pt-3 border-t">
+              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                Notatka
+              </div>
+              <p className="text-sm text-foreground">{prediction.note}</p>
+            </div>
+          )}
+
+          <div className="pt-2 text-xs text-muted-foreground">Zapisano: {formattedCreatedDate}</div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
-      {/* Coupon-style list */}
       <div className="space-y-3">
         {predictions.map((prediction) => {
-          const matchDate = new Date(prediction.match_date)
-          const formattedDate = matchDate.toLocaleDateString('pl-PL', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          })
-          const formattedTime = matchDate.toLocaleTimeString('pl-PL', {
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-
-          const createdDate = new Date(prediction.created_at)
-          const formattedCreatedDate = createdDate.toLocaleDateString('pl-PL', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-          })
-
           const predictionResult = isPredictionProbabilities(prediction.prediction_result)
             ? (prediction.prediction_result as PredictionProbabilities)
             : null
 
-          const userChoicePercentage = getUserChoicePercentage(prediction, predictionResult)
-
-          return (
-            <div
-              key={prediction.id}
-              className="border rounded-lg bg-card transition-all duration-150 hover:shadow-md"
-            >
-              {/* Header - Match Info */}
-              <div className="px-4 py-3 border-b bg-accent/5">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm sm:text-base truncate">
-                      {prediction.home_team} vs {prediction.away_team}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      {formattedDate} {formattedTime} • {prediction.league}
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteClick(prediction)}
-                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-150 flex-shrink-0"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Body - User Choice */}
-              <div className="p-4 space-y-3">
-                {prediction.user_choice ? (
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 mt-0.5">
-                      <CheckCircle2 className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                        Twój wybór
-                      </div>
-                      <div className="flex items-baseline gap-2 flex-wrap">
-                        <span className="font-bold text-base sm:text-lg text-primary">
-                          {getUserChoiceLabel(prediction)}
-                        </span>
-                        {predictionResult && (
-                          <Badge variant="secondary" className="text-xs font-medium">
-                            <TrendingUp className="h-3 w-3 mr-1" />
-                            AI: {userChoicePercentage}%
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-sm text-muted-foreground italic">
-                    Brak wybranej predykcji
-                  </div>
-                )}
-
-                {/* AI Prediction Details - Compact */}
-                {predictionResult && (
-                  <div className="pt-3 border-t space-y-2">
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Predykcja AI
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 text-xs">
-                      <div className="text-center p-2 rounded bg-muted/50">
-                        <div className="font-medium text-muted-foreground mb-0.5">
-                          {prediction.home_team}
-                        </div>
-                        <div className="font-bold text-sm">
-                          {Math.round(predictionResult.home * 100)}%
-                        </div>
-                      </div>
-                      <div className="text-center p-2 rounded bg-muted/50">
-                        <div className="font-medium text-muted-foreground mb-0.5">Remis</div>
-                        <div className="font-bold text-sm">
-                          {Math.round(predictionResult.draw * 100)}%
-                        </div>
-                      </div>
-                      <div className="text-center p-2 rounded bg-muted/50">
-                        <div className="font-medium text-muted-foreground mb-0.5">
-                          {prediction.away_team}
-                        </div>
-                        <div className="font-bold text-sm">
-                          {Math.round(predictionResult.away * 100)}%
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Note */}
-                {prediction.note && (
-                  <div className="pt-3 border-t">
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                      Notatka
-                    </div>
-                    <p className="text-sm text-foreground">{prediction.note}</p>
-                  </div>
-                )}
-
-                {/* Footer - Created Date */}
-                <div className="pt-2 text-xs text-muted-foreground">
-                  Zapisano: {formattedCreatedDate}
-                </div>
-              </div>
-            </div>
-          )
+          return renderPredictionCard(prediction, predictionResult)
         })}
       </div>
 
