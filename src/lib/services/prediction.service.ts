@@ -77,12 +77,13 @@ export async function createPrediction(
   const sanitizedNote = sanitizeNote(data.note)
 
   const insertData = {
-    user_id: userId, 
+    user_id: userId,
     league: data.league,
     match_date: data.match_date,
     home_team: data.home_team,
     away_team: data.away_team,
     prediction_result: data.prediction_result,
+    user_choice: data.user_choice || null,
     note: sanitizedNote,
     home_score: null,
     away_score: null,
