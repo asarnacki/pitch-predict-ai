@@ -1,0 +1,87 @@
+---
+description: Zasady tworzenia testów End-to-End (Playwright)
+globs: ["tests/**/*.spec.ts", "e2e/**/*.spec.ts", "playwright.config.ts"]
+---
+
+# E2E Testing Rules (Playwright)
+
+Te zasady obowiązują przy tworzeniu testów End-to-End. Celem jest weryfikacja krytycznych ścieżek użytkownika przy minimalizacji kosztów API.
+Bazują one na strategii zdefiniowanej w `.ai/test-plan.md`.
+
+## Tech Stack
+- **Framework:** Playwright
+- **Browser:** Chromium, Firefox, WebKit
+- **Mobile:** Mobile Chrome / Safari emulation
+
+## Kluczowe Zasady (Mandatory)
+
+### 1. Koszty i Mockowanie (CRITICAL)
+- **AI Endpoints:** ZAWSZE mockuj endpoint `/api/predictions/generate` w testach automatycznych.
+- **Powód:** Każde wywołanie generuje koszt w OpenRouter. Nie marnuj budżetu na testy regresji.
+  ```typescript
+  // Przykład mockowania w Playwright
+  await page.route('**/api/predictions/generate', async route => {
+    const json = { 
+      home_team: 'Arsenal', 
+      away_team: 'Chelsea',
+      prediction_result: { home: 0.6, draw: 0.2, away: 0.2 }
+    };
+    await route.fulfill({ json });
+  });
+  ```
+
+### 2. Scenariusze Krytyczne (Happy Path)
+Skup się na testowaniu pełnych procesów:
+- **Auth Flow:** Rejestracja -> Logowanie -> Przekierowanie -> Logout.
+- **Prediction Flow:** Wybór ligi -> Wybór meczu -> Generuj (Mock) -> Zapisz -> Sprawdź na liście.
+- **Limit Flow:** Próba dodania 51. predykcji (sprawdź czy UI blokuje lub pokazuje błąd).
+
+### 3. Lokatory i Odporność
+- Używaj **User-facing locators**:
+  - `getByRole('button', { name: 'Zaloguj' })`
+  - `getByLabel('Email')`
+  - `getByText('Predykcja zapisana')`
+- Unikaj CSS selectors bazujących na klasach Tailwind (`.flex.p-4`), bo mogą się zmienić.
+- Dodawaj `data-testid` tylko gdy standardowe lokatory zawodzą.
+
+### 4. Responsywność (Mobile First)
+- Każdy krytyczny test musi przechodzić na widoku mobilnym (np. iPhone 13 viewport).
+- Sprawdzaj czy menu nawigacyjne (hamburger) działa poprawnie na mobile.
+
+### 5. Autentykacja w Testach
+- Używaj mechanizmu `storageState` Playwrighta do zachowania sesji, aby nie logować się w każdym teście od nowa (chyba że testujesz samo logowanie).
+
+## E2E Checklist
+1. [ ] Czy endpoint AI (`/generate`) jest zamockowany?
+2. [ ] Czy test działa na mobile i desktop?
+3. [ ] Czy test czyści po sobie dane (jeśli tworzy realne rekordy w DB)?
+4. [ ] Czy używasz zmiennych środowiskowych (`TEST_USER_EMAIL`) zamiast hardcodowanych danych?
+
+## Playwright Best Practices
+
+### Test Architecture
+- **Page Object Model:** Implementuj POM dla łatwiejszego utrzymania testów w `./e2e/page-objects`
+- **Test Isolation:** Używaj browser contexts do izolacji środowisk testowych
+- **Structure:** Stosuj podejście 'Arrange', 'Act', 'Assert' dla czytelności struktury testów
+
+### Selektory i Lokatory
+- **Priorytet:** Używaj `data-testid` dla odpornych selektorów test-oriented
+- **Konwencja:** Lokalizuj elementy przez `await page.getByTestId('selectorName')`
+- **User-facing locators:** Preferuj `getByRole`, `getByLabel`, `getByText` gdy możliwe
+
+### Narzędzia i Debugowanie
+- **Codegen:** Używaj narzędzia codegen do nagrywania testów
+- **Trace Viewer:** Wykorzystuj trace viewer do debugowania niepowodzeń testów
+- **Visual Testing:** Implementuj porównania wizualne z `expect(page).toHaveScreenshot()`
+
+### Performance i Wykonanie
+- **Parallel Execution:** Wykorzystuj równoległe wykonanie dla szybszych testów
+- **Test Hooks:** Implementuj hooks setup i teardown dla przygotowania/czyszczenia
+
+### API Testing
+- Wykorzystuj możliwości testowania API Playwright do walidacji backendu
+- Używaj asercji `expect` z odpowiednimi matcherami
+
+### Browser Configuration
+- Domyślna konfiguracja: Chromium/Desktop Chrome
+- Testy krytyczne: Również na Firefox, WebKit i mobile viewports
