@@ -45,7 +45,7 @@ export function UserNav({ user }: UserNavProps) {
           asChild
           className="text-xs sm:text-sm"
         >
-          <a href="/login">
+          <a href="/login" data-testid="nav-login-link">
             <LogIn className="sm:mr-2 size-4" />
             <span className="hidden sm:inline">Zaloguj się</span>
           </a>
@@ -56,7 +56,7 @@ export function UserNav({ user }: UserNavProps) {
           asChild
           className="text-xs sm:text-sm"
         >
-          <a href="/register">
+          <a href="/register" data-testid="nav-register-link">
             <UserPlus className="sm:mr-2 size-4" />
             <span className="hidden sm:inline">Zarejestruj się</span>
           </a>
@@ -74,12 +74,15 @@ export function UserNav({ user }: UserNavProps) {
         asChild
         className="text-xs sm:text-sm"
       >
-        <a href="/predictions">
+        <a href="/predictions" data-testid="nav-predictions-link">
           <Bookmark className="sm:mr-2 size-4" />
           <span className="hidden sm:inline">Zapisane</span>
         </a>
       </Button>
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-accent/50 rounded-md">
+      <div 
+        className="flex items-center gap-2 px-3 py-1.5 bg-accent/50 rounded-md"
+        data-testid="nav-user-email"
+      >
         <UserIcon className="size-4 text-muted-foreground" />
         <span className="text-xs sm:text-sm font-medium truncate max-w-[100px] sm:max-w-[150px]">
           {user.email}
@@ -91,6 +94,7 @@ export function UserNav({ user }: UserNavProps) {
         onClick={handleLogout}
         disabled={isLoggingOut}
         className="text-xs sm:text-sm"
+        data-testid="nav-logout-button"
       >
         <LogOut className="sm:mr-2 size-4" />
         <span className="hidden sm:inline">
