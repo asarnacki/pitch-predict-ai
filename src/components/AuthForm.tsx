@@ -63,7 +63,10 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
     <div className="w-full max-w-md mx-auto">
       <div className="bg-card border rounded-lg shadow-lg p-6 sm:p-8 space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          <h1 
+            className="text-2xl sm:text-3xl font-bold tracking-tight"
+            data-testid="auth-form-heading"
+          >
             {config.title}
           </h1>
           {mode === 'reset-password' && (
@@ -89,6 +92,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
                 placeholder="twoj@email.com"
                 disabled={isSubmitting}
                 aria-invalid={!!errors.email}
+                data-testid={`${mode}-email-input`}
                 {...register('email')}
               />
               {errors.email && (
@@ -108,6 +112,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
                   <a
                     href="/reset-password"
                     className="text-xs text-primary hover:underline"
+                    data-testid="auth-reset-password-link"
                   >
                     Zapomniałeś hasła?
                   </a>
@@ -119,6 +124,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
                 placeholder="••••••••"
                 disabled={isSubmitting}
                 aria-invalid={!!errors.password}
+                data-testid={`${mode}-password-input`}
                 {...register('password')}
               />
               {errors.password && (
@@ -139,6 +145,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
                 placeholder="••••••••"
                 disabled={isSubmitting}
                 aria-invalid={!!errors.confirmPassword}
+                data-testid={`${mode}-confirm-password-input`}
                 {...register('confirmPassword')}
               />
               {errors.confirmPassword && (
@@ -151,7 +158,10 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
 
           {/* API Error */}
           {apiError && (
-            <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+            <div 
+              className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md"
+              data-testid="auth-form-error"
+            >
               {apiError}
             </div>
           )}
@@ -162,6 +172,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
             disabled={isSubmitting}
             className="w-full"
             size="lg"
+            data-testid={`${mode}-submit-button`}
           >
             {isSubmitting ? 'Przetwarzanie...' : config.buttonText}
           </Button>
@@ -172,7 +183,11 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
           {mode === 'login' && (
             <p className="text-sm text-muted-foreground">
               Nie masz konta?{' '}
-              <a href="/register" className="text-primary hover:underline font-medium">
+              <a 
+                href="/register" 
+                className="text-primary hover:underline font-medium"
+                data-testid="auth-register-link"
+              >
                 Zarejestruj się
               </a>
             </p>
@@ -180,7 +195,11 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
           {mode === 'register' && (
             <p className="text-sm text-muted-foreground">
               Masz już konto?{' '}
-              <a href="/login" className="text-primary hover:underline font-medium">
+              <a 
+                href="/login" 
+                className="text-primary hover:underline font-medium"
+                data-testid="auth-login-link"
+              >
                 Zaloguj się
               </a>
             </p>
@@ -188,7 +207,11 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
           {mode === 'reset-password' && (
             <p className="text-sm text-muted-foreground">
               Pamiętasz hasło?{' '}
-              <a href="/login" className="text-primary hover:underline font-medium">
+              <a 
+                href="/login" 
+                className="text-primary hover:underline font-medium"
+                data-testid="auth-login-link"
+              >
                 Zaloguj się
               </a>
             </p>

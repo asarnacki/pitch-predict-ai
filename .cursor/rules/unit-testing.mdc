@@ -1,0 +1,52 @@
+---
+description: Zasady tworzenia testów jednostkowych i integracyjnych (Vitest)
+globs: ["**/*.test.ts", "**/*.spec.ts", "src/lib/**/*.ts", "src/pages/api/**/*.ts"]
+---
+
+# Unit & Integration Testing Rules
+
+Te zasady obowiązują przy tworzeniu i modyfikowaniu testów jednostkowych oraz integracyjnych w projekcie PitchPredict AI.
+Bazują one na strategii zdefiniowanej w `.ai/test-plan.md`.
+
+## Tech Stack
+- **Runner:** Vitest
+- **Framework:** React Testing Library (dla komponentów)
+- **Mocking:** Vitest native mocks (`vi.mock`)
+
+## Kluczowe Zasady (Mandatory)
+
+### 1. Izolacja i Mockowanie
+- **External APIs:** ZAWSZE mockuj zapytania do zewnętrznych API (`football-data.org`, `OpenRouter`). Nigdy nie wykonuj rzeczywistych zapytań HTTP w testach jednostkowych.
+  ```typescript
+  // Przykład mockowania serwisu
+  vi.mock('@/lib/services/ai-prediction.service', () => ({
+    generatePrediction: vi.fn().mockResolvedValue(mockPredictionResponse)
+  }))
+  ```
+- **Supabase:** W testach jednostkowych serwisów, mockuj klienta Supabase. W testach integracyjnych używaj lokalnej instancji lub dedykowanego środowiska testowego (nigdy produkcji!).
+
+### 2. Zakres Testów (Scope)
+- **Services (`src/lib/services/`):** Priorytet testowania. Każdy serwis musi mieć pokrycie min. 80%.
+  - Testuj "Happy Path" (sukces).
+  - Testuj obsługę błędów (np. limity API, błędy sieci).
+  - Testuj logikę biznesową (np. czy limit 50 predykcji jest respektowany).
+- **Validation (`src/lib/validation/`):** Testuj schematy Zod dla poprawnych i błędnych danych wejściowych.
+- **API Endpoints:** Weryfikuj statusy odpowiedzi (200, 400, 401, 403, 500) i format JSON.
+
+### 3. Bezpieczeństwo (Critical)
+- **RLS Policies:** Testy integracyjne muszą weryfikować, czy użytkownik A NIE ma dostępu do danych użytkownika B.
+- **Auth:** Testuj zachowanie endpointów dla niezalogowanego użytkownika (oczekiwane 401/Redirect).
+
+### 4. Konwencje Nazewnicze
+- Pliki testowe obok plików źródłowych: `feature.ts` -> `feature.test.ts`.
+- Opisy testów (`it`, `describe`) powinny być czytelne i biznesowe, np. `it('should reject prediction creation when limit is reached')`.
+
+## Unit Test Checklist
+1. [ ] Czy zewnętrzne API są zamockowane?
+2. [ ] Czy testujesz edge cases (puste dane, błędy API)?
+3. [ ] Czy testy walidacji (Zod) sprawdzają odrzucanie błędnych typów?
+4. [ ] Czy testy są niezależne od siebie (nie współdzielą stanu)?
+
+## Debugowanie
+Jeśli testy API failują na `import.meta.env`:
+- Upewnij się, że zmienne środowiskowe są zamockowane lub wczytane przez Vitest (`vite.config.ts`).
