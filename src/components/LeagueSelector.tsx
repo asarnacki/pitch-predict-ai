@@ -1,6 +1,6 @@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { LEAGUE_CODES } from '@/types'
-import type { LeagueCode } from './hooks/usePredictionPanel'
+import type { LeagueCode } from '@/services/api/matches.service'
 
 interface LeagueSelectorProps {
   selectedLeague: LeagueCode

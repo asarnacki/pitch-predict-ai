@@ -1,4 +1,5 @@
-import { usePredictionPanel } from './hooks/usePredictionPanel'
+import { useMatches } from './hooks/useMatches'
+import { usePredictions } from './hooks/usePredictions'
 import { LeagueSelector } from './LeagueSelector'
 import { MatchList } from './MatchList'
 import { EmptyState } from './EmptyState'
@@ -7,14 +8,17 @@ export function PredictionPanel() {
   const {
     league,
     matches,
-    matchesStatus,
-    matchesError,
+    status: matchesStatus,
+    error: matchesError,
+    changeLeague,
+    refetch: refetchMatches,
+  } = useMatches('PREMIER_LEAGUE')
+
+  const {
     predictions,
-    setLeague,
     generatePrediction,
     savePrediction,
-    refetchMatches,
-  } = usePredictionPanel()
+  } = usePredictions()
 
   const isLoading = matchesStatus === 'loading'
   const hasError = matchesStatus === 'error'
@@ -32,7 +36,7 @@ export function PredictionPanel() {
           </p>
         </header>
 
-        <LeagueSelector selectedLeague={league} onLeagueChange={setLeague} />
+        <LeagueSelector selectedLeague={league} onLeagueChange={changeLeague} />
 
         {hasError ? (
           <EmptyState

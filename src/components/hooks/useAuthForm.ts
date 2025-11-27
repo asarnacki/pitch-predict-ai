@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 
-// Import shared validation schemas
 import {
   loginSchema,
   registerSchema,
@@ -14,6 +13,9 @@ import {
   type ResetPasswordFormData,
   type UpdatePasswordFormData,
 } from '@/lib/validation/auth.schemas'
+
+import { authService } from '@/services/api/auth.service'
+import { ApiError } from '@/services/api/client'
 
 export type AuthFormMode = 'login' | 'register' | 'reset-password' | 'update-password'
 
@@ -26,18 +28,15 @@ interface UseAuthFormReturn<T> {
 
 type AuthFormData = LoginFormData | RegisterFormData | ResetPasswordFormData | UpdatePasswordFormData
 
-// Function overloads for type safety
 export function useAuthForm(options: { mode: 'login'; onSuccess?: () => void }): UseAuthFormReturn<LoginFormData>
 export function useAuthForm(options: { mode: 'register'; onSuccess?: () => void }): UseAuthFormReturn<RegisterFormData>
 export function useAuthForm(options: { mode: 'reset-password'; onSuccess?: () => void }): UseAuthFormReturn<ResetPasswordFormData>
 export function useAuthForm(options: { mode: 'update-password'; onSuccess?: () => void }): UseAuthFormReturn<UpdatePasswordFormData>
 
-// Implementation
 export function useAuthForm({ mode, onSuccess }: { mode: AuthFormMode; onSuccess?: () => void }): UseAuthFormReturn<AuthFormData> {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
 
-  // Get resolver based on mode
   const getResolver = () => {
     switch (mode) {
       case 'login':
@@ -53,91 +52,50 @@ export function useAuthForm({ mode, onSuccess }: { mode: AuthFormMode; onSuccess
     }
   }
 
-  // Initialize form
   const form = useForm({
     resolver: getResolver(),
     mode: 'onBlur',
   })
 
-  // Get API endpoint based on mode
-  const getEndpoint = () => {
-    switch (mode) {
-      case 'login':
-        return '/api/auth/login'
-      case 'register':
-        return '/api/auth/register'
-      case 'reset-password':
-        return '/api/auth/reset-password'
-      case 'update-password':
-        return '/api/auth/update-password'
-      default:
-        return '/api/auth/login'
-    }
-  }
 
-  // Submit handler
   const handleSubmit = useCallback(
     async (data: AuthFormData) => {
       setIsSubmitting(true)
       setApiError(null)
 
       try {
-        const endpoint = getEndpoint()
-
-        // Prepare request data - exclude confirmPassword for register and update-password modes
-        let requestData: Partial<AuthFormData>
-
-        if ('confirmPassword' in data) {
-          const { confirmPassword, ...rest } = data
-          requestData = rest
-        } else {
-          requestData = data
-        }
-
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestData),
-        })
-
-        const result = await response.json()
-
-        if (!response.ok) {
-          // Handle API errors
-          const errorMessage = result.error?.message || 'Wystąpił błąd. Spróbuj ponownie.'
-          setApiError(errorMessage)
-          toast.error(errorMessage)
-          return
-        }
-
-        // Success handling based on mode
+        // Call appropriate auth service method based on mode
         switch (mode) {
           case 'login':
+            await authService.login(data.email, data.password)
+            toast.success('Zalogowano pomyślnie!')
+            window.location.href = '/'
+            break
+
           case 'register':
-            toast.success(
-              mode === 'login'
-                ? 'Zalogowano pomyślnie!'
-                : 'Rejestracja zakończona pomyślnie!'
-            )
-            // Redirect to home page
+            await authService.register(data.email, data.password)
+            toast.success('Rejestracja zakończona pomyślnie!')
             window.location.href = '/'
             break
 
           case 'reset-password':
+            await authService.resetPassword(data.email)
             toast.success('Link do resetowania hasła został wysłany na e-mail')
             if (onSuccess) onSuccess()
             break
 
           case 'update-password':
+            await authService.updatePassword(data.password)
             toast.success('Hasło zostało zmienione pomyślnie!')
-            // Redirect to login page
             window.location.href = '/login'
             break
         }
       } catch (error) {
-        const errorMessage = 'Wystąpił błąd połączenia. Sprawdź połączenie internetowe.'
+        const errorMessage =
+          error instanceof ApiError
+            ? error.message
+            : 'Wystąpił błąd połączenia. Sprawdź połączenie internetowe.'
+
         setApiError(errorMessage)
         toast.error(errorMessage)
       } finally {

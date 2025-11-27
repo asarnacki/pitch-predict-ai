@@ -5,7 +5,7 @@ import {
 } from '@/components/ui/accordion'
 import { PredictionResult } from './PredictionResult'
 import type { MatchDTO, UserChoice } from '@/types'
-import type { PredictionState } from './hooks/usePredictionPanel'
+import type { PredictionState } from './hooks/usePredictions'
 
 interface MatchCardProps {
   match: MatchDTO
