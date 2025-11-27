@@ -3,7 +3,7 @@ import { Accordion } from '@/components/ui/accordion'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MatchCard } from './MatchCard'
 import type { MatchDTO, UserChoice } from '@/types'
-import type { PredictionState } from './hooks/usePredictionPanel'
+import type { PredictionState } from './hooks/usePredictions'
 
 interface MatchListProps {
   matches: MatchDTO[]

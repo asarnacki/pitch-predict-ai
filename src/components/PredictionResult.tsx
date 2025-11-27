@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Spinner } from './Spinner'
 import { BarChart } from './BarChart'
-import { SavePredictionForm } from './SavePredictionForm'
+import { SavePredictionForm, type SavePredictionFormHandle } from './SavePredictionForm'
 import type { MatchDTO, UserChoice } from '@/types'
-import type { PredictionState } from './hooks/usePredictionPanel'
+import type { PredictionState } from './hooks/usePredictions'
 
 interface PredictionResultProps {
   match: MatchDTO
@@ -17,10 +17,15 @@ export function PredictionResult({
   onSave,
 }: PredictionResultProps) {
   const [userChoice, setUserChoice] = useState<UserChoice | null>(null)
+  const formRef = useRef<SavePredictionFormHandle>(null)
 
-  // Toggle behavior: clicking the same bar deselects it
   const handleChoiceSelect = (choice: UserChoice) => {
-    setUserChoice((prev) => (prev === choice ? null : choice))
+    const newChoice = userChoice === choice ? null : choice
+    setUserChoice(newChoice)
+
+    if (formRef.current) {
+      formRef.current.setUserChoice(newChoice)
+    }
   }
 
   if (!predictionState || predictionState.status === 'idle') {
@@ -102,9 +107,9 @@ export function PredictionResult({
         {/* For better UX, we could pass user prop from Astro.locals and show */}
         {/* "Login to save" message instead of the form for unauthenticated users. */}
         <SavePredictionForm
+          ref={formRef}
           matchId={match.id}
           saveStatus={predictionState.saveStatus}
-          userChoice={userChoice}
           onSave={onSave}
         />
       </div>
