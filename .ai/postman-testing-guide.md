@@ -3,12 +3,15 @@
 ## 📋 Setup
 
 ### 1. Uruchom dev server
+
 ```bash
 npm run dev
 ```
+
 Powinien działać na: `http://localhost:3000`
 
 ### 2. Upewnij się że Supabase działa
+
 ```bash
 supabase status
 ```
@@ -23,12 +26,14 @@ supabase status
 **URL:** `http://127.0.0.1:54321/auth/v1/token?grant_type=password`
 
 **Headers:**
+
 ```
 apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
 Content-Type: application/json
 ```
 
 **Body (raw JSON):**
+
 ```json
 {
   "email": "testowy@test.pl",
@@ -37,6 +42,7 @@ Content-Type: application/json
 ```
 
 ### ✅ Oczekiwana odpowiedź (200 OK):
+
 ```json
 {
   "access_token": "eyJhbGc...",
@@ -63,11 +69,13 @@ Content-Type: application/json
 **URL:** `http://localhost:4321/api/profile`
 
 **Headers:**
+
 ```
 (żadnych headers)
 ```
 
 ### ✅ Oczekiwana odpowiedź (401 UNAUTHORIZED):
+
 ```json
 {
   "error": {
@@ -89,16 +97,19 @@ Content-Type: application/json
 **URL:** `http://localhost:4321/api/profile`
 
 **Headers:**
+
 ```
 Authorization: Bearer <TUTAJ_WKLEJ_ACCESS_TOKEN>
 ```
 
 **Przykład:**
+
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNjk4MzQyNDAwLCJzdWIiOiIxMTExMTExMS0xMTExLTExMTEtMTExMS0xMTExMTExMTExMTEiLCJlbWFpbCI6InRlc3Rvd3lAdGVzdC5wbCIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnt9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNjk4MzM4ODAwfV0sInNlc3Npb25faWQiOiI..."}
 ```
 
 ### ✅ Oczekiwana odpowiedź (200 OK):
+
 ```json
 {
   "data": {
@@ -111,6 +122,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50a
 **Status Code:** `200 OK`
 
 ### ✅ Weryfikacja:
+
 - ✅ `data.id` powinno być UUID
 - ✅ `data.created_at` powinno być timestampem
 - ✅ `data.id` powinno się zgadzać z `user.id` z login response
@@ -200,6 +212,7 @@ Możesz zaimportować tę kolekcję do Postmana:
 ```
 
 **Jak zaimportować:**
+
 1. Otwórz Postman
 2. Kliknij "Import"
 3. Wybierz "Raw text"
@@ -211,27 +224,35 @@ Możesz zaimportować tę kolekcję do Postmana:
 ## 🐛 Troubleshooting
 
 ### Problem: Login zwraca 404
+
 **Rozwiązanie:** Sprawdź czy Supabase działa:
+
 ```bash
 supabase status
 ```
 
 ### Problem: Login zwraca "Invalid login credentials"
+
 **Rozwiązanie:** Zrób reset bazy z seedem:
+
 ```bash
 supabase db reset
 ```
 
 ### Problem: GET /api/profile zwraca 404
+
 **Rozwiązanie:** Sprawdź czy dev server działa:
+
 ```bash
 npm run dev
 ```
 
 ### Problem: GET /api/profile zwraca 500
+
 **Rozwiązanie:** Sprawdź logi serwera w terminalu gdzie uruchomiłeś `npm run dev`
 
 ### Problem: Token expired
+
 **Rozwiązanie:** Token wygasa po 1h. Zaloguj się ponownie i zdobądź nowy token.
 
 ---

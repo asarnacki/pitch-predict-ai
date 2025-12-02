@@ -3,17 +3,19 @@
 ## 1. Resources
 
 ### Core Resources
-| Resource | Database Table | Description |
-|----------|---------------|-------------|
-| **Profiles** | `public.profiles` | User profile data, 1:1 relationship with `auth.users` |
+
+| Resource        | Database Table       | Description                                               |
+| --------------- | -------------------- | --------------------------------------------------------- |
+| **Profiles**    | `public.profiles`    | User profile data, 1:1 relationship with `auth.users`     |
 | **Predictions** | `public.predictions` | User-saved match predictions with denormalized match data |
 
 ### External Resources (Proxied)
-| Resource | External Source | Description |
-|----------|----------------|-------------|
-| **Matches** | football-data.org API | Upcoming matches for supported leagues |
-| **AI Predictions** | OpenRouter.ai API | AI-generated match outcome probabilities |
-| **Match Results** | football-data.org API | Final scores for completed matches |
+
+| Resource           | External Source       | Description                              |
+| ------------------ | --------------------- | ---------------------------------------- |
+| **Matches**        | football-data.org API | Upcoming matches for supported leagues   |
+| **AI Predictions** | OpenRouter.ai API     | AI-generated match outcome probabilities |
+| **Match Results**  | football-data.org API | Final scores for completed matches       |
 
 ---
 
@@ -22,6 +24,7 @@
 ### 2.1 Profile Endpoints
 
 #### GET `/api/profile`
+
 Get the current authenticated user's profile.
 
 **Authentication**: Required (Bearer token in Authorization header)
@@ -31,6 +34,7 @@ Get the current authenticated user's profile.
 **Request Body**: None
 
 **Response Success** (200 OK):
+
 ```json
 {
   "data": {
@@ -41,7 +45,9 @@ Get the current authenticated user's profile.
 ```
 
 **Response Errors**:
+
 - `401 Unauthorized`: User not authenticated
+
 ```json
 {
   "error": {
@@ -50,7 +56,9 @@ Get the current authenticated user's profile.
   }
 }
 ```
+
 - `404 Not Found`: Profile does not exist
+
 ```json
 {
   "error": {
@@ -65,6 +73,7 @@ Get the current authenticated user's profile.
 ### 2.2 Matches Endpoints
 
 #### GET `/api/matches`
+
 Get upcoming matches for a specific league.
 
 **Authentication**: Optional (works for both authenticated and anonymous users)
@@ -78,6 +87,7 @@ Get upcoming matches for a specific league.
 **Request Body**: None
 
 **Response Success** (200 OK):
+
 ```json
 {
   "data": {
@@ -106,7 +116,9 @@ Get upcoming matches for a specific league.
 ```
 
 **Response Errors**:
+
 - `400 Bad Request`: Invalid league parameter
+
 ```json
 {
   "error": {
@@ -115,7 +127,9 @@ Get upcoming matches for a specific league.
   }
 }
 ```
+
 - `503 Service Unavailable`: External API unavailable
+
 ```json
 {
   "error": {
@@ -132,6 +146,7 @@ Get upcoming matches for a specific league.
 ### 2.3 AI Prediction Endpoints
 
 #### POST `/api/predictions/generate`
+
 Generate AI prediction for a specific match.
 
 **Authentication**: Optional (works for both authenticated and anonymous users)
@@ -139,6 +154,7 @@ Generate AI prediction for a specific match.
 **Query Parameters**: None
 
 **Request Body**:
+
 ```json
 {
   "match_id": "match_12345",
@@ -150,6 +166,7 @@ Generate AI prediction for a specific match.
 ```
 
 **Request Validation**:
+
 - `match_id`: required, non-empty string
 - `home_team`: required, non-empty string
 - `away_team`: required, non-empty string
@@ -157,6 +174,7 @@ Generate AI prediction for a specific match.
 - `match_date`: required, valid ISO 8601 timestamp
 
 **Response Success** (200 OK):
+
 ```json
 {
   "data": {
@@ -168,7 +186,7 @@ Generate AI prediction for a specific match.
     "prediction": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "generated_at": "2024-01-15T10:30:00Z"
   }
@@ -176,7 +194,9 @@ Generate AI prediction for a specific match.
 ```
 
 **Response Errors**:
+
 - `400 Bad Request`: Invalid request body
+
 ```json
 {
   "error": {
@@ -189,7 +209,9 @@ Generate AI prediction for a specific match.
   }
 }
 ```
+
 - `503 Service Unavailable`: AI service unavailable
+
 ```json
 {
   "error": {
@@ -206,6 +228,7 @@ Generate AI prediction for a specific match.
 ### 2.4 Saved Predictions Endpoints
 
 #### POST `/api/predictions`
+
 Save a generated prediction to the user's watched list.
 
 **Authentication**: Required
@@ -213,6 +236,7 @@ Save a generated prediction to the user's watched list.
 **Query Parameters**: None
 
 **Request Body**:
+
 ```json
 {
   "league": "Premier League",
@@ -222,13 +246,14 @@ Save a generated prediction to the user's watched list.
   "prediction_result": {
     "home": 0.52,
     "draw": 0.28,
-    "away": 0.20
+    "away": 0.2
   },
   "note": "High confidence in home win based on recent form"
 }
 ```
 
 **Request Validation**:
+
 - `league`: required, non-empty string
 - `match_date`: required, valid ISO 8601 timestamp
 - `home_team`: required, non-empty string
@@ -237,6 +262,7 @@ Save a generated prediction to the user's watched list.
 - `note`: optional, max 500 characters
 
 **Response Success** (201 Created):
+
 ```json
 {
   "data": {
@@ -250,7 +276,7 @@ Save a generated prediction to the user's watched list.
     "prediction_result": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "note": "High confidence in home win based on recent form",
     "home_score": null,
@@ -260,7 +286,9 @@ Save a generated prediction to the user's watched list.
 ```
 
 **Response Errors**:
+
 - `401 Unauthorized`: User not authenticated
+
 ```json
 {
   "error": {
@@ -269,7 +297,9 @@ Save a generated prediction to the user's watched list.
   }
 }
 ```
+
 - `400 Bad Request`: Validation error
+
 ```json
 {
   "error": {
@@ -282,7 +312,9 @@ Save a generated prediction to the user's watched list.
   }
 }
 ```
+
 - `403 Forbidden`: Prediction limit reached
+
 ```json
 {
   "error": {
@@ -293,6 +325,7 @@ Save a generated prediction to the user's watched list.
 ```
 
 **Business Logic**:
+
 - Enforces 50 prediction limit per user
 - Automatically sets `user_id` from authenticated session
 - Sets `home_score` and `away_score` to null initially
@@ -300,6 +333,7 @@ Save a generated prediction to the user's watched list.
 ---
 
 #### GET `/api/predictions`
+
 Get all saved predictions for the authenticated user.
 
 **Authentication**: Required
@@ -316,6 +350,7 @@ Get all saved predictions for the authenticated user.
 **Request Body**: None
 
 **Response Success** (200 OK):
+
 ```json
 {
   "data": {
@@ -330,7 +365,7 @@ Get all saved predictions for the authenticated user.
         "prediction_result": {
           "home": 0.52,
           "draw": 0.28,
-          "away": 0.20
+          "away": 0.2
         },
         "note": "High confidence in home win",
         "home_score": null,
@@ -345,7 +380,7 @@ Get all saved predictions for the authenticated user.
         "away_team": "Barcelona",
         "prediction_result": {
           "home": 0.45,
-          "draw": 0.30,
+          "draw": 0.3,
           "away": 0.25
         },
         "note": "El Clásico - could go either way",
@@ -364,7 +399,9 @@ Get all saved predictions for the authenticated user.
 ```
 
 **Response Errors**:
+
 - `401 Unauthorized`: User not authenticated
+
 ```json
 {
   "error": {
@@ -373,7 +410,9 @@ Get all saved predictions for the authenticated user.
   }
 }
 ```
+
 - `400 Bad Request`: Invalid query parameters
+
 ```json
 {
   "error": {
@@ -388,6 +427,7 @@ Get all saved predictions for the authenticated user.
 ```
 
 **Business Logic**:
+
 - Returns only predictions belonging to authenticated user (enforced by RLS)
 - Default sort: newest first (created_at desc)
 - Includes pagination metadata
@@ -395,6 +435,7 @@ Get all saved predictions for the authenticated user.
 ---
 
 #### GET `/api/predictions/:id`
+
 Get a specific saved prediction by ID.
 
 **Authentication**: Required
@@ -409,6 +450,7 @@ Get a specific saved prediction by ID.
 **Request Body**: None
 
 **Response Success** (200 OK):
+
 ```json
 {
   "data": {
@@ -422,7 +464,7 @@ Get a specific saved prediction by ID.
     "prediction_result": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "note": "High confidence in home win",
     "home_score": null,
@@ -432,7 +474,9 @@ Get a specific saved prediction by ID.
 ```
 
 **Response Errors**:
+
 - `401 Unauthorized`: User not authenticated
+
 ```json
 {
   "error": {
@@ -441,7 +485,9 @@ Get a specific saved prediction by ID.
   }
 }
 ```
+
 - `404 Not Found`: Prediction not found or doesn't belong to user
+
 ```json
 {
   "error": {
@@ -454,6 +500,7 @@ Get a specific saved prediction by ID.
 ---
 
 #### PATCH `/api/predictions/:id`
+
 Update the note for a saved prediction.
 
 **Authentication**: Required
@@ -466,6 +513,7 @@ Update the note for a saved prediction.
 **Query Parameters**: None
 
 **Request Body**:
+
 ```json
 {
   "note": "Updated analysis after checking team news"
@@ -473,9 +521,11 @@ Update the note for a saved prediction.
 ```
 
 **Request Validation**:
+
 - `note`: optional, max 500 characters (can be null to clear note)
 
 **Response Success** (200 OK):
+
 ```json
 {
   "data": {
@@ -489,7 +539,7 @@ Update the note for a saved prediction.
     "prediction_result": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "note": "Updated analysis after checking team news",
     "home_score": null,
@@ -499,7 +549,9 @@ Update the note for a saved prediction.
 ```
 
 **Response Errors**:
+
 - `401 Unauthorized`: User not authenticated
+
 ```json
 {
   "error": {
@@ -508,7 +560,9 @@ Update the note for a saved prediction.
   }
 }
 ```
+
 - `404 Not Found`: Prediction not found or doesn't belong to user
+
 ```json
 {
   "error": {
@@ -517,7 +571,9 @@ Update the note for a saved prediction.
   }
 }
 ```
+
 - `400 Bad Request`: Validation error
+
 ```json
 {
   "error": {
@@ -532,6 +588,7 @@ Update the note for a saved prediction.
 ```
 
 **Business Logic**:
+
 - Only allows updating the `note` field
 - Other fields (prediction_result, teams, etc.) are immutable
 - RLS ensures user can only update their own predictions
@@ -539,6 +596,7 @@ Update the note for a saved prediction.
 ---
 
 #### DELETE `/api/predictions/:id`
+
 Delete a saved prediction.
 
 **Authentication**: Required
@@ -555,7 +613,9 @@ Delete a saved prediction.
 **Response Success** (204 No Content)
 
 **Response Errors**:
+
 - `401 Unauthorized`: User not authenticated
+
 ```json
 {
   "error": {
@@ -564,7 +624,9 @@ Delete a saved prediction.
   }
 }
 ```
+
 - `404 Not Found`: Prediction not found or doesn't belong to user
+
 ```json
 {
   "error": {
@@ -575,12 +637,14 @@ Delete a saved prediction.
 ```
 
 **Business Logic**:
+
 - RLS ensures user can only delete their own predictions
 - Cascade deletes are handled at database level
 
 ---
 
 #### POST `/api/predictions/:id/fetch-result`
+
 Fetch and cache the final match result for a completed match.
 
 **Authentication**: Required
@@ -595,6 +659,7 @@ Fetch and cache the final match result for a completed match.
 **Request Body**: None
 
 **Response Success** (200 OK):
+
 ```json
 {
   "data": {
@@ -608,7 +673,7 @@ Fetch and cache the final match result for a completed match.
     "prediction_result": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "note": "High confidence in home win",
     "home_score": 2,
@@ -618,7 +683,9 @@ Fetch and cache the final match result for a completed match.
 ```
 
 **Response Errors**:
+
 - `401 Unauthorized`: User not authenticated
+
 ```json
 {
   "error": {
@@ -627,7 +694,9 @@ Fetch and cache the final match result for a completed match.
   }
 }
 ```
+
 - `404 Not Found`: Prediction not found or doesn't belong to user
+
 ```json
 {
   "error": {
@@ -636,7 +705,9 @@ Fetch and cache the final match result for a completed match.
   }
 }
 ```
+
 - `409 Conflict`: Match has not finished yet
+
 ```json
 {
   "error": {
@@ -645,7 +716,9 @@ Fetch and cache the final match result for a completed match.
   }
 }
 ```
+
 - `503 Service Unavailable`: External API unavailable
+
 ```json
 {
   "error": {
@@ -656,6 +729,7 @@ Fetch and cache the final match result for a completed match.
 ```
 
 **Business Logic**:
+
 - Fetches result from football-data.org API
 - Caches result in `home_score` and `away_score` fields
 - Subsequent calls return cached result (no external API call)
@@ -666,6 +740,7 @@ Fetch and cache the final match result for a completed match.
 ## 3. Authentication and Authorization
 
 ### Authentication Mechanism
+
 The application uses **Supabase Auth** with JWT (JSON Web Token) based authentication:
 
 1. **User Registration/Login**: Handled by Supabase Auth service
@@ -676,44 +751,51 @@ The application uses **Supabase Auth** with JWT (JSON Web Token) based authentic
 ### Implementation Details
 
 #### Client-Side (Astro + React)
+
 ```typescript
 // Initialize Supabase client
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
-  }
-})
+    detectSessionInUrl: true,
+  },
+});
 ```
 
 #### Server-Side (Astro Middleware)
+
 ```typescript
 // /src/middleware/index.ts
 // Validate JWT and attach user context to request
 export async function onRequest(context, next) {
-  const token = context.cookies.get('sb-access-token')
-  
+  const token = context.cookies.get("sb-access-token");
+
   if (token) {
-    const { data: { user }, error } = await supabase.auth.getUser(token)
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
     if (!error && user) {
-      context.locals.user = user
+      context.locals.user = user;
     }
   }
-  
-  return next()
+
+  return next();
 }
 ```
 
 ### Authorization Levels
 
 #### Public Endpoints (No Authentication Required)
+
 - `GET /api/matches`
 - `POST /api/predictions/generate`
 
 #### Protected Endpoints (Authentication Required)
+
 - `GET /api/profile`
 - `POST /api/predictions`
 - `GET /api/predictions`
@@ -727,12 +809,14 @@ export async function onRequest(context, next) {
 The database enforces data isolation using PostgreSQL Row Level Security:
 
 #### Profiles Table
+
 - **SELECT**: Users can only view their own profile (`auth.uid() = id`)
 - **UPDATE**: Users can only update their own profile (`auth.uid() = id`)
 - **INSERT**: Blocked (profiles created automatically via trigger)
 - **DELETE**: Blocked (profile deletion handled through Supabase Auth)
 
 #### Predictions Table
+
 - **SELECT**: Users can only view their own predictions (`auth.uid() = user_id`)
 - **INSERT**: Users can only insert predictions with their own `user_id` (`auth.uid() = user_id`)
 - **UPDATE**: Users can only update their own predictions (`auth.uid() = user_id`)
@@ -761,6 +845,7 @@ The database enforces data isolation using PostgreSQL Row Level Security:
 | `away_score` | Optional integer, ≥ 0 |
 
 **Database Constraints**:
+
 - `id`: Auto-incrementing primary key
 - `created_at`: Auto-generated timestamp
 - `user_id`: Must reference existing profile, cascade delete
@@ -769,17 +854,19 @@ The database enforces data isolation using PostgreSQL Row Level Security:
 ### Business Logic Implementation
 
 #### BL-001: 50 Prediction Limit (FR-017)
+
 **Location**: `POST /api/predictions` endpoint
 
 **Logic**:
+
 ```typescript
 async function canCreatePrediction(userId: string): Promise<boolean> {
   const { count } = await supabase
-    .from('predictions')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
-  
-  return count < 50
+    .from("predictions")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  return count < 50;
 }
 ```
 
@@ -788,6 +875,7 @@ async function canCreatePrediction(userId: string): Promise<boolean> {
 ---
 
 #### BL-002: Automatic Profile Creation (DB Schema Requirement)
+
 **Location**: Database trigger `on_auth_user_created`
 
 **Logic**: When a new user signs up via Supabase Auth, a trigger automatically creates a corresponding profile record with the same UUID.
@@ -797,20 +885,24 @@ async function canCreatePrediction(userId: string): Promise<boolean> {
 ---
 
 #### BL-003: Immutable Prediction Data
+
 **Location**: `PATCH /api/predictions/:id` endpoint
 
 **Logic**: Only the `note` field can be updated. Core prediction data (`prediction_result`, `home_team`, `away_team`, `match_date`, `league`) is immutable after creation.
 
-**Enforcement**: 
+**Enforcement**:
+
 - Server-side validation ignores all fields except `note`
 - Database RLS policies ensure users can only update their own records
 
 ---
 
 #### BL-004: Result Caching (FR-016, FR-018)
+
 **Location**: `POST /api/predictions/:id/fetch-result` endpoint
 
 **Logic**:
+
 1. Check if `home_score` and `away_score` are already set
 2. If cached, return immediately without external API call
 3. If not cached:
@@ -820,6 +912,7 @@ async function canCreatePrediction(userId: string): Promise<boolean> {
    - Return updated record
 
 **Benefits**:
+
 - Reduces external API calls
 - Improves response time for repeated requests
 - Lowers operational costs
@@ -827,9 +920,11 @@ async function canCreatePrediction(userId: string): Promise<boolean> {
 ---
 
 #### BL-005: Prediction Generation Caching (FR-018)
+
 **Location**: `POST /api/predictions/generate` endpoint
 
 **Logic**:
+
 1. Generate cache key from match_id
 2. Check cache (in-memory or Redis)
 3. If cached and < 6 hours old, return cached prediction
@@ -847,9 +942,11 @@ async function canCreatePrediction(userId: string): Promise<boolean> {
 ---
 
 #### BL-006: Match List Caching (FR-018)
+
 **Location**: `GET /api/matches` endpoint
 
 **Logic**:
+
 1. Generate cache key from league code
 2. Check cache
 3. If cached and < 1 hour old, return cached matches
@@ -867,31 +964,36 @@ async function canCreatePrediction(userId: string): Promise<boolean> {
 ---
 
 #### BL-007: User Context Enforcement
+
 **Location**: All authenticated endpoints
 
-**Logic**: 
+**Logic**:
+
 - `user_id` is always set from `auth.uid()` extracted from JWT
 - Never accept `user_id` from request body
 - RLS policies enforce user can only access their own data
 
 **Implementation**:
+
 ```typescript
 // Extract user ID from authenticated session
-const userId = context.locals.user.id
+const userId = context.locals.user.id;
 
 // Override any user_id in request body
 const data = {
   ...requestBody,
-  user_id: userId
-}
+  user_id: userId,
+};
 ```
 
 ---
 
 #### BL-008: Error Handling and Logging
+
 **Location**: All endpoints
 
 **Logic**:
+
 - Catch all errors at endpoint level
 - Log errors to monitoring service (e.g., Sentry)
 - Return user-friendly error messages
@@ -899,13 +1001,14 @@ const data = {
 - Use consistent error response format
 
 **Error Response Format**:
+
 ```typescript
 interface ErrorResponse {
   error: {
-    code: string        // Machine-readable error code
-    message: string     // User-friendly message
-    details?: any       // Optional validation details
-  }
+    code: string; // Machine-readable error code
+    message: string; // User-friendly message
+    details?: any; // Optional validation details
+  };
 }
 ```
 
@@ -919,20 +1022,24 @@ interface ErrorResponse {
 
 **Authentication**: API key in `X-Auth-Token` header
 
-**Rate Limits**: 
+**Rate Limits**:
+
 - Free tier: 10 requests/minute
 - Paid tier: Higher limits available
 
 **Endpoints Used**:
+
 - `GET /competitions/{code}/matches` - Get matches for a league
 - `GET /matches/{id}` - Get specific match details including final score
 
 **League Codes**:
+
 - Premier League: `PL`
 - La Liga: `PD`
 - Bundesliga: `BL1`
 
 **Error Handling**:
+
 - 429 Too Many Requests: Return cached data or wait & retry
 - 500 Server Error: Return `503 Service Unavailable` to client
 - Network errors: Return `503 Service Unavailable` to client
@@ -948,9 +1055,11 @@ interface ErrorResponse {
 **Rate Limits**: Configurable per API key
 
 **Endpoints Used**:
+
 - `POST /chat/completions` - Generate match prediction
 
 **Request Format**:
+
 ```json
 {
   "model": "meta-llama/llama-3.1-70b-instruct",
@@ -968,12 +1077,14 @@ interface ErrorResponse {
 ```
 
 **Response Parsing**:
+
 - Extract prediction probabilities from AI response
 - Validate values are between 0 and 1
 - Ensure sum is approximately 1.0
 - Round to 2 decimal places
 
 **Error Handling**:
+
 - 429 Too Many Requests: Implement exponential backoff
 - 500 Server Error: Return `503 Service Unavailable` to client
 - Invalid AI response: Return `503 Service Unavailable` to client
@@ -985,16 +1096,19 @@ interface ErrorResponse {
 ### Technology Stack Integration
 
 **Astro 5**:
+
 - Server-side API endpoints in `/src/pages/api/`
 - Each endpoint is a `.ts` file exporting HTTP method handlers
 - Example: `/src/pages/api/predictions/index.ts` exports `GET` and `POST` functions
 
 **TypeScript 5**:
+
 - Shared types in `/src/types.ts`
 - Generate database types from Supabase schema
 - Strict type checking for all API payloads
 
 **Supabase**:
+
 - Client initialization in `/src/db/supabase.client.ts`
 - Server-side client uses service role key for admin operations
 - Client-side client uses anon key with RLS enforcement
@@ -1002,23 +1116,25 @@ interface ErrorResponse {
 ### Caching Strategy
 
 **Implementation Options**:
+
 1. **In-Memory Cache** (MVP): Simple object store with TTL
 2. **Redis** (Production): Distributed cache for scaling
 
 **Cache Structure**:
+
 ```typescript
 interface CacheEntry<T> {
-  data: T
-  timestamp: number
-  ttl: number
+  data: T;
+  timestamp: number;
+  ttl: number;
 }
 
 class Cache {
-  private store = new Map<string, CacheEntry<any>>()
-  
-  get<T>(key: string): T | null
-  set<T>(key: string, data: T, ttl: number): void
-  clear(key: string): void
+  private store = new Map<string, CacheEntry<any>>();
+
+  get<T>(key: string): T | null;
+  set<T>(key: string, data: T, ttl: number): void;
+  clear(key: string): void;
 }
 ```
 
@@ -1043,6 +1159,7 @@ class Cache {
 ### Monitoring and Logging
 
 **Metrics to Track**:
+
 - API response times (p50, p95, p99)
 - Error rates by endpoint
 - External API success/failure rates
@@ -1050,7 +1167,7 @@ class Cache {
 - Active users and predictions created
 
 **Logging Strategy**:
+
 - Info: All API requests with method, path, user_id, duration
 - Warning: External API failures, cache misses
 - Error: All errors with stack traces and context
-

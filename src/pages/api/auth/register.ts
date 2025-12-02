@@ -1,6 +1,7 @@
-import type { APIRoute } from 'astro'
+import type { APIRoute } from "astro";
 
-import { registerRequestSchema } from '@/lib/validation/auth.schemas'
+import { registerRequestSchema } from "@/lib/validation/auth.schemas";
+import { logError } from "@/lib/logger";
 
 /**
  * POST /api/auth/register
@@ -13,80 +14,80 @@ import { registerRequestSchema } from '@/lib/validation/auth.schemas'
  */
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    const body = await request.json()
+    const body = await request.json();
 
-    const validation = registerRequestSchema.safeParse(body)
+    const validation = registerRequestSchema.safeParse(body);
 
     if (!validation.success) {
       return new Response(
         JSON.stringify({
           error: {
-            message: validation.error.errors[0]?.message || 'Nieprawidłowe dane',
+            message: validation.error.errors[0]?.message || "Nieprawidłowe dane",
           },
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
-    const { email, password } = validation.data
-    const supabase = locals.supabase
+    const { email, password } = validation.data;
+    const supabase = locals.supabase;
 
     if (!supabase) {
       return new Response(
         JSON.stringify({
-          error: { message: 'Błąd serwera - brak klienta Supabase' },
+          error: { message: "Błąd serwera - brak klienta Supabase" },
         }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-    })
+    });
 
     if (error) {
-      if (error.message.includes('already registered')) {
+      if (error.message.includes("already registered")) {
         return new Response(
           JSON.stringify({
-            error: { message: 'Użytkownik o tym adresie e-mail już istnieje' },
+            error: { message: "Użytkownik o tym adresie e-mail już istnieje" },
           }),
           {
             status: 409,
-            headers: { 'Content-Type': 'application/json' },
+            headers: { "Content-Type": "application/json" },
           }
-        )
+        );
       }
 
       return new Response(
         JSON.stringify({
           error: {
-            message: error.message || 'Wystąpił błąd podczas rejestracji',
+            message: error.message || "Wystąpił błąd podczas rejestracji",
           },
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
     if (!data.user) {
       return new Response(
         JSON.stringify({
-          error: { message: 'Nie udało się utworzyć konta użytkownika' },
+          error: { message: "Nie udało się utworzyć konta użytkownika" },
         }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
     return new Response(
@@ -98,22 +99,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
-    )
+    );
   } catch (error) {
-    console.error('Register error:', error)
+    logError("Register error", { error });
 
     return new Response(
       JSON.stringify({
-        error: { message: 'Wystąpił błąd serwera' },
+        error: { message: "Wystąpił błąd serwera" },
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
-    )
+    );
   }
-}
+};
 
-export const prerender = false
+export const prerender = false;

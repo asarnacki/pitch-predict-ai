@@ -44,8 +44,8 @@ jobs:
     env:
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
-      E2E_USERNAME: ${{ github.env.E2E_USERNAME }}
-      E2E_PASSWORD: ${{ github.env.E2E_PASSWORD }}
+      E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
@@ -94,4 +94,3 @@ jobs:
               issue_number: context.payload.pull_request?.number ?? context.issue.number,
               body,
             });
-

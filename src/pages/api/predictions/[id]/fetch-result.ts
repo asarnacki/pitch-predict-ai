@@ -23,33 +23,33 @@
  *   - Returns updated prediction with scores
  */
 
-export const prerender = false
+export const prerender = false;
 
-import type { APIRoute } from 'astro'
-import { predictionIdParamSchema } from '@/lib/validation/schemas'
-import { fetchAndCacheResult } from '@/lib/services/prediction.service'
-import { UnauthorizedError } from '@/lib/errors/api-errors'
-import { formatError } from '@/lib/errors/formatter'
+import type { APIRoute } from "astro";
+import { predictionIdParamSchema } from "@/lib/validation/schemas";
+import { fetchAndCacheResult } from "@/lib/services/prediction.service";
+import { UnauthorizedError } from "@/lib/errors/api-errors";
+import { formatError } from "@/lib/errors/formatter";
 
 export const POST: APIRoute = async ({ locals, params }) => {
   try {
     if (!locals.user) {
-      throw new UnauthorizedError()
+      throw new UnauthorizedError();
     }
 
-    const { id } = predictionIdParamSchema.parse(params)
+    const { id } = predictionIdParamSchema.parse(params);
 
-    const prediction = await fetchAndCacheResult(locals.supabase, locals.user.id, id)
+    const prediction = await fetchAndCacheResult(locals.supabase, locals.user.id, id);
 
     return new Response(JSON.stringify({ data: prediction }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    })
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
-    const { status, body } = formatError(error)
+    const { status, body } = formatError(error);
     return new Response(JSON.stringify(body), {
       status,
-      headers: { 'Content-Type': 'application/json' }
-    })
+      headers: { "Content-Type": "application/json" },
+    });
   }
-}
+};

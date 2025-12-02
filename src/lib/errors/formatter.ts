@@ -5,9 +5,9 @@
  * Ensures consistent error format across all endpoints.
  */
 
-import { ZodError } from 'zod';
-import type { ApiErrorResponse } from '@/types';
-import { ApiError } from './api-errors';
+import { ZodError } from "zod";
+import type { ApiErrorResponse } from "@/types";
+import { ApiError } from "./api-errors";
 
 /**
  * Format error into standardized API response
@@ -42,8 +42,8 @@ export function formatError(error: unknown): {
       status: 400,
       body: {
         error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Invalid request data',
+          code: "VALIDATION_ERROR",
+          message: "Invalid request data",
           details: error.errors,
         },
       },
@@ -54,8 +54,8 @@ export function formatError(error: unknown): {
     status: 500,
     body: {
       error: {
-        code: 'INTERNAL_ERROR',
-        message: 'An unexpected error occurred',
+        code: "INTERNAL_ERROR",
+        message: "An unexpected error occurred",
       },
     },
   };

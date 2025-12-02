@@ -1,7 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
-import type { AstroCookies } from 'astro'
+import { createClient } from "@supabase/supabase-js";
+import type { AstroCookies } from "astro";
 
-import type { Database } from './database.types.ts'
+import type { Database } from "./database.types.ts";
 
 /**
  * Creates a Supabase client for server-side usage with cookie-based session management
@@ -13,13 +13,11 @@ import type { Database } from './database.types.ts'
  * @returns Configured Supabase client instance
  */
 export function createServerClient(cookies: AstroCookies) {
-  const supabaseUrl = import.meta.env.SUPABASE_URL
-  const supabaseAnonKey = import.meta.env.SUPABASE_KEY
+  const supabaseUrl = import.meta.env.SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.SUPABASE_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      'Missing Supabase environment variables. Please check SUPABASE_URL and SUPABASE_KEY.'
-    )
+    throw new Error("Missing Supabase environment variables. Please check SUPABASE_URL and SUPABASE_KEY.");
   }
 
   return createClient<Database>(supabaseUrl, supabaseAnonKey, {
@@ -29,24 +27,24 @@ export function createServerClient(cookies: AstroCookies) {
       detectSessionInUrl: true,
       storage: {
         getItem: (key: string) => {
-          const cookie = cookies.get(key)
-          return cookie?.value ?? null
+          const cookie = cookies.get(key);
+          return cookie?.value ?? null;
         },
         setItem: (key: string, value: string) => {
           cookies.set(key, value, {
-            path: '/',
+            path: "/",
             httpOnly: true,
             secure: import.meta.env.PROD,
-            sameSite: 'lax',
+            sameSite: "lax",
             maxAge: 60 * 60 * 24 * 7, // 7 days
-          })
+          });
         },
         removeItem: (key: string) => {
           cookies.delete(key, {
-            path: '/',
-          })
+            path: "/",
+          });
         },
       },
     },
-  })
+  });
 }

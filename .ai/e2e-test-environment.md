@@ -9,6 +9,7 @@ Dodatkowo, gdy mamy uruchomiony `npm run dev` (port 3000 z `.env`), testy E2E ni
 ## Rozwiązanie - Separacja portów
 
 Testy E2E działają na **porcie 3001** (zamiast 3000), co pozwala:
+
 - Pracować normalnie: `npm run dev` na porcie 3000 z lokalną bazą
 - Testować równocześnie: `npm run test:e2e` na porcie 3001 z testową bazą
 - Brak konfliktów - każde środowisko ma swój port i swoją bazę danych
@@ -39,6 +40,7 @@ webServer: {
 ```
 
 **Jak to działa:**
+
 - `dotenv.config()` parsuje `.env.test` do obiektu JavaScript
 - `webServer.env` przekazuje te zmienne jako environment variables do procesu serwera
 - Serwer Astro używa tych zmiennych zamiast z `.env`
@@ -65,12 +67,12 @@ E2E_PASSWORD=testpassword123
 ## Dostępne komendy
 
 ### Testy E2E (automatycznie uruchomi serwer z .env.test)
+
 ```bash
 npm run test:e2e          # Uruchom wszystkie testy
 npm run test:e2e:ui       # Uruchom w trybie UI
 npm run test:e2e:debug    # Uruchom w trybie debug
 ```
-
 
 ## Workflow testów E2E
 
@@ -84,6 +86,7 @@ npm run test:e2e:debug    # Uruchom w trybie debug
 3. Serwer łączy się z **testową bazą Supabase** (nie lokalną/prod)
 
 **Ważne:** Testy E2E działają na porcie 3001, więc możesz mieć równocześnie:
+
 - `npm run dev` na porcie 3000 (z `.env` - lokalna/prod baza)
 - `npm run test:e2e` na porcie 3001 (z `.env.test` - testowa baza)
 
@@ -92,6 +95,7 @@ npm run test:e2e:debug    # Uruchom w trybie debug
 ### Problem: Testy używają lokalnej bazy zamiast testowej
 
 **Sprawdź:**
+
 1. Czy plik `.env.test` istnieje i zawiera poprawne zmienne
 2. Czy w `.env.test` są ustawione `SUPABASE_URL` i `SUPABASE_KEY` dla testowej bazy
 3. Czy pakiet `dotenv` jest zainstalowany (powinien być w devDependencies)
@@ -99,6 +103,7 @@ npm run test:e2e:debug    # Uruchom w trybie debug
 ### Problem: "Cannot connect to Supabase"
 
 **Sprawdź:**
+
 1. Czy testowa baza Supabase jest uruchomiona i dostępna
 2. Czy URL i KEY w `.env.test` są poprawne
 3. Czy testowy użytkownik (`E2E_USERNAME`/`E2E_PASSWORD`) istnieje w testowej bazie
@@ -106,6 +111,7 @@ npm run test:e2e:debug    # Uruchom w trybie debug
 ### Problem: Port 3001 zajęty
 
 **Rozwiązanie:**
+
 ```bash
 # Zabij proces na porcie 3001
 lsof -ti:3001 | xargs kill -9
@@ -162,9 +168,8 @@ Playwright zatrzymuje serwer po testach
 
 ## Różnice między środowiskami
 
-| Środowisko | Plik | Baza danych | Port | Użycie |
-|------------|------|-------------|------|--------|
-| Development | `.env` | Localhost/Prod | 3000 | `npm run dev` |
-| E2E Tests | `.env.test` | Testowa Supabase | 3001 | `npm run test:e2e` |
-| Production | CI/CD vars | Prod Supabase | - | Deploy |
-
+| Środowisko  | Plik        | Baza danych      | Port | Użycie             |
+| ----------- | ----------- | ---------------- | ---- | ------------------ |
+| Development | `.env`      | Localhost/Prod   | 3000 | `npm run dev`      |
+| E2E Tests   | `.env.test` | Testowa Supabase | 3001 | `npm run test:e2e` |
+| Production  | CI/CD vars  | Prod Supabase    | -    | Deploy             |

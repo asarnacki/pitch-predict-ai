@@ -5,7 +5,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.90 0.018 70);
+  --background: oklch(0.9 0.018 70);
   --foreground: oklch(0.145 0 0);
   --card: oklch(0.94 0.015 70);
   --card-foreground: oklch(0.145 0 0);
@@ -36,7 +36,7 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --hig-surface: oklch(0.90 0.018 70);
+  --hig-surface: oklch(0.9 0.018 70);
   --hig-surface-elevated: oklch(0.94 0.015 70);
   --hig-surface-contrast: oklch(0.86 0.02 70);
   --hig-tint: oklch(0.69 0.233 251.05);
@@ -170,7 +170,9 @@
   }
   body {
     @apply bg-background text-foreground;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
   }
 
   *,

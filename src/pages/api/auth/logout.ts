@@ -1,4 +1,5 @@
-import type { APIRoute } from 'astro'
+import type { APIRoute } from "astro";
+import { logError } from "@/lib/logger";
 
 /**
  * POST /api/auth/logout
@@ -10,57 +11,57 @@ import type { APIRoute } from 'astro'
  */
 export const POST: APIRoute = async ({ locals }) => {
   try {
-    const supabase = locals.supabase
+    const supabase = locals.supabase;
 
     if (!supabase) {
       return new Response(
         JSON.stringify({
-          error: { message: 'Błąd serwera - brak klienta Supabase' },
+          error: { message: "Błąd serwera - brak klienta Supabase" },
         }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
-    const { error } = await supabase.auth.signOut()
+    const { error } = await supabase.auth.signOut();
 
     if (error) {
-      console.error('Logout error:', error)
+      logError("Logout error", { error });
       return new Response(
         JSON.stringify({
-          error: { message: 'Wystąpił błąd podczas wylogowywania' },
+          error: { message: "Wystąpił błąd podczas wylogowywania" },
         }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
     return new Response(
       JSON.stringify({
-        message: 'Wylogowano pomyślnie',
+        message: "Wylogowano pomyślnie",
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
-    )
+    );
   } catch (error) {
-    console.error('Logout error:', error)
+    logError("Logout error", { error });
 
     return new Response(
       JSON.stringify({
-        error: { message: 'Wystąpił błąd serwera' },
+        error: { message: "Wystąpił błąd serwera" },
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
-    )
+    );
   }
-}
+};
 
-export const prerender = false
+export const prerender = false;

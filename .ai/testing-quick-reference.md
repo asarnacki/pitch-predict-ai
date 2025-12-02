@@ -2,15 +2,16 @@
 
 ## Środowiska i porty
 
-| Środowisko | Komenda | Port | Plik env | Baza danych |
-|------------|---------|------|----------|-------------|
-| **Development** | `npm run dev` | 3000 | `.env` | Localhost Docker (54321) |
-| **E2E Tests** | `npm run test:e2e` | 3001 | `.env.test` | Testowa Supabase (cloud) |
-| **Unit Tests** | `npm run test:unit` | - | mock | Mockowany Supabase |
+| Środowisko      | Komenda             | Port | Plik env    | Baza danych              |
+| --------------- | ------------------- | ---- | ----------- | ------------------------ |
+| **Development** | `npm run dev`       | 3000 | `.env`      | Localhost Docker (54321) |
+| **E2E Tests**   | `npm run test:e2e`  | 3001 | `.env.test` | Testowa Supabase (cloud) |
+| **Unit Tests**  | `npm run test:unit` | -    | mock        | Mockowany Supabase       |
 
 ## Kluczowe punkty
 
 ### ✅ Możesz pracować i testować jednocześnie
+
 ```bash
 # Terminal 1 - Development
 npm run dev
@@ -24,13 +25,15 @@ npm run test:e2e
 ### 🔑 Konfiguracja portów
 
 **astro.config.mjs:**
+
 ```javascript
-server: { 
-  port: process.env.PORT ? parseInt(process.env.PORT) : 3000 
+server: {
+  port: process.env.PORT ? parseInt(process.env.PORT) : 3000;
 }
 ```
 
 **playwright.config.ts:**
+
 ```typescript
 webServer: {
   command: 'PORT=3001 npm run dev',  // Wymusza port 3001
@@ -42,6 +45,7 @@ webServer: {
 ## Wymagane pliki
 
 ### `.env` (nie commituj!)
+
 ```env
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_KEY=your-local-key
@@ -49,6 +53,7 @@ SUPABASE_KEY=your-local-key
 ```
 
 ### `.env.test` (nie commituj!)
+
 ```env
 SUPABASE_URL=https://your-test-project.supabase.co
 SUPABASE_KEY=your-test-anon-key
@@ -74,6 +79,7 @@ npm run test:e2e:debug        # Debug mode
 ## Troubleshooting
 
 ### Problem: Port zajęty
+
 ```bash
 # Port 3000 (dev)
 lsof -ti:3000 | xargs kill -9
@@ -83,6 +89,7 @@ lsof -ti:3001 | xargs kill -9
 ```
 
 ### Problem: Testy łączą się z złą bazą
+
 1. Sprawdź czy `.env.test` istnieje i ma poprawne dane
 2. Sprawdź czy Playwright używa portu 3001 (nie 3000)
 3. Sprawdź logi - powinien pokazać testową URL Supabase
@@ -93,4 +100,3 @@ lsof -ti:3001 | xargs kill -9
 - Plan testowy: [.ai/test-plan.md](./.ai/test-plan.md)
 - Reguły E2E: [.cursor/rules/e2e-testing.mdc](../.cursor/rules/e2e-testing.mdc)
 - Reguły Unit: [.cursor/rules/unit-testing.mdc](../.cursor/rules/unit-testing.mdc)
-

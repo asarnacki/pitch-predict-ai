@@ -1,8 +1,8 @@
-import { useMatches } from './hooks/useMatches'
-import { usePredictions } from './hooks/usePredictions'
-import { LeagueSelector } from './LeagueSelector'
-import { MatchList } from './MatchList'
-import { EmptyState } from './EmptyState'
+import { useMatches } from "./hooks/useMatches";
+import { usePredictions } from "./hooks/usePredictions";
+import { LeagueSelector } from "./LeagueSelector";
+import { MatchList } from "./MatchList";
+import { EmptyState } from "./EmptyState";
 
 export function PredictionPanel() {
   const {
@@ -12,25 +12,19 @@ export function PredictionPanel() {
     error: matchesError,
     changeLeague,
     refetch: refetchMatches,
-  } = useMatches('PREMIER_LEAGUE')
+  } = useMatches("PREMIER_LEAGUE");
 
-  const {
-    predictions,
-    generatePrediction,
-    savePrediction,
-  } = usePredictions()
+  const { predictions, generatePrediction, savePrediction } = usePredictions();
 
-  const isLoading = matchesStatus === 'loading'
-  const hasError = matchesStatus === 'error'
-  const hasMatches = matches.length > 0
+  const isLoading = matchesStatus === "loading";
+  const hasError = matchesStatus === "error";
+  const hasMatches = matches.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 max-w-7xl">
         <header className="mb-8 sm:mb-12 text-center space-y-3">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-            PitchPredict AI
-          </h1>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">PitchPredict AI</h1>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
             Wygeneruj predykcje AI dla nadchodzących meczów
           </p>
@@ -41,15 +35,12 @@ export function PredictionPanel() {
         {hasError ? (
           <EmptyState
             title="Nie udało się pobrać meczów"
-            description={matchesError || 'Wystąpił błąd podczas pobierania listy meczów'}
+            description={matchesError || "Wystąpił błąd podczas pobierania listy meczów"}
             actionLabel="Spróbuj ponownie"
             onAction={refetchMatches}
           />
         ) : !isLoading && !hasMatches ? (
-          <EmptyState
-            title="Brak nadchodzących meczów"
-            description="Obecnie nie ma zaplanowanych meczów w tej lidze"
-          />
+          <EmptyState title="Brak nadchodzących meczów" description="Obecnie nie ma zaplanowanych meczów w tej lidze" />
         ) : (
           <MatchList
             matches={matches}
@@ -61,6 +52,5 @@ export function PredictionPanel() {
         )}
       </div>
     </div>
-  )
+  );
 }
-

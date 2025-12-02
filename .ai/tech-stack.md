@@ -47,11 +47,9 @@ CI/CD i Hosting:
 
 ### Krótka odpowiedź na 6 pytań
 
-- 1) Tak, umożliwia szybkie dostarczenie MVP zgodnego z PRD.
-- 2) Tak, skaluje się adekwatnie do oczekiwanego ruchu MVP.
-- 3) Tak, koszty są akceptowalne dla tego zakresu funkcjonalności.
-- 4) Nie, złożoność jest uzasadniona zakresem i celami projektu.
-- 5) Tak, jest wystarczająco prosto jak na wymagania PRD, bez nadmiarowości.
-- 6) Tak, pod warunkiem zastosowania standardowych dobrych praktyk bezpieczeństwa w stacku.
-
-
+- 1. Tak, umożliwia szybkie dostarczenie MVP zgodnego z PRD.
+- 2. Tak, skaluje się adekwatnie do oczekiwanego ruchu MVP.
+- 3. Tak, koszty są akceptowalne dla tego zakresu funkcjonalności.
+- 4. Nie, złożoność jest uzasadniona zakresem i celami projektu.
+- 5. Tak, jest wystarczająco prosto jak na wymagania PRD, bez nadmiarowości.
+- 6. Tak, pod warunkiem zastosowania standardowych dobrych praktyk bezpieczeństwa w stacku.

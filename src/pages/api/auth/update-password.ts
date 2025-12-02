@@ -1,6 +1,7 @@
-import type { APIRoute } from 'astro'
+import type { APIRoute } from "astro";
 
-import { updatePasswordRequestSchema } from '@/lib/validation/auth.schemas'
+import { updatePasswordRequestSchema } from "@/lib/validation/auth.schemas";
+import { logError } from "@/lib/logger";
 
 /**
  * POST /api/auth/update-password
@@ -13,126 +14,124 @@ import { updatePasswordRequestSchema } from '@/lib/validation/auth.schemas'
  */
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    const body = await request.json()
+    const body = await request.json();
 
-    const validation = updatePasswordRequestSchema.safeParse(body)
+    const validation = updatePasswordRequestSchema.safeParse(body);
 
     if (!validation.success) {
       return new Response(
         JSON.stringify({
           error: {
-            message: validation.error.errors[0]?.message || 'Nieprawidłowe dane',
+            message: validation.error.errors[0]?.message || "Nieprawidłowe dane",
           },
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
-    const { password } = validation.data
-    const supabase = locals.supabase
-    const user = locals.user
+    const { password } = validation.data;
+    const supabase = locals.supabase;
+    const user = locals.user;
 
     if (!supabase) {
       return new Response(
         JSON.stringify({
-          error: { message: 'Błąd serwera - brak klienta Supabase' },
+          error: { message: "Błąd serwera - brak klienta Supabase" },
         }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
     if (!user) {
       return new Response(
         JSON.stringify({
           error: {
-            message:
-              'Sesja wygasła. Proszę ponownie zainicjować proces resetowania hasła.',
+            message: "Sesja wygasła. Proszę ponownie zainicjować proces resetowania hasła.",
           },
         }),
         {
           status: 401,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
     const { error } = await supabase.auth.updateUser({
       password,
-    })
+    });
 
     if (error) {
-      console.error('Update password error:', error)
+      logError("Update password error", { error });
 
-      if (error.message.includes('session')) {
+      if (error.message.includes("session")) {
         return new Response(
           JSON.stringify({
             error: {
-              message:
-                'Sesja wygasła. Proszę ponownie zainicjować proces resetowania hasła.',
+              message: "Sesja wygasła. Proszę ponownie zainicjować proces resetowania hasła.",
             },
           }),
           {
             status: 401,
-            headers: { 'Content-Type': 'application/json' },
+            headers: { "Content-Type": "application/json" },
           }
-        )
+        );
       }
 
-      if (error.message.includes('password')) {
+      if (error.message.includes("password")) {
         return new Response(
           JSON.stringify({
             error: {
-              message: 'Hasło nie spełnia wymagań bezpieczeństwa',
+              message: "Hasło nie spełnia wymagań bezpieczeństwa",
             },
           }),
           {
             status: 400,
-            headers: { 'Content-Type': 'application/json' },
+            headers: { "Content-Type": "application/json" },
           }
-        )
+        );
       }
 
       return new Response(
         JSON.stringify({
           error: {
-            message: 'Wystąpił błąd podczas zmiany hasła',
+            message: "Wystąpił błąd podczas zmiany hasła",
           },
         }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
     return new Response(
       JSON.stringify({
-        message: 'Hasło zostało zmienione pomyślnie',
+        message: "Hasło zostało zmienione pomyślnie",
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
-    )
+    );
   } catch (error) {
-    console.error('Update password error:', error)
+    logError("Update password error", { error });
 
     return new Response(
       JSON.stringify({
-        error: { message: 'Wystąpił błąd serwera' },
+        error: { message: "Wystąpił błąd serwera" },
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
-    )
+    );
   }
-}
+};
 
-export const prerender = false
+export const prerender = false;

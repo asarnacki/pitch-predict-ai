@@ -5,14 +5,20 @@
  * Handles CRUD operations with validation and business rules enforcement.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/db/database.types'
-import type { CreatePredictionDTO, PredictionDTO, GetPredictionsQueryParams, PaginatedPredictionsResponseDTO } from '@/types'
-import { BUSINESS_RULES } from '@/types'
-import { PredictionLimitError, NotFoundError, ConflictError } from '@/lib/errors/api-errors'
-import { fetchMatchResult } from './football-data.service'
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/db/database.types";
+import type {
+  CreatePredictionDTO,
+  PredictionDTO,
+  GetPredictionsQueryParams,
+  PaginatedPredictionsResponseDTO,
+} from "@/types";
+import { BUSINESS_RULES } from "@/types";
+import { PredictionLimitError, NotFoundError, ConflictError } from "@/lib/errors/api-errors";
+import { fetchMatchResult } from "./football-data.service";
+import { logError } from "@/lib/logger";
 
-type TypedSupabaseClient = SupabaseClient<Database>
+type TypedSupabaseClient = SupabaseClient<Database>;
 
 /**
  * Check if user has reached the prediction limit (50 predictions)
@@ -21,21 +27,18 @@ type TypedSupabaseClient = SupabaseClient<Database>
  * @param userId - User ID from authenticated session
  * @throws PredictionLimitError if user has >= 50 predictions
  */
-export async function checkPredictionLimit(
-  supabase: TypedSupabaseClient,
-  userId: string
-): Promise<void> {
+export async function checkPredictionLimit(supabase: TypedSupabaseClient, userId: string): Promise<void> {
   const { count, error } = await supabase
-    .from('predictions')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
+    .from("predictions")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
 
   if (error) {
-    throw new Error(`Failed to check prediction limit: ${error.message}`)
+    throw new Error(`Failed to check prediction limit: ${error.message}`);
   }
 
   if (count !== null && count >= BUSINESS_RULES.MAX_PREDICTIONS_PER_USER) {
-    throw new PredictionLimitError()
+    throw new PredictionLimitError();
   }
 }
 
@@ -49,12 +52,9 @@ export async function checkPredictionLimit(
  * @returns Sanitized note or null
  */
 export function sanitizeNote(note?: string | null): string | null {
-  if (!note) return null
+  if (!note) return null;
 
-  return note
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .trim()
+  return note.replace(/</g, "&lt;").replace(/>/g, "&gt;").trim();
 }
 
 /**
@@ -72,9 +72,9 @@ export async function createPrediction(
   userId: string,
   data: CreatePredictionDTO
 ): Promise<PredictionDTO> {
-  await checkPredictionLimit(supabase, userId)
+  await checkPredictionLimit(supabase, userId);
 
-  const sanitizedNote = sanitizeNote(data.note)
+  const sanitizedNote = sanitizeNote(data.note);
 
   const insertData = {
     user_id: userId,
@@ -88,23 +88,19 @@ export async function createPrediction(
     home_score: null,
     away_score: null,
     match_id: data.match_id || null,
-  }
+  };
 
-  const { data: prediction, error } = await supabase
-    .from('predictions')
-    .insert(insertData)
-    .select()
-    .single()
+  const { data: prediction, error } = await supabase.from("predictions").insert(insertData).select().single();
 
   if (error) {
-    console.error('[prediction.service] Create failed:', {
+    logError("[prediction.service] Create failed", {
       userId,
       error: error.message,
-    })
-    throw new Error(`Failed to create prediction: ${error.message}`)
+    });
+    throw new Error(`Failed to create prediction: ${error.message}`);
   }
 
-  return prediction as PredictionDTO
+  return prediction as PredictionDTO;
 }
 
 /**
@@ -121,36 +117,33 @@ export async function getPredictions(
   userId: string,
   params: GetPredictionsQueryParams
 ): Promise<PaginatedPredictionsResponseDTO> {
-  let query = supabase
-    .from('predictions')
-    .select('*', { count: 'exact' })
-    .eq('user_id', userId)
+  let query = supabase.from("predictions").select("*", { count: "exact" }).eq("user_id", userId);
 
   if (params.league) {
-    query = query.eq('league', params.league)
+    query = query.eq("league", params.league);
   }
 
-  const sortField = params.sort || 'created_at'
-  const sortOrder = params.order || 'desc'
-  query = query.order(sortField, { ascending: sortOrder === 'asc' })
+  const sortField = params.sort || "created_at";
+  const sortOrder = params.order || "desc";
+  query = query.order(sortField, { ascending: sortOrder === "asc" });
 
-  const limit = params.limit || BUSINESS_RULES.DEFAULT_PREDICTIONS_LIMIT
-  const offset = params.offset || 0
-  query = query.range(offset, offset + limit - 1)
+  const limit = params.limit || BUSINESS_RULES.DEFAULT_PREDICTIONS_LIMIT;
+  const offset = params.offset || 0;
+  query = query.range(offset, offset + limit - 1);
 
-  const { data, count, error } = await query
+  const { data, count, error } = await query;
 
   if (error) {
-    console.error('[prediction.service] Get predictions failed:', {
+    logError("[prediction.service] Get predictions failed", {
       userId,
       params,
       error: error.message,
-    })
-    throw new Error(`Failed to fetch predictions: ${error.message}`)
+    });
+    throw new Error(`Failed to fetch predictions: ${error.message}`);
   }
 
-  const total = count || 0
-  const hasMore = total > offset + limit
+  const total = count || 0;
+  const hasMore = total > offset + limit;
 
   return {
     predictions: (data || []) as PredictionDTO[],
@@ -160,7 +153,7 @@ export async function getPredictions(
       offset,
       has_more: hasMore,
     },
-  }
+  };
 }
 
 /**
@@ -178,26 +171,26 @@ export async function getPredictionById(
   predictionId: number
 ): Promise<PredictionDTO | null> {
   const { data, error } = await supabase
-    .from('predictions')
-    .select('*')
-    .eq('id', predictionId)
-    .eq('user_id', userId)
-    .single()
+    .from("predictions")
+    .select("*")
+    .eq("id", predictionId)
+    .eq("user_id", userId)
+    .single();
 
   if (error) {
-    if (error.code === 'PGRST116') {
-      return null
+    if (error.code === "PGRST116") {
+      return null;
     }
 
-    console.error('[prediction.service] Get prediction by ID failed:', {
+    logError("[prediction.service] Get prediction by ID failed", {
       userId,
       predictionId,
       error: error.message,
-    })
-    throw new Error(`Failed to fetch prediction: ${error.message}`)
+    });
+    throw new Error(`Failed to fetch prediction: ${error.message}`);
   }
 
-  return data as PredictionDTO
+  return data as PredictionDTO;
 }
 
 /**
@@ -218,30 +211,30 @@ export async function updatePredictionNote(
   predictionId: number,
   note: string | null | undefined
 ): Promise<PredictionDTO | null> {
-  const sanitizedNote = sanitizeNote(note)
+  const sanitizedNote = sanitizeNote(note);
 
   const { data, error } = await supabase
-    .from('predictions')
+    .from("predictions")
     .update({ note: sanitizedNote })
-    .eq('id', predictionId)
-    .eq('user_id', userId)
+    .eq("id", predictionId)
+    .eq("user_id", userId)
     .select()
-    .single()
+    .single();
 
   if (error) {
-    if (error.code === 'PGRST116') {
-      return null
+    if (error.code === "PGRST116") {
+      return null;
     }
 
-    console.error('[prediction.service] Update prediction note failed:', {
+    logError("[prediction.service] Update prediction note failed", {
       userId,
       predictionId,
       error: error.message,
-    })
-    throw new Error(`Failed to update prediction: ${error.message}`)
+    });
+    throw new Error(`Failed to update prediction: ${error.message}`);
   }
 
-  return data as PredictionDTO
+  return data as PredictionDTO;
 }
 
 /**
@@ -259,22 +252,22 @@ export async function deletePrediction(
   predictionId: number
 ): Promise<boolean> {
   const { data, error } = await supabase
-    .from('predictions')
+    .from("predictions")
     .delete()
-    .eq('id', predictionId)
-    .eq('user_id', userId)
-    .select()
+    .eq("id", predictionId)
+    .eq("user_id", userId)
+    .select();
 
   if (error) {
-    console.error('[prediction.service] Delete prediction failed:', {
+    logError("[prediction.service] Delete prediction failed", {
       userId,
       predictionId,
       error: error.message,
-    })
-    throw new Error(`Failed to delete prediction: ${error.message}`)
+    });
+    throw new Error(`Failed to delete prediction: ${error.message}`);
   }
 
-  return data && data.length > 0
+  return data && data.length > 0;
 }
 
 /**
@@ -284,10 +277,10 @@ export async function deletePrediction(
  * @returns true if match is finished (current time > match time + 3 hours)
  */
 function isMatchFinished(matchDate: string): boolean {
-  const matchTime = new Date(matchDate).getTime()
-  const now = Date.now()
-  const threeHours = 3 * 60 * 60 * 1000
-  return now - matchTime > threeHours
+  const matchTime = new Date(matchDate).getTime();
+  const now = Date.now();
+  const threeHours = 3 * 60 * 60 * 1000;
+  return now - matchTime > threeHours;
 }
 
 /**
@@ -315,47 +308,47 @@ export async function fetchAndCacheResult(
   userId: string,
   predictionId: number
 ): Promise<PredictionDTO> {
-  const prediction = await getPredictionById(supabase, userId, predictionId)
+  const prediction = await getPredictionById(supabase, userId, predictionId);
 
   if (!prediction) {
-    throw new NotFoundError('PREDICTION_NOT_FOUND', 'Prediction not found')
+    throw new NotFoundError("PREDICTION_NOT_FOUND", "Prediction not found");
   }
 
   if (prediction.home_score !== null && prediction.away_score !== null) {
-    return prediction
+    return prediction;
   }
 
   if (!prediction.match_id) {
-    throw new ConflictError('MATCH_ID_MISSING', 'Cannot fetch result: match_id not available')
+    throw new ConflictError("MATCH_ID_MISSING", "Cannot fetch result: match_id not available");
   }
 
   if (!isMatchFinished(prediction.match_date)) {
-    throw new ConflictError('MATCH_NOT_FINISHED', 'Match result not available yet')
+    throw new ConflictError("MATCH_NOT_FINISHED", "Match result not available yet");
   }
 
   // Fetch result from external API
-  const result = await fetchMatchResult(prediction.match_id)
+  const result = await fetchMatchResult(prediction.match_id);
 
   // Update prediction with scores
   const { data, error } = await supabase
-    .from('predictions')
+    .from("predictions")
     .update({
       home_score: result.home_score,
       away_score: result.away_score,
     })
-    .eq('id', predictionId)
-    .eq('user_id', userId)
+    .eq("id", predictionId)
+    .eq("user_id", userId)
     .select()
-    .single()
+    .single();
 
   if (error) {
-    console.error('[prediction.service] Fetch and cache result failed:', {
+    logError("[prediction.service] Fetch and cache result failed", {
       userId,
       predictionId,
       error: error.message,
-    })
-    throw new Error(`Failed to cache match result: ${error.message}`)
+    });
+    throw new Error(`Failed to cache match result: ${error.message}`);
   }
 
-  return data as PredictionDTO
+  return data as PredictionDTO;
 }

@@ -1,54 +1,54 @@
-import { apiClient } from './client'
+import { apiClient } from "./client";
 
 export interface AuthUser {
-  id: string
-  email: string
+  id: string;
+  email: string;
 }
 
 export interface AuthResponse {
-  user: AuthUser
+  user: AuthUser;
 }
 
 export interface MessageResponse {
-  message: string
+  message: string;
 }
 
 export const authService = {
   async login(email: string, password: string): Promise<AuthUser> {
-    const response = await apiClient<AuthResponse>('/api/auth/login', {
-      method: 'POST',
+    const response = await apiClient<AuthResponse>("/api/auth/login", {
+      method: "POST",
       body: JSON.stringify({ email, password }),
-    })
-    return response.user
+    });
+    return response.user;
   },
 
   async register(email: string, password: string): Promise<AuthUser> {
-    const response = await apiClient<AuthResponse>('/api/auth/register', {
-      method: 'POST',
+    const response = await apiClient<AuthResponse>("/api/auth/register", {
+      method: "POST",
       body: JSON.stringify({ email, password }),
-    })
-    return response.user
+    });
+    return response.user;
   },
 
   async resetPassword(email: string): Promise<string> {
-    const response = await apiClient<MessageResponse>('/api/auth/reset-password', {
-      method: 'POST',
+    const response = await apiClient<MessageResponse>("/api/auth/reset-password", {
+      method: "POST",
       body: JSON.stringify({ email }),
-    })
-    return response.message
+    });
+    return response.message;
   },
 
   async updatePassword(password: string): Promise<string> {
-    const response = await apiClient<MessageResponse>('/api/auth/update-password', {
-      method: 'POST',
+    const response = await apiClient<MessageResponse>("/api/auth/update-password", {
+      method: "POST",
       body: JSON.stringify({ password }),
-    })
-    return response.message
+    });
+    return response.message;
   },
 
   async logout(): Promise<void> {
-    await apiClient('/api/auth/logout', {
-      method: 'POST',
-    })
+    await apiClient("/api/auth/logout", {
+      method: "POST",
+    });
   },
-}
+};
