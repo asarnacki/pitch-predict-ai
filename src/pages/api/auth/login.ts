@@ -1,6 +1,7 @@
-import type { APIRoute } from 'astro'
+import type { APIRoute } from "astro";
 
-import { loginSchema } from '@/lib/validation/auth.schemas'
+import { loginSchema } from "@/lib/validation/auth.schemas";
+import { logError } from "@/lib/logger";
 
 /**
  * POST /api/auth/login
@@ -13,68 +14,68 @@ import { loginSchema } from '@/lib/validation/auth.schemas'
  */
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    const body = await request.json()
+    const body = await request.json();
 
-    const validation = loginSchema.safeParse(body)
+    const validation = loginSchema.safeParse(body);
 
     if (!validation.success) {
       return new Response(
         JSON.stringify({
           error: {
-            message: validation.error.errors[0]?.message || 'Nieprawidłowe dane',
+            message: validation.error.errors[0]?.message || "Nieprawidłowe dane",
           },
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
-    const { email, password } = validation.data
-    const supabase = locals.supabase
+    const { email, password } = validation.data;
+    const supabase = locals.supabase;
 
     if (!supabase) {
       return new Response(
         JSON.stringify({
-          error: { message: 'Błąd serwera - brak klienta Supabase' },
+          error: { message: "Błąd serwera - brak klienta Supabase" },
         }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
-    })
+    });
 
     if (error) {
       return new Response(
         JSON.stringify({
           error: {
-            message: 'Nieprawidłowy e-mail lub hasło',
+            message: "Nieprawidłowy e-mail lub hasło",
           },
         }),
         {
           status: 401,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
     if (!data.user) {
       return new Response(
         JSON.stringify({
-          error: { message: 'Nie udało się zalogować' },
+          error: { message: "Nie udało się zalogować" },
         }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
-      )
+      );
     }
 
     return new Response(
@@ -86,22 +87,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
-    )
+    );
   } catch (error) {
-    console.error('Login error:', error)
+    logError("Login error", { error });
 
     return new Response(
       JSON.stringify({
-        error: { message: 'Wystąpił błąd serwera' },
+        error: { message: "Wystąpił błąd serwera" },
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
-    )
+    );
   }
-}
+};
 
-export const prerender = false
+export const prerender = false;

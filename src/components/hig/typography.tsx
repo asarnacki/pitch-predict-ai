@@ -1,7 +1,7 @@
-import { createElement } from "react"
-import type { HTMLAttributes } from "react"
+import { createElement } from "react";
+import type { HTMLAttributes } from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 type HIGTypographyVariant =
   | "largeTitle"
@@ -14,16 +14,16 @@ type HIGTypographyVariant =
   | "body"
   | "footnote"
   | "caption1"
-  | "caption2"
+  | "caption2";
 
-type HIGTone = "primary" | "secondary" | "tertiary"
+type HIGTone = "primary" | "secondary" | "tertiary";
 
 export interface HIGTypographyProps extends HTMLAttributes<HTMLElement> {
-  align?: "start" | "center" | "end" | "justify"
-  as?: keyof JSX.IntrinsicElements
-  tone?: HIGTone
-  variant?: HIGTypographyVariant
-  weight?: "regular" | "medium" | "semibold" | "bold"
+  align?: "start" | "center" | "end" | "justify";
+  as?: keyof JSX.IntrinsicElements;
+  tone?: HIGTone;
+  variant?: HIGTypographyVariant;
+  weight?: "regular" | "medium" | "semibold" | "bold";
 }
 
 const VARIANT_STYLES: Record<HIGTypographyVariant, string> = {
@@ -38,20 +38,20 @@ const VARIANT_STYLES: Record<HIGTypographyVariant, string> = {
   footnote: "text-[0.94rem] leading-[1.32]",
   caption1: "text-[0.86rem] leading-[1.28]",
   caption2: "text-[0.78rem] leading-[1.24]",
-}
+};
 
 const WEIGHT_STYLES: Record<NonNullable<HIGTypographyProps["weight"]>, string> = {
   regular: "font-normal",
   medium: "font-medium",
   semibold: "font-semibold",
   bold: "font-bold",
-}
+};
 
 const TONE_STYLES: Record<HIGTone, string> = {
   primary: "text-[color:var(--hig-color-label-primary)]",
   secondary: "text-[color:var(--hig-color-label-secondary)]",
   tertiary: "text-[color:var(--hig-color-label-tertiary)]",
-}
+};
 
 const DEFAULT_ELEMENT: Record<HIGTypographyVariant, keyof JSX.IntrinsicElements> = {
   largeTitle: "h1",
@@ -65,7 +65,7 @@ const DEFAULT_ELEMENT: Record<HIGTypographyVariant, keyof JSX.IntrinsicElements>
   footnote: "p",
   caption1: "span",
   caption2: "span",
-}
+};
 
 export const HIGTypography = ({
   align = "start",
@@ -76,7 +76,7 @@ export const HIGTypography = ({
   weight = "regular",
   ...props
 }: HIGTypographyProps) => {
-  const element = as ?? DEFAULT_ELEMENT[variant]
+  const element = as ?? DEFAULT_ELEMENT[variant];
 
   return createElement(element, {
     className: cn(
@@ -87,10 +87,8 @@ export const HIGTypography = ({
       align === "center" && "text-center",
       align === "end" && "text-right",
       align === "justify" && "text-justify",
-      className,
+      className
     ),
     ...props,
-  })
-}
-
-
+  });
+};

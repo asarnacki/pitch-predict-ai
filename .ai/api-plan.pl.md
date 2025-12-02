@@ -3,17 +3,19 @@
 ## 1. Zasoby
 
 ### Główne Zasoby
-| Zasób | Tabela w bazie danych | Opis |
-|---|---|---|
-| **Profile** | `public.profiles` | Dane profilu użytkownika, relacja 1:1 z `auth.users` |
-| **Predykcje** | `public.predictions` | Zapisane przez użytkownika predykcje meczów z denormalizowanymi danymi meczu |
+
+| Zasób         | Tabela w bazie danych | Opis                                                                         |
+| ------------- | --------------------- | ---------------------------------------------------------------------------- |
+| **Profile**   | `public.profiles`     | Dane profilu użytkownika, relacja 1:1 z `auth.users`                         |
+| **Predykcje** | `public.predictions`  | Zapisane przez użytkownika predykcje meczów z denormalizowanymi danymi meczu |
 
 ### Zasoby Zewnętrzne (Proxy)
-| Zasób | Zewnętrzne źródło | Opis |
-|---|---|---|
-| **Mecze** | API football-data.org | Nadchodzące mecze dla wspieranych lig |
-| **Predykcje AI** | API OpenRouter.ai | Prawdopodobieństwa wyniku meczu wygenerowane przez AI |
-| **Wyniki Meczów**| API football-data.org | Końcowe wyniki zakończonych meczów |
+
+| Zasób             | Zewnętrzne źródło     | Opis                                                  |
+| ----------------- | --------------------- | ----------------------------------------------------- |
+| **Mecze**         | API football-data.org | Nadchodzące mecze dla wspieranych lig                 |
+| **Predykcje AI**  | API OpenRouter.ai     | Prawdopodobieństwa wyniku meczu wygenerowane przez AI |
+| **Wyniki Meczów** | API football-data.org | Końcowe wyniki zakończonych meczów                    |
 
 ---
 
@@ -22,6 +24,7 @@
 ### 2.1 Endpointy Profilu
 
 #### GET `/api/profile`
+
 Pobierz profil aktualnie uwierzytelnionego użytkownika.
 
 **Uwierzytelnianie**: Wymagane (token Bearer w nagłówku Authorization)
@@ -31,6 +34,7 @@ Pobierz profil aktualnie uwierzytelnionego użytkownika.
 **Ciało żądania**: Brak
 
 **Odpowiedź sukcesu** (200 OK):
+
 ```json
 {
   "data": {
@@ -41,7 +45,9 @@ Pobierz profil aktualnie uwierzytelnionego użytkownika.
 ```
 
 **Odpowiedzi błędów**:
+
 - `401 Unauthorized`: Użytkownik nieuwierzytelniony
+
 ```json
 {
   "error": {
@@ -50,7 +56,9 @@ Pobierz profil aktualnie uwierzytelnionego użytkownika.
   }
 }
 ```
+
 - `404 Not Found`: Profil nie istnieje
+
 ```json
 {
   "error": {
@@ -65,6 +73,7 @@ Pobierz profil aktualnie uwierzytelnionego użytkownika.
 ### 2.2 Endpointy Meczów
 
 #### GET `/api/matches`
+
 Pobierz nadchodzące mecze dla określonej ligi.
 
 **Uwierzytelnianie**: Opcjonalne (działa zarówno dla uwierzytelnionych, jak i anonimowych użytkowników)
@@ -78,6 +87,7 @@ Pobierz nadchodzące mecze dla określonej ligi.
 **Ciało żądania**: Brak
 
 **Odpowiedź sukcesu** (200 OK):
+
 ```json
 {
   "data": {
@@ -106,7 +116,9 @@ Pobierz nadchodzące mecze dla określonej ligi.
 ```
 
 **Odpowiedzi błędów**:
+
 - `400 Bad Request`: Nieprawidłowy parametr ligi
+
 ```json
 {
   "error": {
@@ -115,7 +127,9 @@ Pobierz nadchodzące mecze dla określonej ligi.
   }
 }
 ```
+
 - `503 Service Unavailable`: Zewnętrzne API niedostępne
+
 ```json
 {
   "error": {
@@ -132,6 +146,7 @@ Pobierz nadchodzące mecze dla określonej ligi.
 ### 2.3 Endpointy Predykcji AI
 
 #### POST `/api/predictions/generate`
+
 Wygeneruj predykcję AI dla określonego meczu.
 
 **Uwierzytelnianie**: Opcjonalne (działa zarówno dla uwierzytelnionych, jak i anonimowych użytkowników)
@@ -139,6 +154,7 @@ Wygeneruj predykcję AI dla określonego meczu.
 **Parametry zapytania**: Brak
 
 **Ciało żądania**:
+
 ```json
 {
   "match_id": "match_12345",
@@ -150,6 +166,7 @@ Wygeneruj predykcję AI dla określonego meczu.
 ```
 
 **Walidacja żądania**:
+
 - `match_id`: wymagany, niepusty ciąg znaków
 - `home_team`: wymagany, niepusty ciąg znaków
 - `away_team`: wymagany, niepusty ciąg znaków
@@ -157,6 +174,7 @@ Wygeneruj predykcję AI dla określonego meczu.
 - `match_date`: wymagany, prawidłowy znacznik czasu ISO 8601
 
 **Odpowiedź sukcesu** (200 OK):
+
 ```json
 {
   "data": {
@@ -168,7 +186,7 @@ Wygeneruj predykcję AI dla określonego meczu.
     "prediction": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "generated_at": "2024-01-15T10:30:00Z"
   }
@@ -176,7 +194,9 @@ Wygeneruj predykcję AI dla określonego meczu.
 ```
 
 **Odpowiedzi błędów**:
+
 - `400 Bad Request`: Nieprawidłowe ciało żądania
+
 ```json
 {
   "error": {
@@ -189,7 +209,9 @@ Wygeneruj predykcję AI dla określonego meczu.
   }
 }
 ```
+
 - `503 Service Unavailable`: Usługa AI niedostępna
+
 ```json
 {
   "error": {
@@ -206,6 +228,7 @@ Wygeneruj predykcję AI dla określonego meczu.
 ### 2.4 Endpointy Zapisanych Predykcji
 
 #### POST `/api/predictions`
+
 Zapisz wygenerowaną predykcję na listę obserwowanych przez użytkownika.
 
 **Uwierzytelnianie**: Wymagane
@@ -213,6 +236,7 @@ Zapisz wygenerowaną predykcję na listę obserwowanych przez użytkownika.
 **Parametry zapytania**: Brak
 
 **Ciało żądania**:
+
 ```json
 {
   "league": "Premier League",
@@ -222,13 +246,14 @@ Zapisz wygenerowaną predykcję na listę obserwowanych przez użytkownika.
   "prediction_result": {
     "home": 0.52,
     "draw": 0.28,
-    "away": 0.20
+    "away": 0.2
   },
   "note": "Wysoka pewność wygranej gospodarzy na podstawie ostatniej formy"
 }
 ```
 
 **Walidacja żądania**:
+
 - `league`: wymagany, niepusty ciąg znaków
 - `match_date`: wymagany, prawidłowy znacznik czasu ISO 8601
 - `home_team`: wymagany, niepusty ciąg znaków
@@ -237,6 +262,7 @@ Zapisz wygenerowaną predykcję na listę obserwowanych przez użytkownika.
 - `note`: opcjonalny, maks. 500 znaków
 
 **Odpowiedź sukcesu** (201 Created):
+
 ```json
 {
   "data": {
@@ -250,7 +276,7 @@ Zapisz wygenerowaną predykcję na listę obserwowanych przez użytkownika.
     "prediction_result": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "note": "Wysoka pewność wygranej gospodarzy na podstawie ostatniej formy",
     "home_score": null,
@@ -260,7 +286,9 @@ Zapisz wygenerowaną predykcję na listę obserwowanych przez użytkownika.
 ```
 
 **Odpowiedzi błędów**:
+
 - `401 Unauthorized`: Użytkownik nieuwierzytelniony
+
 ```json
 {
   "error": {
@@ -269,7 +297,9 @@ Zapisz wygenerowaną predykcję na listę obserwowanych przez użytkownika.
   }
 }
 ```
+
 - `400 Bad Request`: Błąd walidacji
+
 ```json
 {
   "error": {
@@ -282,7 +312,9 @@ Zapisz wygenerowaną predykcję na listę obserwowanych przez użytkownika.
   }
 }
 ```
+
 - `403 Forbidden`: Osiągnięto limit predykcji
+
 ```json
 {
   "error": {
@@ -293,6 +325,7 @@ Zapisz wygenerowaną predykcję na listę obserwowanych przez użytkownika.
 ```
 
 **Logika Biznesowa**:
+
 - Wymusza limit 50 predykcji na użytkownika
 - Automatycznie ustawia `user_id` z uwierzytelnionej sesji
 - Ustawia `home_score` i `away_score` początkowo na null
@@ -300,6 +333,7 @@ Zapisz wygenerowaną predykcję na listę obserwowanych przez użytkownika.
 ---
 
 #### GET `/api/predictions`
+
 Pobierz wszystkie zapisane predykcje dla uwierzytelnionego użytkownika.
 
 **Uwierzytelnianie**: Wymagane
@@ -316,6 +350,7 @@ Pobierz wszystkie zapisane predykcje dla uwierzytelnionego użytkownika.
 **Ciało żądania**: Brak
 
 **Odpowiedź sukcesu** (200 OK):
+
 ```json
 {
   "data": {
@@ -330,7 +365,7 @@ Pobierz wszystkie zapisane predykcje dla uwierzytelnionego użytkownika.
         "prediction_result": {
           "home": 0.52,
           "draw": 0.28,
-          "away": 0.20
+          "away": 0.2
         },
         "note": "Wysoka pewność wygranej gospodarzy",
         "home_score": null,
@@ -345,7 +380,7 @@ Pobierz wszystkie zapisane predykcje dla uwierzytelnionego użytkownika.
         "away_team": "Barcelona",
         "prediction_result": {
           "home": 0.45,
-          "draw": 0.30,
+          "draw": 0.3,
           "away": 0.25
         },
         "note": "El Clásico - wszystko może się zdarzyć",
@@ -364,7 +399,9 @@ Pobierz wszystkie zapisane predykcje dla uwierzytelnionego użytkownika.
 ```
 
 **Odpowiedzi błędów**:
+
 - `401 Unauthorized`: Użytkownik nieuwierzytelniony
+
 ```json
 {
   "error": {
@@ -373,7 +410,9 @@ Pobierz wszystkie zapisane predykcje dla uwierzytelnionego użytkownika.
   }
 }
 ```
+
 - `400 Bad Request`: Nieprawidłowe parametry zapytania
+
 ```json
 {
   "error": {
@@ -388,6 +427,7 @@ Pobierz wszystkie zapisane predykcje dla uwierzytelnionego użytkownika.
 ```
 
 **Logika Biznesowa**:
+
 - Zwraca tylko predykcje należące do uwierzytelnionego użytkownika (wymuszone przez RLS)
 - Domyślne sortowanie: najnowsze najpierw (created_at desc)
 - Zawiera metadane paginacji
@@ -395,6 +435,7 @@ Pobierz wszystkie zapisane predykcje dla uwierzytelnionego użytkownika.
 ---
 
 #### GET `/api/predictions/:id`
+
 Pobierz konkretną zapisaną predykcję według ID.
 
 **Uwierzytelnianie**: Wymagane
@@ -409,6 +450,7 @@ Pobierz konkretną zapisaną predykcję według ID.
 **Ciało żądania**: Brak
 
 **Odpowiedź sukcesu** (200 OK):
+
 ```json
 {
   "data": {
@@ -422,7 +464,7 @@ Pobierz konkretną zapisaną predykcję według ID.
     "prediction_result": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "note": "Wysoka pewność wygranej gospodarzy",
     "home_score": null,
@@ -432,7 +474,9 @@ Pobierz konkretną zapisaną predykcję według ID.
 ```
 
 **Odpowiedzi błędów**:
+
 - `401 Unauthorized`: Użytkownik nieuwierzytelniony
+
 ```json
 {
   "error": {
@@ -441,7 +485,9 @@ Pobierz konkretną zapisaną predykcję według ID.
   }
 }
 ```
+
 - `404 Not Found`: Predykcja nie znaleziona lub nie należy do użytkownika
+
 ```json
 {
   "error": {
@@ -454,6 +500,7 @@ Pobierz konkretną zapisaną predykcję według ID.
 ---
 
 #### PATCH `/api/predictions/:id`
+
 Zaktualizuj notatkę dla zapisanej predykcji.
 
 **Uwierzytelnianie**: Wymagane
@@ -466,6 +513,7 @@ Zaktualizuj notatkę dla zapisanej predykcji.
 **Parametry zapytania**: Brak
 
 **Ciało żądania**:
+
 ```json
 {
   "note": "Zaktualizowana analiza po sprawdzeniu wiadomości o drużynie"
@@ -473,9 +521,11 @@ Zaktualizuj notatkę dla zapisanej predykcji.
 ```
 
 **Walidacja żądania**:
+
 - `note`: opcjonalny, maks. 500 znaków (może być null, aby wyczyścić notatkę)
 
 **Odpowiedź sukcesu** (200 OK):
+
 ```json
 {
   "data": {
@@ -489,7 +539,7 @@ Zaktualizuj notatkę dla zapisanej predykcji.
     "prediction_result": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "note": "Zaktualizowana analiza po sprawdzeniu wiadomości o drużynie",
     "home_score": null,
@@ -499,7 +549,9 @@ Zaktualizuj notatkę dla zapisanej predykcji.
 ```
 
 **Odpowiedzi błędów**:
+
 - `401 Unauthorized`: Użytkownik nieuwierzytelniony
+
 ```json
 {
   "error": {
@@ -508,7 +560,9 @@ Zaktualizuj notatkę dla zapisanej predykcji.
   }
 }
 ```
+
 - `404 Not Found`: Predykcja nie znaleziona lub nie należy do użytkownika
+
 ```json
 {
   "error": {
@@ -517,7 +571,9 @@ Zaktualizuj notatkę dla zapisanej predykcji.
   }
 }
 ```
+
 - `400 Bad Request`: Błąd walidacji
+
 ```json
 {
   "error": {
@@ -532,6 +588,7 @@ Zaktualizuj notatkę dla zapisanej predykcji.
 ```
 
 **Logika Biznesowa**:
+
 - Pozwala na aktualizację tylko pola `note`
 - Inne pola (`prediction_result`, drużyny, itp.) są niezmienne
 - RLS zapewnia, że użytkownik może aktualizować tylko własne predykcje
@@ -539,6 +596,7 @@ Zaktualizuj notatkę dla zapisanej predykcji.
 ---
 
 #### DELETE `/api/predictions/:id`
+
 Usuń zapisaną predykcję.
 
 **Uwierzytelnianie**: Wymagane
@@ -555,7 +613,9 @@ Usuń zapisaną predykcję.
 **Odpowiedź sukcesu** (204 No Content)
 
 **Odpowiedzi błędów**:
+
 - `401 Unauthorized`: Użytkownik nieuwierzytelniony
+
 ```json
 {
   "error": {
@@ -564,7 +624,9 @@ Usuń zapisaną predykcję.
   }
 }
 ```
+
 - `404 Not Found`: Predykcja nie znaleziona lub nie należy do użytkownika
+
 ```json
 {
   "error": {
@@ -575,12 +637,14 @@ Usuń zapisaną predykcję.
 ```
 
 **Logika Biznesowa**:
+
 - RLS zapewnia, że użytkownik może usuwać tylko własne predykcje
 - Usuwanie kaskadowe jest obsługiwane na poziomie bazy danych
 
 ---
 
 #### POST `/api/predictions/:id/fetch-result`
+
 Pobierz i zapisz w pamięci podręcznej końcowy wynik meczu dla zakończonego meczu.
 
 **Uwierzytelnianie**: Wymagane
@@ -595,6 +659,7 @@ Pobierz i zapisz w pamięci podręcznej końcowy wynik meczu dla zakończonego m
 **Ciało żądania**: Brak
 
 **Odpowiedź sukcesu** (200 OK):
+
 ```json
 {
   "data": {
@@ -608,7 +673,7 @@ Pobierz i zapisz w pamięci podręcznej końcowy wynik meczu dla zakończonego m
     "prediction_result": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "note": "Wysoka pewność wygranej gospodarzy",
     "home_score": 2,
@@ -618,7 +683,9 @@ Pobierz i zapisz w pamięci podręcznej końcowy wynik meczu dla zakończonego m
 ```
 
 **Odpowiedzi błędów**:
+
 - `401 Unauthorized`: Użytkownik nieuwierzytelniony
+
 ```json
 {
   "error": {
@@ -627,7 +694,9 @@ Pobierz i zapisz w pamięci podręcznej końcowy wynik meczu dla zakończonego m
   }
 }
 ```
+
 - `404 Not Found`: Predykcja nie znaleziona lub nie należy do użytkownika
+
 ```json
 {
   "error": {
@@ -636,7 +705,9 @@ Pobierz i zapisz w pamięci podręcznej końcowy wynik meczu dla zakończonego m
   }
 }
 ```
+
 - `409 Conflict`: Mecz się jeszcze nie zakończył
+
 ```json
 {
   "error": {
@@ -645,7 +716,9 @@ Pobierz i zapisz w pamięci podręcznej końcowy wynik meczu dla zakończonego m
   }
 }
 ```
+
 - `503 Service Unavailable`: Zewnętrzne API niedostępne
+
 ```json
 {
   "error": {
@@ -656,6 +729,7 @@ Pobierz i zapisz w pamięci podręcznej końcowy wynik meczu dla zakończonego m
 ```
 
 **Logika Biznesowa**:
+
 - Pobiera wynik z API football-data.org
 - Zapisuje wynik w polach `home_score` i `away_score`
 - Kolejne wywołania zwracają wynik z pamięci podręcznej (bez wywołania zewnętrznego API)
@@ -666,6 +740,7 @@ Pobierz i zapisz w pamięci podręcznej końcowy wynik meczu dla zakończonego m
 ## 3. Uwierzytelnianie i Autoryzacja
 
 ### Mechanizm Uwierzytelniania
+
 Aplikacja używa **Supabase Auth** z uwierzytelnianiem opartym na JWT (JSON Web Token):
 
 1. **Rejestracja/Logowanie Użytkownika**: Obsługiwane przez usługę Supabase Auth
@@ -676,44 +751,51 @@ Aplikacja używa **Supabase Auth** z uwierzytelnianiem opartym na JWT (JSON Web 
 ### Szczegóły Implementacji
 
 #### Po stronie klienta (Astro + React)
+
 ```typescript
 // Inicjalizacja klienta Supabase
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
-  }
-})
+    detectSessionInUrl: true,
+  },
+});
 ```
 
 #### Po stronie serwera (Astro Middleware)
+
 ```typescript
 // /src/middleware/index.ts
 // Waliduj JWT i dołącz kontekst użytkownika do żądania
 export async function onRequest(context, next) {
-  const token = context.cookies.get('sb-access-token')
-  
+  const token = context.cookies.get("sb-access-token");
+
   if (token) {
-    const { data: { user }, error } = await supabase.auth.getUser(token)
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
     if (!error && user) {
-      context.locals.user = user
+      context.locals.user = user;
     }
   }
-  
-  return next()
+
+  return next();
 }
 ```
 
 ### Poziomy Autoryzacji
 
 #### Publiczne Endpointy (Nie wymagają uwierzytelniania)
+
 - `GET /api/matches`
 - `POST /api/predictions/generate`
 
 #### Chronione Endpointy (Wymagają uwierzytelniania)
+
 - `GET /api/profile`
 - `POST /api/predictions`
 - `GET /api/predictions`
@@ -727,12 +809,14 @@ export async function onRequest(context, next) {
 Baza danych wymusza izolację danych za pomocą Row Level Security w PostgreSQL:
 
 #### Tabela `Profiles`
+
 - **SELECT**: Użytkownicy mogą przeglądać tylko własny profil (`auth.uid() = id`)
 - **UPDATE**: Użytkownicy mogą aktualizować tylko własny profil (`auth.uid() = id`)
 - **INSERT**: Zablokowane (profile tworzone automatycznie przez trigger)
 - **DELETE**: Zablokowane (usuwanie profilu obsługiwane przez Supabase Auth)
 
 #### Tabela `Predictions`
+
 - **SELECT**: Użytkownicy mogą przeglądać tylko własne predykcje (`auth.uid() = user_id`)
 - **INSERT**: Użytkownicy mogą wstawiać predykcje tylko z własnym `user_id` (`auth.uid() = user_id`)
 - **UPDATE**: Użytkownicy mogą aktualizować tylko własne predykcje (`auth.uid() = user_id`)
@@ -761,6 +845,7 @@ Baza danych wymusza izolację danych za pomocą Row Level Security w PostgreSQL:
 | `away_score` | Opcjonalna liczba całkowita, ≥ 0 |
 
 **Ograniczenia Bazy Danych**:
+
 - `id`: Automatycznie inkrementowany klucz główny
 - `created_at`: Automatycznie generowany znacznik czasu
 - `user_id`: Musi odnosić się do istniejącego profilu, usuwanie kaskadowe
@@ -769,17 +854,19 @@ Baza danych wymusza izolację danych za pomocą Row Level Security w PostgreSQL:
 ### Implementacja Logiki Biznesowej
 
 #### BL-001: Limit 50 Predykcji (FR-017)
+
 **Lokalizacja**: Endpoint `POST /api/predictions`
 
 **Logika**:
+
 ```typescript
 async function canCreatePrediction(userId: string): Promise<boolean> {
   const { count } = await supabase
-    .from('predictions')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
-  
-  return count < 50
+    .from("predictions")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  return count < 50;
 }
 ```
 
@@ -788,6 +875,7 @@ async function canCreatePrediction(userId: string): Promise<boolean> {
 ---
 
 #### BL-002: Automatyczne Tworzenie Profilu (Wymaganie schematu bazy danych)
+
 **Lokalizacja**: Trigger bazy danych `on_auth_user_created`
 
 **Logika**: Kiedy nowy użytkownik rejestruje się przez Supabase Auth, trigger automatycznie tworzy odpowiadający mu rekord profilu z tym samym UUID.
@@ -797,20 +885,24 @@ async function canCreatePrediction(userId: string): Promise<boolean> {
 ---
 
 #### BL-003: Niezmienne Dane Predykcji
+
 **Lokalizacja**: Endpoint `PATCH /api/predictions/:id`
 
 **Logika**: Tylko pole `note` może być aktualizowane. Główne dane predykcji (`prediction_result`, `home_team`, `away_team`, `match_date`, `league`) są niezmienne po utworzeniu.
 
 **Wymuszenie**:
+
 - Walidacja po stronie serwera ignoruje wszystkie pola oprócz `note`
 - Polityki RLS bazy danych zapewniają, że użytkownicy mogą aktualizować tylko własne rekordy
 
 ---
 
 #### BL-004: Caching Wyników (FR-016, FR-018)
+
 **Lokalizacja**: Endpoint `POST /api/predictions/:id/fetch-result`
 
 **Logika**:
+
 1. Sprawdź, czy `home_score` i `away_score` są już ustawione
 2. Jeśli są w pamięci podręcznej, zwróć natychmiast bez wywołania zewnętrznego API
 3. Jeśli nie są w pamięci podręcznej:
@@ -820,6 +912,7 @@ async function canCreatePrediction(userId: string): Promise<boolean> {
    - Zwróć zaktualizowany rekord
 
 **Korzyści**:
+
 - Zmniejsza liczbę wywołań zewnętrznego API
 - Poprawia czas odpowiedzi na powtarzające się żądania
 - Obniża koszty operacyjne
@@ -827,9 +920,11 @@ async function canCreatePrediction(userId: string): Promise<boolean> {
 ---
 
 #### BL-005: Caching Generowania Predykcji (FR-018)
+
 **Lokalizacja**: Endpoint `POST /api/predictions/generate`
 
 **Logika**:
+
 1. Wygeneruj klucz pamięci podręcznej z `match_id`
 2. Sprawdź pamięć podręczną (w pamięci lub Redis)
 3. Jeśli jest w pamięci podręcznej i ma mniej niż 6 godzin, zwróć predykcję z pamięci podręcznej
@@ -847,9 +942,11 @@ async function canCreatePrediction(userId: string): Promise<boolean> {
 ---
 
 #### BL-006: Caching Listy Meczów (FR-018)
+
 **Lokalizacja**: Endpoint `GET /api/matches`
 
 **Logika**:
+
 1. Wygeneruj klucz pamięci podręcznej z kodu ligi
 2. Sprawdź pamięć podręczną
 3. Jeśli jest w pamięci podręcznej i ma mniej niż 1 godzinę, zwróć mecze z pamięci podręcznej
@@ -867,31 +964,36 @@ async function canCreatePrediction(userId: string): Promise<boolean> {
 ---
 
 #### BL-007: Wymuszenie Kontekstu Użytkownika
+
 **Lokalizacja**: Wszystkie uwierzytelnione endpointy
 
 **Logika**:
+
 - `user_id` jest zawsze ustawiany z `auth.uid()` wyodrębnionego z JWT
 - Nigdy nie akceptuj `user_id` z ciała żądania
 - Polityki RLS wymuszają, że użytkownik ma dostęp tylko do własnych danych
 
 **Implementacja**:
+
 ```typescript
 // Wyodrębnij ID użytkownika z uwierzytelnionej sesji
-const userId = context.locals.user.id
+const userId = context.locals.user.id;
 
 // Nadpisz dowolne user_id w ciele żądania
 const data = {
   ...requestBody,
-  user_id: userId
-}
+  user_id: userId,
+};
 ```
 
 ---
 
 #### BL-008: Obsługa Błędów i Logowanie
+
 **Lokalizacja**: Wszystkie endpointy
 
 **Logika**:
+
 - Przechwytuj wszystkie błędy na poziomie endpointu
 - Loguj błędy do usługi monitorującej (np. Sentry)
 - Zwracaj przyjazne dla użytkownika komunikaty o błędach
@@ -899,13 +1001,14 @@ const data = {
 - Używaj spójnego formatu odpowiedzi błędu
 
 **Format Odpowiedzi Błędu**:
+
 ```typescript
 interface ErrorResponse {
   error: {
-    code: string        // Kod błędu czytelny maszynowo
-    message: string     // Wiadomość przyjazna dla użytkownika
-    details?: any       // Opcjonalne szczegóły walidacji
-  }
+    code: string; // Kod błędu czytelny maszynowo
+    message: string; // Wiadomość przyjazna dla użytkownika
+    details?: any; // Opcjonalne szczegóły walidacji
+  };
 }
 ```
 
@@ -920,19 +1023,23 @@ interface ErrorResponse {
 **Uwierzytelnianie**: Klucz API w nagłówku `X-Auth-Token`
 
 **Limity zapytań**:
+
 - Darmowy plan: 10 żądań/minutę
 - Płatny plan: Dostępne wyższe limity
 
 **Używane Endpointy**:
+
 - `GET /competitions/{code}/matches` - Pobierz mecze dla ligi
 - `GET /matches/{id}` - Pobierz szczegóły konkretnego meczu, w tym wynik końcowy
 
 **Kody Lig**:
+
 - Premier League: `PL`
 - La Liga: `PD`
 - Bundesliga: `BL1`
 
 **Obsługa Błędów**:
+
 - 429 Too Many Requests: Zwróć dane z pamięci podręcznej lub poczekaj i ponów próbę
 - 500 Server Error: Zwróć `503 Service Unavailable` do klienta
 - Błędy sieciowe: Zwróć `503 Service Unavailable` do klienta
@@ -948,9 +1055,11 @@ interface ErrorResponse {
 **Limity zapytań**: Konfigurowalne dla każdego klucza API
 
 **Używane Endpointy**:
+
 - `POST /chat/completions` - Generuj predykcję meczu
 
 **Format Żądania**:
+
 ```json
 {
   "model": "meta-llama/llama-3.1-70b-instruct",
@@ -968,12 +1077,14 @@ interface ErrorResponse {
 ```
 
 **Przetwarzanie Odpowiedzi**:
+
 - Wyodrębnij prawdopodobieństwa predykcji z odpowiedzi AI
 - Sprawdź, czy wartości są między 0 a 1
 - Upewnij się, że suma wynosi około 1.0
 - Zaokrąglij do 2 miejsc po przecinku
 
 **Obsługa Błędów**:
+
 - 429 Too Many Requests: Zaimplementuj wykładnicze ponawianie
 - 500 Server Error: Zwróć `503 Service Unavailable` do klienta
 - Nieprawidłowa odpowiedź AI: Zwróć `503 Service Unavailable` do klienta
@@ -985,16 +1096,19 @@ interface ErrorResponse {
 ### Integracja Stosu Technologicznego
 
 **Astro 5**:
+
 - Endpointy API po stronie serwera w `/src/pages/api/`
 - Każdy endpoint to plik `.ts` eksportujący handlery metod HTTP
 - Przykład: `/src/pages/api/predictions/index.ts` eksportuje funkcje `GET` i `POST`
 
 **TypeScript 5**:
+
 - Współdzielone typy w `/src/types.ts`
 - Generuj typy bazy danych ze schematu Supabase
 - Ścisłe sprawdzanie typów dla wszystkich payloadów API
 
 **Supabase**:
+
 - Inicjalizacja klienta w `/src/db/supabase.client.ts`
 - Klient po stronie serwera używa klucza roli serwisowej do operacji administracyjnych
 - Klient po stronie klienta używa klucza anonimowego z wymuszeniem RLS
@@ -1002,23 +1116,25 @@ interface ErrorResponse {
 ### Strategia Cachingowa
 
 **Opcje Implementacji**:
+
 1. **Pamięć podręczna w pamięci** (MVP): Prosty magazyn obiektów z TTL
 2. **Redis** (Produkcja): Rozproszona pamięć podręczna do skalowania
 
 **Struktura Pamięci Podręcznej**:
+
 ```typescript
 interface CacheEntry<T> {
-  data: T
-  timestamp: number
-  ttl: number
+  data: T;
+  timestamp: number;
+  ttl: number;
 }
 
 class Cache {
-  private store = new Map<string, CacheEntry<any>>()
-  
-  get<T>(key: string): T | null
-  set<T>(key: string, data: T, ttl: number): void
-  clear(key: string): void
+  private store = new Map<string, CacheEntry<any>>();
+
+  get<T>(key: string): T | null;
+  set<T>(key: string, data: T, ttl: number): void;
+  clear(key: string): void;
 }
 ```
 
@@ -1043,6 +1159,7 @@ class Cache {
 ### Monitorowanie i Logowanie
 
 **Metryki do Śledzenia**:
+
 - Czasy odpowiedzi API (p50, p95, p99)
 - Wskaźniki błędów według endpointu
 - Wskaźniki sukcesu/porażki zewnętrznych API
@@ -1050,6 +1167,7 @@ class Cache {
 - Aktywni użytkownicy i utworzone predykcje
 
 **Strategia Logowania**:
+
 - Info: Wszystkie żądania API z metodą, ścieżką, user_id, czasem trwania
 - Warning: Awarie zewnętrznych API, chybienia pamięci podręcznej
 - Error: Wszystkie błędy ze śladami stosu i kontekstem

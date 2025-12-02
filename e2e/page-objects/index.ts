@@ -1,3 +1,2 @@
-export { LoginPage } from './LoginPage';
-export { NavigationPage } from './NavigationPage';
-
+export { LoginPage } from "./LoginPage";
+export { NavigationPage } from "./NavigationPage";

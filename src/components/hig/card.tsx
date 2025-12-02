@@ -1,21 +1,18 @@
-import { forwardRef } from "react"
-import type { HTMLAttributes, ReactNode } from "react"
+import { forwardRef } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 export interface HIGCardProps extends HTMLAttributes<HTMLDivElement> {
-  actions?: ReactNode
-  media?: ReactNode
-  subtitle?: ReactNode
-  title?: ReactNode
-  variant?: "translucent" | "solid"
+  actions?: ReactNode;
+  media?: ReactNode;
+  subtitle?: ReactNode;
+  title?: ReactNode;
+  variant?: "translucent" | "solid";
 }
 
 export const HIGCard = forwardRef<HTMLDivElement, HIGCardProps>(
-  (
-    { actions, children, className, media, subtitle, title, variant = "translucent", ...props },
-    ref,
-  ) => {
+  ({ actions, children, className, media, subtitle, title, variant = "translucent", ...props }, ref) => {
     return (
       <article
         ref={ref}
@@ -27,7 +24,7 @@ export const HIGCard = forwardRef<HTMLDivElement, HIGCardProps>(
             ? "bg-[color:color-mix(in_oklch,var(--hig-color-surface-elevated)_60%,transparent)] backdrop-blur-[length:var(--hig-token-blur)]"
             : "bg-[color:var(--hig-color-surface)]",
           "transition-transform duration-200 ease-out hover:-translate-y-[2px]",
-          className,
+          className
         )}
         {...props}
       >
@@ -41,22 +38,16 @@ export const HIGCard = forwardRef<HTMLDivElement, HIGCardProps>(
         <div className="flex flex-col gap-3 px-5 py-5 text-[color:var(--hig-color-label-primary)]">
           {title ? <div className="text-[1.25rem] font-semibold leading-tight">{title}</div> : null}
           {subtitle ? (
-            <div className="text-[0.95rem] text-[color:var(--hig-color-label-secondary)]">
-              {subtitle}
-            </div>
+            <div className="text-[0.95rem] text-[color:var(--hig-color-label-secondary)]">{subtitle}</div>
           ) : null}
           {children ? <div className="text-[1rem] text-[color:var(--hig-color-label-primary)]">{children}</div> : null}
           {actions ? (
-            <div className="flex flex-wrap gap-2 pt-1 text-[color:var(--hig-color-label-primary)]">
-              {actions}
-            </div>
+            <div className="flex flex-wrap gap-2 pt-1 text-[color:var(--hig-color-label-primary)]">{actions}</div>
           ) : null}
         </div>
       </article>
-    )
-  },
-)
+    );
+  }
+);
 
-HIGCard.displayName = "HIGCard"
-
-
+HIGCard.displayName = "HIGCard";

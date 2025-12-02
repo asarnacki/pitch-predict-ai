@@ -10,10 +10,10 @@
 
 export const prerender = false;
 
-import type { APIRoute } from 'astro';
-import { getProfile } from '@/lib/services/profile.service';
-import { UnauthorizedError, NotFoundError } from '@/lib/errors/api-errors';
-import { formatError } from '@/lib/errors/formatter';
+import type { APIRoute } from "astro";
+import { getProfile } from "@/lib/services/profile.service";
+import { UnauthorizedError, NotFoundError } from "@/lib/errors/api-errors";
+import { formatError } from "@/lib/errors/formatter";
 
 /**
  * GET handler for /api/profile
@@ -30,13 +30,13 @@ export const GET: APIRoute = async ({ locals }) => {
     const profile = await getProfile(locals.supabase, locals.user.id);
 
     if (!profile) {
-      throw new NotFoundError('PROFILE_NOT_FOUND', 'User profile not found');
+      throw new NotFoundError("PROFILE_NOT_FOUND", "User profile not found");
     }
 
     return new Response(JSON.stringify({ data: profile }), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
   } catch (error) {
@@ -45,7 +45,7 @@ export const GET: APIRoute = async ({ locals }) => {
     return new Response(JSON.stringify(body), {
       status,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
   }

@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from "@playwright/test";
 
 export class LoginPage {
   readonly page: Page;
@@ -12,17 +12,17 @@ export class LoginPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.emailInput = page.getByTestId('login-email-input');
-    this.passwordInput = page.getByTestId('login-password-input');
-    this.submitButton = page.getByTestId('login-submit-button');
-    this.heading = page.getByTestId('auth-form-heading');
-    this.errorMessage = page.getByTestId('auth-form-error');
-    this.registerLink = page.getByTestId('auth-register-link');
-    this.resetPasswordLink = page.getByTestId('auth-reset-password-link');
+    this.emailInput = page.getByTestId("login-email-input");
+    this.passwordInput = page.getByTestId("login-password-input");
+    this.submitButton = page.getByTestId("login-submit-button");
+    this.heading = page.getByTestId("auth-form-heading");
+    this.errorMessage = page.getByTestId("auth-form-error");
+    this.registerLink = page.getByTestId("auth-register-link");
+    this.resetPasswordLink = page.getByTestId("auth-reset-password-link");
   }
 
   async goto() {
-    await this.page.goto('/login');
+    await this.page.goto("/login");
   }
 
   async fillCredentials(email: string, password: string) {
@@ -40,7 +40,7 @@ export class LoginPage {
   }
 
   async waitForSuccessfulLogin() {
-    await this.page.waitForURL('/', { timeout: 10000 });
+    await this.page.waitForURL("/", { timeout: 10000 });
   }
 
   async hasError() {
@@ -51,4 +51,3 @@ export class LoginPage {
     return await this.errorMessage.textContent();
   }
 }
-

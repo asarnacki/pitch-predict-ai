@@ -1,16 +1,16 @@
-import { forwardRef, useId } from "react"
-import type { InputHTMLAttributes, ReactNode } from "react"
+import { forwardRef, useId } from "react";
+import type { InputHTMLAttributes, ReactNode } from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 export interface HIGInputProps extends InputHTMLAttributes<HTMLInputElement> {
-  description?: string
-  error?: string
-  label?: string
-  leadingVisual?: ReactNode
-  optional?: boolean
-  supportingText?: string
-  trailingVisual?: ReactNode
+  description?: string;
+  error?: string;
+  label?: string;
+  leadingVisual?: ReactNode;
+  optional?: boolean;
+  supportingText?: string;
+  trailingVisual?: ReactNode;
 }
 
 export const HIGInput = forwardRef<HTMLInputElement, HIGInputProps>(
@@ -29,17 +29,15 @@ export const HIGInput = forwardRef<HTMLInputElement, HIGInputProps>(
       trailingVisual,
       ...props
     },
-    ref,
+    ref
   ) => {
-    const generatedId = useId()
-    const inputId = id ?? generatedId
-    const descriptionId = description ? `${inputId}-description` : undefined
-    const supportingTextId = supportingText ? `${inputId}-support` : undefined
-    const errorId = error ? `${inputId}-error` : undefined
+    const generatedId = useId();
+    const inputId = id ?? generatedId;
+    const descriptionId = description ? `${inputId}-description` : undefined;
+    const supportingTextId = supportingText ? `${inputId}-support` : undefined;
+    const errorId = error ? `${inputId}-error` : undefined;
 
-    const ariaDescribedBy = [descriptionId, supportingTextId, errorId]
-      .filter(Boolean)
-      .join(" ")
+    const ariaDescribedBy = [descriptionId, supportingTextId, errorId].filter(Boolean).join(" ");
 
     return (
       <div className="flex w-full flex-col gap-1.5 text-[color:var(--hig-color-label-primary)]">
@@ -69,7 +67,7 @@ export const HIGInput = forwardRef<HTMLInputElement, HIGInputProps>(
             "focus-within:ring-4 focus-within:ring-[color:color-mix(in_oklch,var(--hig-color-tint)_30%,transparent)]",
             "transition-shadow duration-150 ease-out",
             disabled && "opacity-60",
-            error && "shadow-[0_0_0_1.5px_color-mix(in_oklch,var(--hig-color-danger)_80%,transparent)]",
+            error && "shadow-[0_0_0_1.5px_color-mix(in_oklch,var(--hig-color-danger)_80%,transparent)]"
           )}
         >
           {leadingVisual ? (
@@ -85,7 +83,7 @@ export const HIGInput = forwardRef<HTMLInputElement, HIGInputProps>(
               "flex-1 bg-transparent text-[color:inherit] placeholder:text-[color:var(--hig-color-label-tertiary)]",
               "autofill:bg-transparent autofill:shadow-[0_0_0px_1000px_color:transparent]",
               "outline-none",
-              className,
+              className
             )}
             aria-describedby={ariaDescribedBy}
             aria-invalid={Boolean(error) || undefined}
@@ -102,10 +100,7 @@ export const HIGInput = forwardRef<HTMLInputElement, HIGInputProps>(
         </div>
 
         {supportingText ? (
-          <p
-            id={supportingTextId}
-            className="text-[0.85rem] text-[color:var(--hig-color-label-tertiary)]"
-          >
+          <p id={supportingTextId} className="text-[0.85rem] text-[color:var(--hig-color-label-tertiary)]">
             {supportingText}
           </p>
         ) : null}
@@ -116,10 +111,8 @@ export const HIGInput = forwardRef<HTMLInputElement, HIGInputProps>(
           </p>
         ) : null}
       </div>
-    )
-  },
-)
+    );
+  }
+);
 
-HIGInput.displayName = "HIGInput"
-
-
+HIGInput.displayName = "HIGInput";

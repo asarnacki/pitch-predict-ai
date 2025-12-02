@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from "@playwright/test";
 
 export class NavigationPage {
   readonly page: Page;
@@ -11,13 +11,13 @@ export class NavigationPage {
 
   constructor(page: Page) {
     this.page = page;
-    
-    this.loginLink = page.getByTestId('nav-login-link');
-    this.registerLink = page.getByTestId('nav-register-link');
-    this.logoutButton = page.getByTestId('nav-logout-button');
-    this.userEmail = page.getByTestId('nav-user-email');
-    this.savedPredictionsLink = page.getByTestId('nav-predictions-link');
-    this.logo = page.getByTestId('nav-logo');
+
+    this.loginLink = page.getByTestId("nav-login-link");
+    this.registerLink = page.getByTestId("nav-register-link");
+    this.logoutButton = page.getByTestId("nav-logout-button");
+    this.userEmail = page.getByTestId("nav-user-email");
+    this.savedPredictionsLink = page.getByTestId("nav-predictions-link");
+    this.logo = page.getByTestId("nav-logo");
   }
 
   async isLoggedIn() {
@@ -30,7 +30,7 @@ export class NavigationPage {
 
   async logout() {
     await this.logoutButton.click();
-    await this.page.waitForURL('/', { timeout: 5000 });
+    await this.page.waitForURL("/", { timeout: 5000 });
   }
 
   async goToLogin() {
@@ -53,4 +53,3 @@ export class NavigationPage {
     await this.logo.click();
   }
 }
-

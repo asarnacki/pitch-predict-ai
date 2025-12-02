@@ -1,20 +1,20 @@
-import type { HTMLAttributes, ReactNode } from "react"
+import type { HTMLAttributes, ReactNode } from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-type ViewWidth = "compact" | "comfortable" | "expanded"
+type ViewWidth = "compact" | "comfortable" | "expanded";
 
 const WIDTH_CLASS: Record<ViewWidth, string> = {
   compact: "max-w-3xl",
   comfortable: "max-w-5xl",
   expanded: "max-w-7xl",
-}
+};
 
 export interface HIGPageLayoutProps extends HTMLAttributes<HTMLDivElement> {
-  bottomBar?: ReactNode
-  navigationBar?: ReactNode
-  sidebar?: ReactNode
-  width?: ViewWidth
+  bottomBar?: ReactNode;
+  navigationBar?: ReactNode;
+  sidebar?: ReactNode;
+  width?: ViewWidth;
 }
 
 export const HIGPageLayout = ({
@@ -35,7 +35,7 @@ export const HIGPageLayout = ({
             "relative flex w-full flex-1 gap-8",
             WIDTH_CLASS[width],
             sidebar ? "lg:flex-row" : "flex-col",
-            "mx-auto",
+            "mx-auto"
           )}
         >
           {sidebar ? (
@@ -48,7 +48,7 @@ export const HIGPageLayout = ({
               "flex flex-1 flex-col gap-6 rounded-[var(--hig-token-radius)] bg-[color:var(--hig-color-surface)]",
               "ring-1 ring-[color:var(--hig-color-separator)] shadow-[var(--hig-token-shadow)]",
               "p-6",
-              className,
+              className
             )}
           >
             {children}
@@ -61,14 +61,14 @@ export const HIGPageLayout = ({
         </div>
       ) : null}
     </div>
-  )
-}
+  );
+};
 
-HIGPageLayout.displayName = "HIGPageLayout"
+HIGPageLayout.displayName = "HIGPageLayout";
 
 export interface HIGSplitViewProps {
-  primary: ReactNode
-  secondary: ReactNode
+  primary: ReactNode;
+  secondary: ReactNode;
 }
 
 export const HIGSplitView = ({ primary, secondary }: HIGSplitViewProps) => {
@@ -81,9 +81,7 @@ export const HIGSplitView = ({ primary, secondary }: HIGSplitViewProps) => {
         {secondary}
       </div>
     </section>
-  )
-}
+  );
+};
 
-HIGSplitView.displayName = "HIGSplitView"
-
-
+HIGSplitView.displayName = "HIGSplitView";

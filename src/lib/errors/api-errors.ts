@@ -9,15 +9,17 @@
  * Base API Error class
  * All custom API errors extend this class
  */
+import type { ApiErrorDetails } from "@/types";
+
 export class ApiError extends Error {
   constructor(
     public statusCode: number,
     public code: string,
     message: string,
-    public details?: any
+    public details?: ApiErrorDetails
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
@@ -26,9 +28,9 @@ export class ApiError extends Error {
  * Used when user is not authenticated or token is invalid
  */
 export class UnauthorizedError extends ApiError {
-  constructor(message = 'Authentication required') {
-    super(401, 'UNAUTHORIZED', message);
-    this.name = 'UnauthorizedError';
+  constructor(message = "Authentication required") {
+    super(401, "UNAUTHORIZED", message);
+    this.name = "UnauthorizedError";
   }
 }
 
@@ -37,9 +39,9 @@ export class UnauthorizedError extends ApiError {
  * Used when request data fails validation
  */
 export class ValidationError extends ApiError {
-  constructor(message: string, details?: any) {
-    super(400, 'VALIDATION_ERROR', message, details);
-    this.name = 'ValidationError';
+  constructor(message: string, details?: ApiErrorDetails) {
+    super(400, "VALIDATION_ERROR", message, details);
+    this.name = "ValidationError";
   }
 }
 
@@ -50,7 +52,7 @@ export class ValidationError extends ApiError {
 export class NotFoundError extends ApiError {
   constructor(code: string, message: string) {
     super(404, code, message);
-    this.name = 'NotFoundError';
+    this.name = "NotFoundError";
   }
 }
 
@@ -62,10 +64,10 @@ export class PredictionLimitError extends ApiError {
   constructor() {
     super(
       403,
-      'PREDICTION_LIMIT_REACHED',
-      'Maximum of 50 saved predictions reached. Please delete some predictions to add new ones.'
+      "PREDICTION_LIMIT_REACHED",
+      "Maximum of 50 saved predictions reached. Please delete some predictions to add new ones."
     );
-    this.name = 'PredictionLimitError';
+    this.name = "PredictionLimitError";
   }
 }
 
@@ -75,8 +77,8 @@ export class PredictionLimitError extends ApiError {
  */
 export class ExternalServiceError extends ApiError {
   constructor(message: string) {
-    super(503, 'EXTERNAL_API_ERROR', message);
-    this.name = 'ExternalServiceError';
+    super(503, "EXTERNAL_API_ERROR", message);
+    this.name = "ExternalServiceError";
   }
 }
 
@@ -87,6 +89,6 @@ export class ExternalServiceError extends ApiError {
 export class ConflictError extends ApiError {
   constructor(code: string, message: string) {
     super(409, code, message);
-    this.name = 'ConflictError';
+    this.name = "ConflictError";
   }
 }

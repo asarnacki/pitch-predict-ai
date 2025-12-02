@@ -1,6 +1,7 @@
 # API Endpoints Implementation Plan - PitchPredict AI
 
 ## Spis treści
+
 1. [Przegląd ogólny](#przegląd-ogólny)
 2. [Wspólne komponenty](#wspólne-komponenty)
 3. [Endpoint 1: GET /api/profile](#endpoint-1-get-apiprofile)
@@ -21,6 +22,7 @@
 Ten dokument zawiera szczegółowy plan implementacji wszystkich 9 endpointów REST API dla aplikacji PitchPredict AI. Plan obejmuje strukturę zapytań, odpowiedzi, walidację, obsługę błędów, integracje z zewnętrznymi API oraz wymagania bezpieczeństwa.
 
 ### Tech Stack
+
 - **Frontend**: Astro 5, React 19, TypeScript 5, Tailwind 4, Shadcn/ui
 - **Backend**: Supabase (PostgreSQL + Auth), Astro API Routes
 - **External APIs**: football-data.org, OpenRouter.ai
@@ -28,6 +30,7 @@ Ten dokument zawiera szczegółowy plan implementacji wszystkich 9 endpointów R
 - **Cache**: In-memory cache z TTL (MVP), Redis (produkcja)
 
 ### Struktura projektu
+
 ```
 src/
 ├── pages/api/              # Astro API endpoints
@@ -72,33 +75,36 @@ Przed implementacją endpointów, należy stworzyć wspólne komponenty wykorzys
 **Cel**: Zarządzanie cache'owaniem odpowiedzi z external APIs (matches: 1h TTL, predictions: 6h TTL)
 
 **Interfejs**:
+
 ```typescript
 export interface CacheEntry<T> {
-  data: T
-  timestamp: number
-  ttl: number
+  data: T;
+  timestamp: number;
+  ttl: number;
 }
 
 export class CacheService {
-  private store: Map<string, CacheEntry<any>>
+  private store: Map<string, CacheEntry<any>>;
 
-  get<T>(key: string): T | null
-  set<T>(key: string, data: T, ttl: number): void
-  clear(key: string): void
-  clearAll(): void
+  get<T>(key: string): T | null;
+  set<T>(key: string, data: T, ttl: number): void;
+  clear(key: string): void;
+  clearAll(): void;
 
   // Helper: sprawdza czy entry jest ważny
-  private isValid(entry: CacheEntry<any>): boolean
+  private isValid(entry: CacheEntry<any>): boolean;
 }
 ```
 
 **Implementacja**:
+
 - In-memory Map dla MVP
 - TTL w milisekundach
 - Auto-cleanup expired entries przy każdym get()
 - Thread-safe (jeśli potrzebne w przyszłości)
 
 **Cache Keys**:
+
 - Matches: `matches:${leagueCode}` (np. `matches:PL`)
 - AI Predictions: `prediction:${matchId}` (np. `prediction:match_12345`)
 
@@ -111,6 +117,7 @@ export class CacheService {
 **Cel**: Ustandaryzowane błędy API z odpowiednimi kodami HTTP
 
 **Klasy błędów**:
+
 ```typescript
 export class ApiError extends Error {
   constructor(
@@ -119,25 +126,25 @@ export class ApiError extends Error {
     message: string,
     public details?: any
   ) {
-    super(message)
+    super(message);
   }
 }
 
 export class UnauthorizedError extends ApiError {
-  constructor(message = 'Authentication required') {
-    super(401, 'UNAUTHORIZED', message)
+  constructor(message = "Authentication required") {
+    super(401, "UNAUTHORIZED", message);
   }
 }
 
 export class ValidationError extends ApiError {
   constructor(message: string, details?: any) {
-    super(400, 'VALIDATION_ERROR', message, details)
+    super(400, "VALIDATION_ERROR", message, details);
   }
 }
 
 export class NotFoundError extends ApiError {
   constructor(code: string, message: string) {
-    super(404, code, message)
+    super(404, code, message);
   }
 }
 
@@ -145,21 +152,21 @@ export class PredictionLimitError extends ApiError {
   constructor() {
     super(
       403,
-      'PREDICTION_LIMIT_REACHED',
-      'Maximum of 50 saved predictions reached. Please delete some predictions to add new ones.'
-    )
+      "PREDICTION_LIMIT_REACHED",
+      "Maximum of 50 saved predictions reached. Please delete some predictions to add new ones."
+    );
   }
 }
 
 export class ExternalServiceError extends ApiError {
   constructor(message: string) {
-    super(503, 'EXTERNAL_API_ERROR', message)
+    super(503, "EXTERNAL_API_ERROR", message);
   }
 }
 
 export class ConflictError extends ApiError {
   constructor(code: string, message: string) {
-    super(409, code, message)
+    super(409, code, message);
   }
 }
 ```
@@ -173,12 +180,12 @@ export class ConflictError extends ApiError {
 **Cel**: Konwersja błędów na standardowy format ApiErrorResponse
 
 ```typescript
-import type { ApiErrorResponse } from '@/types'
-import { ApiError } from './api-errors'
+import type { ApiErrorResponse } from "@/types";
+import { ApiError } from "./api-errors";
 
 export function formatError(error: unknown): {
   status: number;
-  body: ApiErrorResponse
+  body: ApiErrorResponse;
 } {
   // ApiError - custom errors
   if (error instanceof ApiError) {
@@ -191,7 +198,7 @@ export function formatError(error: unknown): {
           details: error.details,
         },
       },
-    }
+    };
   }
 
   // Zod validation errors
@@ -200,25 +207,25 @@ export function formatError(error: unknown): {
       status: 400,
       body: {
         error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Invalid request data',
+          code: "VALIDATION_ERROR",
+          message: "Invalid request data",
           details: error.errors,
         },
       },
-    }
+    };
   }
 
   // Generic errors - nie pokazuj szczegółów
-  console.error('Unexpected error:', error)
+  console.error("Unexpected error:", error);
   return {
     status: 500,
     body: {
       error: {
-        code: 'INTERNAL_ERROR',
-        message: 'An unexpected error occurred',
+        code: "INTERNAL_ERROR",
+        message: "An unexpected error occurred",
       },
     },
-  }
+  };
 }
 ```
 
@@ -231,14 +238,20 @@ export function formatError(error: unknown): {
 **Cel**: Zod schemas dla wszystkich request/response typów
 
 ```typescript
-import { z } from 'zod'
-import { LEAGUE_CODES, LEAGUE_NAMES, BUSINESS_RULES } from '@/types'
+import { z } from "zod";
+import { LEAGUE_CODES, LEAGUE_NAMES, BUSINESS_RULES } from "@/types";
 
 // GET /api/matches
 export const getMatchesQuerySchema = z.object({
   league: z.enum([LEAGUE_CODES.PREMIER_LEAGUE, LEAGUE_CODES.LA_LIGA, LEAGUE_CODES.BUNDESLIGA]),
-  limit: z.coerce.number().int().min(1).max(BUSINESS_RULES.MAX_MATCHES_LIMIT).optional().default(BUSINESS_RULES.DEFAULT_MATCHES_LIMIT),
-})
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(BUSINESS_RULES.MAX_MATCHES_LIMIT)
+    .optional()
+    .default(BUSINESS_RULES.DEFAULT_MATCHES_LIMIT),
+});
 
 // POST /api/predictions/generate
 export const generatePredictionBodySchema = z.object({
@@ -247,7 +260,7 @@ export const generatePredictionBodySchema = z.object({
   away_team: z.string().min(1),
   league: z.enum([LEAGUE_NAMES.PREMIER_LEAGUE, LEAGUE_NAMES.LA_LIGA, LEAGUE_NAMES.BUNDESLIGA]),
   match_date: z.string().datetime(),
-})
+});
 
 // POST /api/predictions
 export const createPredictionBodySchema = z.object({
@@ -255,35 +268,42 @@ export const createPredictionBodySchema = z.object({
   match_date: z.string().datetime(),
   home_team: z.string().min(1),
   away_team: z.string().min(1),
-  prediction_result: z.object({
-    home: z.number().min(0).max(1),
-    draw: z.number().min(0).max(1),
-    away: z.number().min(0).max(1),
-  }).refine(
-    (data) => Math.abs(data.home + data.draw + data.away - 1) < 0.01,
-    { message: 'Probabilities must sum to approximately 1.0' }
-  ),
+  prediction_result: z
+    .object({
+      home: z.number().min(0).max(1),
+      draw: z.number().min(0).max(1),
+      away: z.number().min(0).max(1),
+    })
+    .refine((data) => Math.abs(data.home + data.draw + data.away - 1) < 0.01, {
+      message: "Probabilities must sum to approximately 1.0",
+    }),
   note: z.string().max(BUSINESS_RULES.MAX_NOTE_LENGTH).optional(),
-})
+});
 
 // GET /api/predictions
 export const getPredictionsQuerySchema = z.object({
-  limit: z.coerce.number().int().min(1).max(BUSINESS_RULES.MAX_MATCHES_LIMIT).optional().default(BUSINESS_RULES.DEFAULT_PREDICTIONS_LIMIT),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(BUSINESS_RULES.MAX_MATCHES_LIMIT)
+    .optional()
+    .default(BUSINESS_RULES.DEFAULT_PREDICTIONS_LIMIT),
   offset: z.coerce.number().int().min(0).optional().default(0),
-  sort: z.enum(['created_at', 'match_date']).optional().default('created_at'),
-  order: z.enum(['asc', 'desc']).optional().default('desc'),
+  sort: z.enum(["created_at", "match_date"]).optional().default("created_at"),
+  order: z.enum(["asc", "desc"]).optional().default("desc"),
   league: z.string().optional(),
-})
+});
 
 // PATCH /api/predictions/:id
 export const updatePredictionBodySchema = z.object({
   note: z.string().max(BUSINESS_RULES.MAX_NOTE_LENGTH).nullable().optional(),
-})
+});
 
 // Path params
 export const predictionIdParamSchema = z.object({
   id: z.coerce.number().int().positive(),
-})
+});
 ```
 
 ---
@@ -295,33 +315,37 @@ export const predictionIdParamSchema = z.object({
 **Rozszerzenie istniejącego middleware**:
 
 ```typescript
-import { defineMiddleware } from 'astro:middleware'
-import { createServerClient } from '@/db/supabase.client'
+import { defineMiddleware } from "astro:middleware";
+import { createServerClient } from "@/db/supabase.client";
 
 export const onRequest = defineMiddleware(async (context, next) => {
   // Create Supabase client
-  const supabase = createServerClient(context)
+  const supabase = createServerClient(context);
 
   // Attach to context for easy access in endpoints
-  context.locals.supabase = supabase
+  context.locals.supabase = supabase;
 
   // Try to get authenticated user
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
   if (user && !error) {
-    context.locals.user = user
+    context.locals.user = user;
   }
 
-  return next()
-})
+  return next();
+});
 ```
 
 **Context.locals type enhancement** w `src/env.d.ts`:
+
 ```typescript
 declare namespace App {
   interface Locals {
-    supabase: SupabaseClient<Database>
-    user?: User
+    supabase: SupabaseClient<Database>;
+    user?: User;
   }
 }
 ```
@@ -347,16 +371,19 @@ Endpoint zwraca profil zalogowanego użytkownika. Prosty endpoint służący do 
 ### 1.3 Wykorzystywane typy
 
 **DTOs**:
+
 - `ProfileDTO` (response) - z `src/types.ts`
 - `ApiSuccessResponse<ProfileDTO>` - wrapper
 - `ApiErrorResponse` - dla błędów
 
 **Database types**:
+
 - `Tables<'profiles'>` - typ Row z Supabase
 
 ### 1.4 Szczegóły odpowiedzi
 
 **Success (200 OK)**:
+
 ```json
 {
   "data": {
@@ -367,6 +394,7 @@ Endpoint zwraca profil zalogowanego użytkownika. Prosty endpoint służący do 
 ```
 
 **Errors**:
+
 - `401 UNAUTHORIZED`: Użytkownik nie jest zalogowany
 - `404 PROFILE_NOT_FOUND`: Profil nie istnieje w bazie
 
@@ -379,6 +407,7 @@ Endpoint zwraca profil zalogowanego użytkownika. Prosty endpoint służący do 
 5. **Response** zwraca `ApiSuccessResponse<ProfileDTO>`
 
 **Diagram**:
+
 ```
 Client → Middleware (JWT) → Endpoint → ProfileService → Supabase (RLS) → Response
 ```
@@ -391,6 +420,7 @@ Client → Middleware (JWT) → Endpoint → ProfileService → Supabase (RLS) �
 - **Rate limiting**: Nie wymagane (prosty read operation)
 
 **RLS Policy** (do stworzenia w migracji):
+
 ```sql
 CREATE POLICY "Users can view their own profile"
   ON profiles FOR SELECT
@@ -399,23 +429,24 @@ CREATE POLICY "Users can view their own profile"
 
 ### 1.7 Obsługa błędów
 
-| Kod | Error Code | Scenariusz | Akcja |
-|-----|-----------|------------|-------|
-| 401 | UNAUTHORIZED | Brak tokena lub nieprawidłowy token | Zwróć UnauthorizedError |
-| 404 | PROFILE_NOT_FOUND | Profil nie istnieje (edge case) | Zwróć NotFoundError |
-| 500 | INTERNAL_ERROR | Błąd Supabase/DB | Log error, zwróć generic error |
+| Kod | Error Code        | Scenariusz                          | Akcja                          |
+| --- | ----------------- | ----------------------------------- | ------------------------------ |
+| 401 | UNAUTHORIZED      | Brak tokena lub nieprawidłowy token | Zwróć UnauthorizedError        |
+| 404 | PROFILE_NOT_FOUND | Profil nie istnieje (edge case)     | Zwróć NotFoundError            |
+| 500 | INTERNAL_ERROR    | Błąd Supabase/DB                    | Log error, zwróć generic error |
 
 **Error handling w endpoint**:
+
 ```typescript
 try {
-  const profile = await profileService.getProfile(userId)
+  const profile = await profileService.getProfile(userId);
   if (!profile) {
-    throw new NotFoundError('PROFILE_NOT_FOUND', 'User profile not found')
+    throw new NotFoundError("PROFILE_NOT_FOUND", "User profile not found");
   }
-  return { data: profile }
+  return { data: profile };
 } catch (error) {
-  const { status, body } = formatError(error)
-  return new Response(JSON.stringify(body), { status })
+  const { status, body } = formatError(error);
+  return new Response(JSON.stringify(body), { status });
 }
 ```
 
@@ -427,59 +458,58 @@ try {
 - **Response size**: Bardzo mały (~100 bytes)
 
 **Potencjalne optymalizacje**:
+
 - Brak - endpoint jest już optymalny
 
 ### 1.9 Etapy wdrożenia
 
 1. **Stwórz ProfileService** (`src/lib/services/profile.service.ts`):
+
    ```typescript
    export async function getProfile(supabase: SupabaseClient, userId: string): Promise<ProfileDTO | null> {
-     const { data, error } = await supabase
-       .from('profiles')
-       .select('*')
-       .eq('id', userId)
-       .single()
+     const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single();
 
-     if (error) throw error
-     return data
+     if (error) throw error;
+     return data;
    }
    ```
 
 2. **Stwórz endpoint** (`src/pages/api/profile.ts`):
-   ```typescript
-   export const prerender = false
 
-   import type { APIRoute } from 'astro'
-   import { getProfile } from '@/lib/services/profile.service'
-   import { UnauthorizedError, NotFoundError } from '@/lib/errors/api-errors'
-   import { formatError } from '@/lib/errors/formatter'
+   ```typescript
+   export const prerender = false;
+
+   import type { APIRoute } from "astro";
+   import { getProfile } from "@/lib/services/profile.service";
+   import { UnauthorizedError, NotFoundError } from "@/lib/errors/api-errors";
+   import { formatError } from "@/lib/errors/formatter";
 
    export const GET: APIRoute = async ({ locals }) => {
      try {
        // Check authentication
        if (!locals.user) {
-         throw new UnauthorizedError()
+         throw new UnauthorizedError();
        }
 
        // Fetch profile
-       const profile = await getProfile(locals.supabase, locals.user.id)
+       const profile = await getProfile(locals.supabase, locals.user.id);
 
        if (!profile) {
-         throw new NotFoundError('PROFILE_NOT_FOUND', 'User profile not found')
+         throw new NotFoundError("PROFILE_NOT_FOUND", "User profile not found");
        }
 
        return new Response(JSON.stringify({ data: profile }), {
          status: 200,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      } catch (error) {
-       const { status, body } = formatError(error)
+       const { status, body } = formatError(error);
        return new Response(JSON.stringify(body), {
          status,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      }
-   }
+   };
    ```
 
 3. **Stwórz RLS policy** w nowej migracji Supabase
@@ -513,12 +543,14 @@ Endpoint zwraca listę nadchodzących meczów dla wybranej ligi. Pobiera dane z 
 ### 2.3 Wykorzystywane typy
 
 **DTOs**:
+
 - `GetMatchesQueryParams` - query parameters
 - `MatchesResponseDTO` - response (zawiera matches: MatchDTO[], cached_at)
 - `MatchDTO` - pojedynczy mecz
 - `ApiSuccessResponse<MatchesResponseDTO>` - wrapper
 
 **Constants**:
+
 - `LEAGUE_CODES` - dozwolone kody lig
 - `BUSINESS_RULES.MAX_MATCHES_LIMIT` - max 50
 - `BUSINESS_RULES.DEFAULT_MATCHES_LIMIT` - default 20
@@ -527,6 +559,7 @@ Endpoint zwraca listę nadchodzących meczów dla wybranej ligi. Pobiera dane z 
 ### 2.4 Szczegóły odpowiedzi
 
 **Success (200 OK)**:
+
 ```json
 {
   "data": {
@@ -547,6 +580,7 @@ Endpoint zwraca listę nadchodzących meczów dla wybranej ligi. Pobiera dane z 
 ```
 
 **Errors**:
+
 - `400 INVALID_LEAGUE`: Nieprawidłowy kod ligi
 - `503 EXTERNAL_API_ERROR`: football-data.org niedostępne
 
@@ -563,6 +597,7 @@ Endpoint zwraca listę nadchodzących meczów dla wybranej ligi. Pobiera dane z 
 5. **Response** zwraca `ApiSuccessResponse<MatchesResponseDTO>`
 
 **Diagram**:
+
 ```
 Client → Endpoint → Validation → Cache Check
                                      ↓ (miss)
@@ -582,37 +617,39 @@ Client → Endpoint → Validation → Cache Check
 - **CORS**: Skonfiguruj dozwolone origins w production
 
 **Environment variables**:
+
 ```env
 FOOTBALL_DATA_API_KEY=your_api_key_here
 ```
 
 ### 2.7 Obsługa błędów
 
-| Kod | Error Code | Scenariusz | Akcja |
-|-----|-----------|------------|-------|
-| 400 | INVALID_LEAGUE | league nie jest PL/PD/BL1 | ValidationError z Zod |
-| 400 | INVALID_PARAMETERS | limit poza zakresem 1-50 | ValidationError z Zod |
-| 503 | EXTERNAL_API_ERROR | football-data.org timeout/error | ExternalServiceError |
+| Kod | Error Code         | Scenariusz                         | Akcja                              |
+| --- | ------------------ | ---------------------------------- | ---------------------------------- |
+| 400 | INVALID_LEAGUE     | league nie jest PL/PD/BL1          | ValidationError z Zod              |
+| 400 | INVALID_PARAMETERS | limit poza zakresem 1-50           | ValidationError z Zod              |
+| 503 | EXTERNAL_API_ERROR | football-data.org timeout/error    | ExternalServiceError               |
 | 503 | EXTERNAL_API_ERROR | football-data.org 429 (rate limit) | ExternalServiceError, wait & retry |
-| 500 | INTERNAL_ERROR | Unexpected error | Log + generic error |
+| 500 | INTERNAL_ERROR     | Unexpected error                   | Log + generic error                |
 
 **Retry logic dla External API**:
+
 ```typescript
 async function fetchWithRetry(url: string, options: RequestInit, retries = 3): Promise<Response> {
   for (let i = 0; i < retries; i++) {
     try {
-      const response = await fetch(url, options)
+      const response = await fetch(url, options);
       if (response.status === 429) {
-        await new Promise(resolve => setTimeout(resolve, 2000 * (i + 1))) // exponential backoff
-        continue
+        await new Promise((resolve) => setTimeout(resolve, 2000 * (i + 1))); // exponential backoff
+        continue;
       }
-      return response
+      return response;
     } catch (error) {
-      if (i === retries - 1) throw error
-      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
+      if (i === retries - 1) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
     }
   }
-  throw new Error('Max retries exceeded')
+  throw new Error("Max retries exceeded");
 }
 ```
 
@@ -629,27 +666,29 @@ async function fetchWithRetry(url: string, options: RequestInit, retries = 3): P
 - **Database**: Brak zapytań do DB
 
 **Cache Hit Rate** (estimated):
+
 - First hour after deploy: ~5% (cold cache)
 - Steady state: ~95% (users hitting cached data)
 
 ### 2.9 Etapy wdrożenia
 
 1. **Stwórz CacheService** (`src/lib/services/cache.service.ts`):
+
    ```typescript
    export class CacheService {
-     private store = new Map<string, CacheEntry<any>>()
+     private store = new Map<string, CacheEntry<any>>();
 
      get<T>(key: string): T | null {
-       const entry = this.store.get(key)
-       if (!entry) return null
+       const entry = this.store.get(key);
+       if (!entry) return null;
 
-       const now = Date.now()
+       const now = Date.now();
        if (now - entry.timestamp > entry.ttl) {
-         this.store.delete(key)
-         return null
+         this.store.delete(key);
+         return null;
        }
 
-       return entry.data as T
+       return entry.data as T;
      }
 
      set<T>(key: string, data: T, ttl: number): void {
@@ -657,29 +696,27 @@ async function fetchWithRetry(url: string, options: RequestInit, retries = 3): P
          data,
          timestamp: Date.now(),
          ttl,
-       })
+       });
      }
 
      clear(key: string): void {
-       this.store.delete(key)
+       this.store.delete(key);
      }
    }
 
-   export const cache = new CacheService()
+   export const cache = new CacheService();
    ```
 
 2. **Stwórz FootballDataService** (`src/lib/services/football-data.service.ts`):
-   ```typescript
-   import type { MatchDTO } from '@/types'
-   import { ExternalServiceError } from '@/lib/errors/api-errors'
 
-   export async function fetchUpcomingMatches(
-     leagueCode: string,
-     limit: number
-   ): Promise<MatchDTO[]> {
-     const apiKey = import.meta.env.FOOTBALL_DATA_API_KEY
+   ```typescript
+   import type { MatchDTO } from "@/types";
+   import { ExternalServiceError } from "@/lib/errors/api-errors";
+
+   export async function fetchUpcomingMatches(leagueCode: string, limit: number): Promise<MatchDTO[]> {
+     const apiKey = import.meta.env.FOOTBALL_DATA_API_KEY;
      if (!apiKey) {
-       throw new Error('FOOTBALL_DATA_API_KEY not configured')
+       throw new Error("FOOTBALL_DATA_API_KEY not configured");
      }
 
      try {
@@ -687,33 +724,31 @@ async function fetchWithRetry(url: string, options: RequestInit, retries = 3): P
          `https://api.football-data.org/v4/competitions/${leagueCode}/matches?status=SCHEDULED`,
          {
            headers: {
-             'X-Auth-Token': apiKey,
+             "X-Auth-Token": apiKey,
            },
          }
-       )
+       );
 
        if (!response.ok) {
-         throw new ExternalServiceError('Unable to fetch matches at this time')
+         throw new ExternalServiceError("Unable to fetch matches at this time");
        }
 
-       const data = await response.json()
+       const data = await response.json();
 
        // Transform external API format to our DTO
-       const matches: MatchDTO[] = data.matches
-         .slice(0, limit)
-         .map((match: any) => ({
-           id: match.id.toString(),
-           home_team: match.homeTeam.name,
-           away_team: match.awayTeam.name,
-           match_date: match.utcDate,
-           league: leagueCode,
-           status: match.status,
-         }))
+       const matches: MatchDTO[] = data.matches.slice(0, limit).map((match: any) => ({
+         id: match.id.toString(),
+         home_team: match.homeTeam.name,
+         away_team: match.awayTeam.name,
+         match_date: match.utcDate,
+         league: leagueCode,
+         status: match.status,
+       }));
 
-       return matches
+       return matches;
      } catch (error) {
-       if (error instanceof ExternalServiceError) throw error
-       throw new ExternalServiceError('Unable to fetch matches at this time')
+       if (error instanceof ExternalServiceError) throw error;
+       throw new ExternalServiceError("Unable to fetch matches at this time");
      }
    }
    ```
@@ -721,64 +756,65 @@ async function fetchWithRetry(url: string, options: RequestInit, retries = 3): P
 3. **Stwórz validation schema** (dodaj do `src/lib/validation/schemas.ts`)
 
 4. **Stwórz endpoint** (`src/pages/api/matches.ts`):
-   ```typescript
-   export const prerender = false
 
-   import type { APIRoute } from 'astro'
-   import { getMatchesQuerySchema } from '@/lib/validation/schemas'
-   import { fetchUpcomingMatches } from '@/lib/services/football-data.service'
-   import { cache } from '@/lib/services/cache.service'
-   import { formatError } from '@/lib/errors/formatter'
-   import { BUSINESS_RULES } from '@/types'
+   ```typescript
+   export const prerender = false;
+
+   import type { APIRoute } from "astro";
+   import { getMatchesQuerySchema } from "@/lib/validation/schemas";
+   import { fetchUpcomingMatches } from "@/lib/services/football-data.service";
+   import { cache } from "@/lib/services/cache.service";
+   import { formatError } from "@/lib/errors/formatter";
+   import { BUSINESS_RULES } from "@/types";
 
    export const GET: APIRoute = async ({ request }) => {
      try {
        // Parse and validate query params
-       const url = new URL(request.url)
+       const url = new URL(request.url);
        const queryParams = {
-         league: url.searchParams.get('league'),
-         limit: url.searchParams.get('limit'),
-       }
+         league: url.searchParams.get("league"),
+         limit: url.searchParams.get("limit"),
+       };
 
-       const { league, limit } = getMatchesQuerySchema.parse(queryParams)
+       const { league, limit } = getMatchesQuerySchema.parse(queryParams);
 
        // Check cache
-       const cacheKey = `matches:${league}`
-       const cached = cache.get<any>(cacheKey)
+       const cacheKey = `matches:${league}`;
+       const cached = cache.get<any>(cacheKey);
 
        if (cached) {
          return new Response(JSON.stringify({ data: cached }), {
            status: 200,
-           headers: { 'Content-Type': 'application/json' }
-         })
+           headers: { "Content-Type": "application/json" },
+         });
        }
 
        // Fetch from external API
-       const matches = await fetchUpcomingMatches(league, limit)
+       const matches = await fetchUpcomingMatches(league, limit);
 
        // Prepare response
        const responseData = {
          league,
          matches,
          cached_at: new Date().toISOString(),
-       }
+       };
 
        // Cache for 1 hour
-       const ttl = BUSINESS_RULES.MATCHES_CACHE_TTL_HOURS * 60 * 60 * 1000
-       cache.set(cacheKey, responseData, ttl)
+       const ttl = BUSINESS_RULES.MATCHES_CACHE_TTL_HOURS * 60 * 60 * 1000;
+       cache.set(cacheKey, responseData, ttl);
 
        return new Response(JSON.stringify({ data: responseData }), {
          status: 200,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      } catch (error) {
-       const { status, body } = formatError(error)
+       const { status, body } = formatError(error);
        return new Response(JSON.stringify(body), {
          status,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      }
-   }
+   };
    ```
 
 5. **Dodaj environment variable** do `.env`
@@ -811,6 +847,7 @@ Endpoint generuje predykcję AI dla meczu. Wywołuje OpenRouter.ai API z konteks
     - `match_date`: string - ISO 8601 timestamp
   - **Opcjonalne**: Brak
 - **Request Body**:
+
 ```json
 {
   "match_id": "match_12345",
@@ -820,26 +857,31 @@ Endpoint generuje predykcję AI dla meczu. Wywołuje OpenRouter.ai API z konteks
   "match_date": "2024-01-20T15:00:00Z"
 }
 ```
+
 - **Authentication**: Optional (publiczny endpoint)
 
 ### 3.3 Wykorzystywane typy
 
 **DTOs**:
+
 - `GeneratePredictionRequestDTO` - request body
 - `GeneratePredictionResponseDTO` - response
 - `PredictionProbabilities` - struktura prawdopodobieństw
 - `ApiSuccessResponse<GeneratePredictionResponseDTO>` - wrapper
 
 **Type guards**:
+
 - `isPredictionProbabilities()` - walidacja AI response
 
 **Constants**:
+
 - `LEAGUE_NAMES` - dozwolone nazwy lig
 - `BUSINESS_RULES.PREDICTION_CACHE_TTL_HOURS` - 6 hours
 
 ### 3.4 Szczegóły odpowiedzi
 
 **Success (200 OK)**:
+
 ```json
 {
   "data": {
@@ -851,7 +893,7 @@ Endpoint generuje predykcję AI dla meczu. Wywołuje OpenRouter.ai API z konteks
     "prediction": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "generated_at": "2024-01-15T10:30:00Z"
   }
@@ -859,6 +901,7 @@ Endpoint generuje predykcję AI dla meczu. Wywołuje OpenRouter.ai API z konteks
 ```
 
 **Errors**:
+
 - `400 INVALID_REQUEST`: Nieprawidłowe dane wejściowe (Zod validation)
 - `503 AI_SERVICE_ERROR`: OpenRouter.ai niedostępne lub invalid response
 
@@ -876,6 +919,7 @@ Endpoint generuje predykcję AI dla meczu. Wywołuje OpenRouter.ai API z konteks
 5. **Response** zwraca `ApiSuccessResponse<GeneratePredictionResponseDTO>`
 
 **Diagram**:
+
 ```
 Client → Endpoint → Validation → Cache Check
                                      ↓ (miss)
@@ -902,47 +946,50 @@ Client → Endpoint → Validation → Cache Check
   - Use structured output format od AI
 
 **Environment variables**:
+
 ```env
 OPENROUTER_API_KEY=your_api_key_here
 OPENROUTER_MODEL=meta-llama/llama-3.1-70b-instruct
 ```
 
 **Prompt sanitization**:
+
 ```typescript
 function sanitizeInput(input: string): string {
   // Remove potential injection attempts
   return input
-    .replace(/[<>{}]/g, '') // Remove brackets
-    .replace(/\n/g, ' ')     // Remove newlines
+    .replace(/[<>{}]/g, "") // Remove brackets
+    .replace(/\n/g, " ") // Remove newlines
     .trim()
-    .slice(0, 100)           // Limit length
+    .slice(0, 100); // Limit length
 }
 ```
 
 ### 3.7 Obsługa błędów
 
-| Kod | Error Code | Scenariusz | Akcja |
-|-----|-----------|------------|-------|
-| 400 | INVALID_REQUEST | Nieprawidłowy request body | ValidationError z Zod |
-| 400 | INVALID_REQUEST | league nie jest dozwolone | ValidationError z Zod |
-| 400 | INVALID_REQUEST | match_date nie jest ISO 8601 | ValidationError z Zod |
-| 503 | AI_SERVICE_ERROR | OpenRouter.ai timeout/error | ExternalServiceError |
+| Kod | Error Code       | Scenariusz                     | Akcja                                     |
+| --- | ---------------- | ------------------------------ | ----------------------------------------- |
+| 400 | INVALID_REQUEST  | Nieprawidłowy request body     | ValidationError z Zod                     |
+| 400 | INVALID_REQUEST  | league nie jest dozwolone      | ValidationError z Zod                     |
+| 400 | INVALID_REQUEST  | match_date nie jest ISO 8601   | ValidationError z Zod                     |
+| 503 | AI_SERVICE_ERROR | OpenRouter.ai timeout/error    | ExternalServiceError                      |
 | 503 | AI_SERVICE_ERROR | OpenRouter.ai 429 (rate limit) | ExternalServiceError, exponential backoff |
-| 503 | AI_SERVICE_ERROR | AI response invalid format | ExternalServiceError |
-| 500 | INTERNAL_ERROR | Unexpected error | Log + generic error |
+| 503 | AI_SERVICE_ERROR | AI response invalid format     | ExternalServiceError                      |
+| 500 | INTERNAL_ERROR   | Unexpected error               | Log + generic error                       |
 
 **AI Response Validation**:
+
 ```typescript
 function validateAIResponse(response: any): PredictionProbabilities {
   // Extract probabilities from AI response
-  const prediction = parseAIResponse(response)
+  const prediction = parseAIResponse(response);
 
   // Validate using type guard
   if (!isPredictionProbabilities(prediction)) {
-    throw new ExternalServiceError('Invalid AI prediction format')
+    throw new ExternalServiceError("Invalid AI prediction format");
   }
 
-  return prediction
+  return prediction;
 }
 ```
 
@@ -969,6 +1016,7 @@ function validateAIResponse(response: any): PredictionProbabilities {
 ### 3.9 Etapy wdrożenia
 
 1. **Stwórz AIPredictionService** (`src/lib/services/ai-prediction.service.ts`):
+
    ```typescript
    import type { GeneratePredictionRequestDTO, PredictionProbabilities } from '@/types'
    import { isPredictionProbabilities } from '@/types'
@@ -998,15 +1046,16 @@ function validateAIResponse(response: any): PredictionProbabilities {
      const league = sanitizeInput(matchData.league)
 
      const systemPrompt = `You are a football match prediction expert. Analyze matches and provide win probabilities.
-Always respond with ONLY a JSON object in this exact format:
-{"home": 0.XX, "draw": 0.XX, "away": 0.XX}
-The three probabilities must sum to 1.0.`
+   Always respond with ONLY a JSON object in this exact format:
+   {"home": 0.XX, "draw": 0.XX, "away": 0.XX}
+   The three probabilities must sum to 1.0.`
 
      const userPrompt = `Predict the outcome for this match:
-League: ${league}
-Home Team: ${homeTeam}
-Away Team: ${awayTeam}
-Match Date: ${matchData.match_date}
+   League: ${league}
+   Home Team: ${homeTeam}
+   Away Team: ${awayTeam}
+   Match Date: ${matchData.match_date}
+   ```
 
 Provide probabilities for home win, draw, and away win.`
 
@@ -1055,66 +1104,68 @@ Provide probabilities for home win, draw, and away win.`
        }
        throw new ExternalServiceError('Unable to generate prediction at this time')
      }
-   }
-   ```
+
+}
+
+````
 
 2. **Stwórz validation schema** (dodaj do `src/lib/validation/schemas.ts`)
 
 3. **Stwórz endpoint** (`src/pages/api/predictions/generate.ts`):
-   ```typescript
-   export const prerender = false
+```typescript
+export const prerender = false
 
-   import type { APIRoute } from 'astro'
-   import { generatePredictionBodySchema } from '@/lib/validation/schemas'
-   import { generatePrediction } from '@/lib/services/ai-prediction.service'
-   import { cache } from '@/lib/services/cache.service'
-   import { formatError } from '@/lib/errors/formatter'
-   import { BUSINESS_RULES } from '@/types'
+import type { APIRoute } from 'astro'
+import { generatePredictionBodySchema } from '@/lib/validation/schemas'
+import { generatePrediction } from '@/lib/services/ai-prediction.service'
+import { cache } from '@/lib/services/cache.service'
+import { formatError } from '@/lib/errors/formatter'
+import { BUSINESS_RULES } from '@/types'
 
-   export const POST: APIRoute = async ({ request }) => {
-     try {
-       // Parse and validate body
-       const body = await request.json()
-       const matchData = generatePredictionBodySchema.parse(body)
+export const POST: APIRoute = async ({ request }) => {
+  try {
+    // Parse and validate body
+    const body = await request.json()
+    const matchData = generatePredictionBodySchema.parse(body)
 
-       // Check cache
-       const cacheKey = `prediction:${matchData.match_id}`
-       const cached = cache.get<any>(cacheKey)
+    // Check cache
+    const cacheKey = `prediction:${matchData.match_id}`
+    const cached = cache.get<any>(cacheKey)
 
-       if (cached) {
-         return new Response(JSON.stringify({ data: cached }), {
-           status: 200,
-           headers: { 'Content-Type': 'application/json' }
-         })
-       }
+    if (cached) {
+      return new Response(JSON.stringify({ data: cached }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
 
-       // Generate prediction
-       const prediction = await generatePrediction(matchData)
+    // Generate prediction
+    const prediction = await generatePrediction(matchData)
 
-       // Prepare response
-       const responseData = {
-         ...matchData,
-         prediction,
-         generated_at: new Date().toISOString(),
-       }
+    // Prepare response
+    const responseData = {
+      ...matchData,
+      prediction,
+      generated_at: new Date().toISOString(),
+    }
 
-       // Cache for 6 hours
-       const ttl = BUSINESS_RULES.PREDICTION_CACHE_TTL_HOURS * 60 * 60 * 1000
-       cache.set(cacheKey, responseData, ttl)
+    // Cache for 6 hours
+    const ttl = BUSINESS_RULES.PREDICTION_CACHE_TTL_HOURS * 60 * 60 * 1000
+    cache.set(cacheKey, responseData, ttl)
 
-       return new Response(JSON.stringify({ data: responseData }), {
-         status: 200,
-         headers: { 'Content-Type': 'application/json' }
-       })
-     } catch (error) {
-       const { status, body } = formatError(error)
-       return new Response(JSON.stringify(body), {
-         status,
-         headers: { 'Content-Type': 'application/json' }
-       })
-     }
-   }
-   ```
+    return new Response(JSON.stringify({ data: responseData }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  } catch (error) {
+    const { status, body } = formatError(error)
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
+}
+````
 
 4. **Dodaj environment variables** do `.env`
 
@@ -1150,6 +1201,7 @@ Endpoint zapisuje wygenerowaną predykcję do listy "Obserwowanych meczów" uży
   - **Automatyczne**:
     - `user_id`: pobierany z `context.locals.user.id`
 - **Request Body**:
+
 ```json
 {
   "league": "Premier League",
@@ -1159,27 +1211,31 @@ Endpoint zapisuje wygenerowaną predykcję do listy "Obserwowanych meczów" uży
   "prediction_result": {
     "home": 0.52,
     "draw": 0.28,
-    "away": 0.20
+    "away": 0.2
   },
   "note": "High confidence in home win based on recent form"
 }
 ```
+
 - **Authentication**: Required
 
 ### 4.3 Wykorzystywane typy
 
 **DTOs**:
+
 - `CreatePredictionDTO` - request body (bez user_id, id, created_at)
 - `PredictionDTO` - response (pełny obiekt z DB)
 - `ApiSuccessResponse<PredictionDTO>` - wrapper
 
 **Constants**:
+
 - `BUSINESS_RULES.MAX_PREDICTIONS_PER_USER` - 50
 - `BUSINESS_RULES.MAX_NOTE_LENGTH` - 500
 
 ### 4.4 Szczegóły odpowiedzi
 
 **Success (201 Created)**:
+
 ```json
 {
   "data": {
@@ -1193,7 +1249,7 @@ Endpoint zapisuje wygenerowaną predykcję do listy "Obserwowanych meczów" uży
     "prediction_result": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "note": "High confidence in home win based on recent form",
     "home_score": null,
@@ -1203,6 +1259,7 @@ Endpoint zapisuje wygenerowaną predykcję do listy "Obserwowanych meczów" uży
 ```
 
 **Errors**:
+
 - `401 UNAUTHORIZED`: Użytkownik nie jest zalogowany
 - `400 VALIDATION_ERROR`: Nieprawidłowe dane (Zod validation)
 - `403 PREDICTION_LIMIT_REACHED`: Osiągnięto limit 50 predykcji
@@ -1222,6 +1279,7 @@ Endpoint zapisuje wygenerowaną predykcję do listy "Obserwowanych meczów" uży
 8. **Response** zwraca `ApiSuccessResponse<PredictionDTO>` z status 201
 
 **Diagram**:
+
 ```
 Client → Middleware (JWT) → Endpoint → Validation → Check Limit
                                                           ↓
@@ -1249,6 +1307,7 @@ Client → Middleware (JWT) → Endpoint → Validation → Check Limit
   - Immutable fields po utworzeniu (poza note)
 
 **RLS Policy** (do stworzenia w migracji):
+
 ```sql
 CREATE POLICY "Users can insert their own predictions"
   ON predictions FOR INSERT
@@ -1256,40 +1315,39 @@ CREATE POLICY "Users can insert their own predictions"
 ```
 
 **XSS Prevention**:
+
 ```typescript
 function sanitizeNote(note: string | undefined): string | null {
-  if (!note) return null
+  if (!note) return null;
   // Basic HTML escaping
-  return note
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .trim()
+  return note.replace(/</g, "&lt;").replace(/>/g, "&gt;").trim();
 }
 ```
 
 ### 4.7 Obsługa błędów
 
-| Kod | Error Code | Scenariusz | Akcja |
-|-----|-----------|------------|-------|
-| 401 | UNAUTHORIZED | Brak tokena/nieprawidłowy token | UnauthorizedError |
-| 400 | VALIDATION_ERROR | Nieprawidłowy request body | ValidationError z Zod |
-| 400 | VALIDATION_ERROR | prediction_result suma != 1.0 | ValidationError z Zod refine |
-| 400 | VALIDATION_ERROR | note > 500 chars | ValidationError z Zod |
-| 403 | PREDICTION_LIMIT_REACHED | User ma już 50 predykcji | PredictionLimitError |
-| 500 | INTERNAL_ERROR | DB error | Log + generic error |
+| Kod | Error Code               | Scenariusz                      | Akcja                        |
+| --- | ------------------------ | ------------------------------- | ---------------------------- |
+| 401 | UNAUTHORIZED             | Brak tokena/nieprawidłowy token | UnauthorizedError            |
+| 400 | VALIDATION_ERROR         | Nieprawidłowy request body      | ValidationError z Zod        |
+| 400 | VALIDATION_ERROR         | prediction_result suma != 1.0   | ValidationError z Zod refine |
+| 400 | VALIDATION_ERROR         | note > 500 chars                | ValidationError z Zod        |
+| 403 | PREDICTION_LIMIT_REACHED | User ma już 50 predykcji        | PredictionLimitError         |
+| 500 | INTERNAL_ERROR           | DB error                        | Log + generic error          |
 
 **Limit check implementation**:
+
 ```typescript
 async function checkPredictionLimit(supabase: SupabaseClient, userId: string): Promise<void> {
   const { count, error } = await supabase
-    .from('predictions')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
+    .from("predictions")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
 
-  if (error) throw error
+  if (error) throw error;
 
   if (count && count >= BUSINESS_RULES.MAX_PREDICTIONS_PER_USER) {
-    throw new PredictionLimitError()
+    throw new PredictionLimitError();
   }
 }
 ```
@@ -1307,6 +1365,7 @@ async function checkPredictionLimit(supabase: SupabaseClient, userId: string): P
 - **Response size**: ~500 bytes
 
 **Database indexes** (już zaplanowane w db-plan):
+
 ```sql
 CREATE INDEX idx_predictions_user_id ON predictions(user_id);
 ```
@@ -1314,34 +1373,29 @@ CREATE INDEX idx_predictions_user_id ON predictions(user_id);
 ### 4.9 Etapy wdrożenia
 
 1. **Stwórz PredictionService** (`src/lib/services/prediction.service.ts`):
+
    ```typescript
-   import type { SupabaseClient } from '@/db/supabase.client'
-   import type { CreatePredictionDTO, PredictionDTO } from '@/types'
-   import { BUSINESS_RULES } from '@/types'
-   import { PredictionLimitError } from '@/lib/errors/api-errors'
+   import type { SupabaseClient } from "@/db/supabase.client";
+   import type { CreatePredictionDTO, PredictionDTO } from "@/types";
+   import { BUSINESS_RULES } from "@/types";
+   import { PredictionLimitError } from "@/lib/errors/api-errors";
 
-   export async function checkPredictionLimit(
-     supabase: SupabaseClient,
-     userId: string
-   ): Promise<void> {
+   export async function checkPredictionLimit(supabase: SupabaseClient, userId: string): Promise<void> {
      const { count, error } = await supabase
-       .from('predictions')
-       .select('*', { count: 'exact', head: true })
-       .eq('user_id', userId)
+       .from("predictions")
+       .select("*", { count: "exact", head: true })
+       .eq("user_id", userId);
 
-     if (error) throw error
+     if (error) throw error;
 
      if (count && count >= BUSINESS_RULES.MAX_PREDICTIONS_PER_USER) {
-       throw new PredictionLimitError()
+       throw new PredictionLimitError();
      }
    }
 
    function sanitizeNote(note: string | undefined): string | null {
-     if (!note) return null
-     return note
-       .replace(/</g, '&lt;')
-       .replace(/>/g, '&gt;')
-       .trim()
+     if (!note) return null;
+     return note.replace(/</g, "&lt;").replace(/>/g, "&gt;").trim();
    }
 
    export async function createPrediction(
@@ -1360,61 +1414,58 @@ CREATE INDEX idx_predictions_user_id ON predictions(user_id);
        note: sanitizeNote(data.note),
        home_score: null,
        away_score: null,
-     }
+     };
 
-     const { data: prediction, error } = await supabase
-       .from('predictions')
-       .insert(insertData)
-       .select()
-       .single()
+     const { data: prediction, error } = await supabase.from("predictions").insert(insertData).select().single();
 
-     if (error) throw error
+     if (error) throw error;
 
-     return prediction as PredictionDTO
+     return prediction as PredictionDTO;
    }
    ```
 
 2. **Stwórz validation schema** (dodaj do `src/lib/validation/schemas.ts`)
 
 3. **Stwórz endpoint** (`src/pages/api/predictions/index.ts`):
-   ```typescript
-   export const prerender = false
 
-   import type { APIRoute } from 'astro'
-   import { createPredictionBodySchema } from '@/lib/validation/schemas'
-   import { createPrediction, checkPredictionLimit } from '@/lib/services/prediction.service'
-   import { UnauthorizedError } from '@/lib/errors/api-errors'
-   import { formatError } from '@/lib/errors/formatter'
+   ```typescript
+   export const prerender = false;
+
+   import type { APIRoute } from "astro";
+   import { createPredictionBodySchema } from "@/lib/validation/schemas";
+   import { createPrediction, checkPredictionLimit } from "@/lib/services/prediction.service";
+   import { UnauthorizedError } from "@/lib/errors/api-errors";
+   import { formatError } from "@/lib/errors/formatter";
 
    export const POST: APIRoute = async ({ locals, request }) => {
      try {
        // Check authentication
        if (!locals.user) {
-         throw new UnauthorizedError()
+         throw new UnauthorizedError();
        }
 
        // Parse and validate body
-       const body = await request.json()
-       const data = createPredictionBodySchema.parse(body)
+       const body = await request.json();
+       const data = createPredictionBodySchema.parse(body);
 
        // Check prediction limit
-       await checkPredictionLimit(locals.supabase, locals.user.id)
+       await checkPredictionLimit(locals.supabase, locals.user.id);
 
        // Create prediction
-       const prediction = await createPrediction(locals.supabase, locals.user.id, data)
+       const prediction = await createPrediction(locals.supabase, locals.user.id, data);
 
        return new Response(JSON.stringify({ data: prediction }), {
          status: 201,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      } catch (error) {
-       const { status, body } = formatError(error)
+       const { status, body } = formatError(error);
        return new Response(JSON.stringify(body), {
          status,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      }
-   }
+   };
    ```
 
 4. **Stwórz RLS policy** w nowej migracji Supabase
@@ -1455,6 +1506,7 @@ Endpoint zwraca paginowaną listę wszystkich zapisanych predykcji zalogowanego 
 ### 5.3 Wykorzystywane typy
 
 **DTOs**:
+
 - `GetPredictionsQueryParams` - query parameters
 - `PaginatedPredictionsResponseDTO` - response wrapper
 - `PredictionDTO[]` - lista predykcji
@@ -1462,12 +1514,14 @@ Endpoint zwraca paginowaną listę wszystkich zapisanych predykcji zalogowanego 
 - `ApiSuccessResponse<PaginatedPredictionsResponseDTO>` - wrapper
 
 **Constants**:
+
 - `BUSINESS_RULES.DEFAULT_PREDICTIONS_LIMIT` - 20
 - `BUSINESS_RULES.MAX_MATCHES_LIMIT` - 50
 
 ### 5.4 Szczegóły odpowiedzi
 
 **Success (200 OK)**:
+
 ```json
 {
   "data": {
@@ -1483,7 +1537,7 @@ Endpoint zwraca paginowaną listę wszystkich zapisanych predykcji zalogowanego 
         "prediction_result": {
           "home": 0.52,
           "draw": 0.28,
-          "away": 0.20
+          "away": 0.2
         },
         "note": "High confidence in home win",
         "home_score": null,
@@ -1501,6 +1555,7 @@ Endpoint zwraca paginowaną listę wszystkich zapisanych predykcji zalogowanego 
 ```
 
 **Errors**:
+
 - `401 UNAUTHORIZED`: Użytkownik nie jest zalogowany
 - `400 INVALID_PARAMETERS`: Nieprawidłowe query params
 
@@ -1517,6 +1572,7 @@ Endpoint zwraca paginowaną listę wszystkich zapisanych predykcji zalogowanego 
 7. **Response** zwraca `ApiSuccessResponse<PaginatedPredictionsResponseDTO>`
 
 **Diagram**:
+
 ```
 Client → Middleware (JWT) → Endpoint → Validation
                                           ↓
@@ -1545,6 +1601,7 @@ Client → Middleware (JWT) → Endpoint → Validation
 - **Data exposure**: RLS zapewnia, że user widzi tylko swoje predykcje
 
 **RLS Policy** (do stworzenia w migracji):
+
 ```sql
 CREATE POLICY "Users can view their own predictions"
   ON predictions FOR SELECT
@@ -1553,14 +1610,14 @@ CREATE POLICY "Users can view their own predictions"
 
 ### 5.7 Obsługa błędów
 
-| Kod | Error Code | Scenariusz | Akcja |
-|-----|-----------|------------|-------|
-| 401 | UNAUTHORIZED | Brak tokena/nieprawidłowy token | UnauthorizedError |
-| 400 | INVALID_PARAMETERS | limit poza zakresem 1-50 | ValidationError z Zod |
-| 400 | INVALID_PARAMETERS | offset < 0 | ValidationError z Zod |
+| Kod | Error Code         | Scenariusz                          | Akcja                 |
+| --- | ------------------ | ----------------------------------- | --------------------- |
+| 401 | UNAUTHORIZED       | Brak tokena/nieprawidłowy token     | UnauthorizedError     |
+| 400 | INVALID_PARAMETERS | limit poza zakresem 1-50            | ValidationError z Zod |
+| 400 | INVALID_PARAMETERS | offset < 0                          | ValidationError z Zod |
 | 400 | INVALID_PARAMETERS | sort nie jest created_at/match_date | ValidationError z Zod |
-| 400 | INVALID_PARAMETERS | order nie jest asc/desc | ValidationError z Zod |
-| 500 | INTERNAL_ERROR | DB error | Log + generic error |
+| 400 | INVALID_PARAMETERS | order nie jest asc/desc             | ValidationError z Zod |
+| 500 | INTERNAL_ERROR     | DB error                            | Log + generic error   |
 
 ### 5.8 Rozważania dotyczące wydajności
 
@@ -1579,6 +1636,7 @@ CREATE POLICY "Users can view their own predictions"
 - **Response size**: ~10-25KB (20 predictions x ~500 bytes each)
 
 **Recommended indexes** (dodać do migracji):
+
 ```sql
 -- Already planned
 CREATE INDEX idx_predictions_user_id ON predictions(user_id);
@@ -1591,8 +1649,9 @@ CREATE INDEX idx_predictions_user_match_date ON predictions(user_id, match_date 
 ### 5.9 Etapy wdrożenia
 
 1. **Rozszerz PredictionService** (dodaj do `src/lib/services/prediction.service.ts`):
+
    ```typescript
-   import type { GetPredictionsQueryParams, PaginatedPredictionsResponseDTO } from '@/types'
+   import type { GetPredictionsQueryParams, PaginatedPredictionsResponseDTO } from "@/types";
 
    export async function getPredictions(
      supabase: SupabaseClient,
@@ -1600,34 +1659,31 @@ CREATE INDEX idx_predictions_user_match_date ON predictions(user_id, match_date 
      params: GetPredictionsQueryParams
    ): Promise<PaginatedPredictionsResponseDTO> {
      // Build base query
-     let query = supabase
-       .from('predictions')
-       .select('*', { count: 'exact' })
-       .eq('user_id', userId)
+     let query = supabase.from("predictions").select("*", { count: "exact" }).eq("user_id", userId);
 
      // Apply league filter if provided
      if (params.league) {
-       query = query.eq('league', params.league)
+       query = query.eq("league", params.league);
      }
 
      // Apply sorting
-     const sortField = params.sort || 'created_at'
-     const sortOrder = params.order || 'desc'
-     query = query.order(sortField, { ascending: sortOrder === 'asc' })
+     const sortField = params.sort || "created_at";
+     const sortOrder = params.order || "desc";
+     query = query.order(sortField, { ascending: sortOrder === "asc" });
 
      // Apply pagination
-     const limit = params.limit || BUSINESS_RULES.DEFAULT_PREDICTIONS_LIMIT
-     const offset = params.offset || 0
-     query = query.range(offset, offset + limit - 1)
+     const limit = params.limit || BUSINESS_RULES.DEFAULT_PREDICTIONS_LIMIT;
+     const offset = params.offset || 0;
+     query = query.range(offset, offset + limit - 1);
 
      // Execute query
-     const { data, count, error } = await query
+     const { data, count, error } = await query;
 
-     if (error) throw error
+     if (error) throw error;
 
      // Build pagination metadata
-     const total = count || 0
-     const hasMore = total > offset + limit
+     const total = count || 0;
+     const hasMore = total > offset + limit;
 
      return {
        predictions: (data || []) as PredictionDTO[],
@@ -1637,51 +1693,52 @@ CREATE INDEX idx_predictions_user_match_date ON predictions(user_id, match_date 
          offset,
          has_more: hasMore,
        },
-     }
+     };
    }
    ```
 
 2. **Stwórz validation schema** (dodaj do `src/lib/validation/schemas.ts`)
 
 3. **Rozszerz endpoint** (w `src/pages/api/predictions/index.ts`):
+
    ```typescript
-   import { getPredictionsQuerySchema } from '@/lib/validation/schemas'
-   import { getPredictions } from '@/lib/services/prediction.service'
+   import { getPredictionsQuerySchema } from "@/lib/validation/schemas";
+   import { getPredictions } from "@/lib/services/prediction.service";
 
    export const GET: APIRoute = async ({ locals, request }) => {
      try {
        // Check authentication
        if (!locals.user) {
-         throw new UnauthorizedError()
+         throw new UnauthorizedError();
        }
 
        // Parse and validate query params
-       const url = new URL(request.url)
+       const url = new URL(request.url);
        const queryParams = {
-         limit: url.searchParams.get('limit'),
-         offset: url.searchParams.get('offset'),
-         sort: url.searchParams.get('sort'),
-         order: url.searchParams.get('order'),
-         league: url.searchParams.get('league'),
-       }
+         limit: url.searchParams.get("limit"),
+         offset: url.searchParams.get("offset"),
+         sort: url.searchParams.get("sort"),
+         order: url.searchParams.get("order"),
+         league: url.searchParams.get("league"),
+       };
 
-       const params = getPredictionsQuerySchema.parse(queryParams)
+       const params = getPredictionsQuerySchema.parse(queryParams);
 
        // Fetch predictions
-       const result = await getPredictions(locals.supabase, locals.user.id, params)
+       const result = await getPredictions(locals.supabase, locals.user.id, params);
 
        return new Response(JSON.stringify({ data: result }), {
          status: 200,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      } catch (error) {
-       const { status, body } = formatError(error)
+       const { status, body } = formatError(error);
        return new Response(JSON.stringify(body), {
          status,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      }
-   }
+   };
    ```
 
 4. **Stwórz RLS policy** w migracji Supabase
@@ -1722,15 +1779,18 @@ Endpoint zwraca szczegóły pojedynczej predykcji po ID. Wymaga autentykacji i R
 ### 6.3 Wykorzystywane typy
 
 **DTOs**:
+
 - `PredictionDTO` - response (pełny obiekt)
 - `ApiSuccessResponse<PredictionDTO>` - wrapper
 
 **Validation**:
+
 - `predictionIdParamSchema` - walidacja path param
 
 ### 6.4 Szczegóły odpowiedzi
 
 **Success (200 OK)**:
+
 ```json
 {
   "data": {
@@ -1744,7 +1804,7 @@ Endpoint zwraca szczegóły pojedynczej predykcji po ID. Wymaga autentykacji i R
     "prediction_result": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "note": "High confidence in home win",
     "home_score": null,
@@ -1754,6 +1814,7 @@ Endpoint zwraca szczegóły pojedynczej predykcji po ID. Wymaga autentykacji i R
 ```
 
 **Errors**:
+
 - `401 UNAUTHORIZED`: Użytkownik nie jest zalogowany
 - `404 PREDICTION_NOT_FOUND`: Predykcja nie istnieje lub nie należy do użytkownika
 
@@ -1768,6 +1829,7 @@ Endpoint zwraca szczegóły pojedynczej predykcji po ID. Wymaga autentykacji i R
 7. **Response** zwraca `ApiSuccessResponse<PredictionDTO>`
 
 **Diagram**:
+
 ```
 Client → Middleware (JWT) → Endpoint → Validation
                                           ↓
@@ -1790,6 +1852,7 @@ Client → Middleware (JWT) → Endpoint → Validation
   - 404 dla nie znalezionej predykcji (nie ujawniamy czy istnieje u innego użytkownika)
 
 **RLS Policy** (ta sama co dla GET /api/predictions):
+
 ```sql
 CREATE POLICY "Users can view their own predictions"
   ON predictions FOR SELECT
@@ -1798,13 +1861,13 @@ CREATE POLICY "Users can view their own predictions"
 
 ### 6.7 Obsługa błędów
 
-| Kod | Error Code | Scenariusz | Akcja |
-|-----|-----------|------------|-------|
-| 401 | UNAUTHORIZED | Brak tokena/nieprawidłowy token | UnauthorizedError |
-| 404 | PREDICTION_NOT_FOUND | ID nie istnieje | NotFoundError |
+| Kod | Error Code           | Scenariusz                                   | Akcja                              |
+| --- | -------------------- | -------------------------------------------- | ---------------------------------- |
+| 401 | UNAUTHORIZED         | Brak tokena/nieprawidłowy token              | UnauthorizedError                  |
+| 404 | PREDICTION_NOT_FOUND | ID nie istnieje                              | NotFoundError                      |
 | 404 | PREDICTION_NOT_FOUND | ID istnieje ale należy do innego użytkownika | NotFoundError (nie ujawniamy tego) |
-| 400 | VALIDATION_ERROR | ID nie jest valid integer | ValidationError z Zod |
-| 500 | INTERNAL_ERROR | DB error | Log + generic error |
+| 400 | VALIDATION_ERROR     | ID nie jest valid integer                    | ValidationError z Zod              |
+| 500 | INTERNAL_ERROR       | DB error                                     | Log + generic error                |
 
 ### 6.8 Rozważania dotyczące wydajności
 
@@ -1817,6 +1880,7 @@ CREATE POLICY "Users can view their own predictions"
 ### 6.9 Etapy wdrożenia
 
 1. **Rozszerz PredictionService** (dodaj do `src/lib/services/prediction.service.ts`):
+
    ```typescript
    export async function getPredictionById(
      supabase: SupabaseClient,
@@ -1824,63 +1888,64 @@ CREATE POLICY "Users can view their own predictions"
      predictionId: number
    ): Promise<PredictionDTO | null> {
      const { data, error } = await supabase
-       .from('predictions')
-       .select('*')
-       .eq('id', predictionId)
-       .eq('user_id', userId) // Additional security check
-       .single()
+       .from("predictions")
+       .select("*")
+       .eq("id", predictionId)
+       .eq("user_id", userId) // Additional security check
+       .single();
 
      if (error) {
        // Not found error
-       if (error.code === 'PGRST116') return null
-       throw error
+       if (error.code === "PGRST116") return null;
+       throw error;
      }
 
-     return data as PredictionDTO
+     return data as PredictionDTO;
    }
    ```
 
 2. **Stwórz validation schema** (dodaj do `src/lib/validation/schemas.ts`)
 
 3. **Stwórz endpoint** (`src/pages/api/predictions/[id]/index.ts`):
-   ```typescript
-   export const prerender = false
 
-   import type { APIRoute } from 'astro'
-   import { predictionIdParamSchema } from '@/lib/validation/schemas'
-   import { getPredictionById } from '@/lib/services/prediction.service'
-   import { UnauthorizedError, NotFoundError } from '@/lib/errors/api-errors'
-   import { formatError } from '@/lib/errors/formatter'
+   ```typescript
+   export const prerender = false;
+
+   import type { APIRoute } from "astro";
+   import { predictionIdParamSchema } from "@/lib/validation/schemas";
+   import { getPredictionById } from "@/lib/services/prediction.service";
+   import { UnauthorizedError, NotFoundError } from "@/lib/errors/api-errors";
+   import { formatError } from "@/lib/errors/formatter";
 
    export const GET: APIRoute = async ({ locals, params }) => {
      try {
        // Check authentication
        if (!locals.user) {
-         throw new UnauthorizedError()
+         throw new UnauthorizedError();
        }
 
        // Validate path param
-       const { id } = predictionIdParamSchema.parse(params)
+       const { id } = predictionIdParamSchema.parse(params);
 
        // Fetch prediction
-       const prediction = await getPredictionById(locals.supabase, locals.user.id, id)
+       const prediction = await getPredictionById(locals.supabase, locals.user.id, id);
 
        if (!prediction) {
-         throw new NotFoundError('PREDICTION_NOT_FOUND', 'Prediction not found')
+         throw new NotFoundError("PREDICTION_NOT_FOUND", "Prediction not found");
        }
 
        return new Response(JSON.stringify({ data: prediction }), {
          status: 200,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      } catch (error) {
-       const { status, body } = formatError(error)
+       const { status, body } = formatError(error);
        return new Response(JSON.stringify(body), {
          status,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      }
-   }
+   };
    ```
 
 4. **RLS policy już istnieje** (ta sama co dla GET /api/predictions)
@@ -1912,26 +1977,31 @@ Endpoint aktualizuje TYLKO pole `note` w predykcji. Wszystkie inne pola są immu
   - **Automatyczne**:
     - `user_id`: z `context.locals.user.id`
 - **Request Body**:
+
 ```json
 {
   "note": "Updated analysis after checking team news"
 }
 ```
+
 - **Authentication**: Required
 
 ### 7.3 Wykorzystywane typy
 
 **DTOs**:
+
 - `UpdatePredictionDTO` - request body (tylko note)
 - `PredictionDTO` - response (pełny obiekt po update)
 - `ApiSuccessResponse<PredictionDTO>` - wrapper
 
 **Constants**:
+
 - `BUSINESS_RULES.MAX_NOTE_LENGTH` - 500
 
 ### 7.4 Szczegóły odpowiedzi
 
 **Success (200 OK)**:
+
 ```json
 {
   "data": {
@@ -1945,7 +2015,7 @@ Endpoint aktualizuje TYLKO pole `note` w predykcji. Wszystkie inne pola są immu
     "prediction_result": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "note": "Updated analysis after checking team news",
     "home_score": null,
@@ -1955,6 +2025,7 @@ Endpoint aktualizuje TYLKO pole `note` w predykcji. Wszystkie inne pola są immu
 ```
 
 **Errors**:
+
 - `401 UNAUTHORIZED`: Użytkownik nie jest zalogowany
 - `404 PREDICTION_NOT_FOUND`: Predykcja nie istnieje lub nie należy do użytkownika
 - `400 VALIDATION_ERROR`: note za długie (> 500 chars)
@@ -1973,6 +2044,7 @@ Endpoint aktualizuje TYLKO pole `note` w predykcji. Wszystkie inne pola są immu
 10. **Response** zwraca `ApiSuccessResponse<PredictionDTO>`
 
 **Diagram**:
+
 ```
 Client → Middleware (JWT) → Endpoint → Validation → Sanitize note
                                                           ↓
@@ -1999,6 +2071,7 @@ Client → Middleware (JWT) → Endpoint → Validation → Sanitize note
 - **XSS prevention**: Sanityzacja note przed zapisem
 
 **RLS Policy** (do stworzenia w migracji):
+
 ```sql
 CREATE POLICY "Users can update their own predictions"
   ON predictions FOR UPDATE
@@ -2007,29 +2080,30 @@ CREATE POLICY "Users can update their own predictions"
 ```
 
 **Immutability test**:
+
 ```typescript
 // Jeśli user spróbuje zmienić inne pola:
 const maliciousBody = {
   note: "Updated note",
   prediction_result: { home: 1.0, draw: 0.0, away: 0.0 }, // Próba zmiany
   home_score: 99, // Próba zmiany
-}
+};
 
 // Endpoint MUSI zignorować wszystko poza note
-const { note } = updatePredictionBodySchema.parse(maliciousBody)
+const { note } = updatePredictionBodySchema.parse(maliciousBody);
 // note = "Updated note", inne pola nie przechodzą przez schema
 ```
 
 ### 7.7 Obsługa błędów
 
-| Kod | Error Code | Scenariusz | Akcja |
-|-----|-----------|------------|-------|
-| 401 | UNAUTHORIZED | Brak tokena/nieprawidłowy token | UnauthorizedError |
-| 404 | PREDICTION_NOT_FOUND | ID nie istnieje | NotFoundError |
-| 404 | PREDICTION_NOT_FOUND | ID należy do innego użytkownika | NotFoundError |
-| 400 | VALIDATION_ERROR | note > 500 chars | ValidationError z Zod |
-| 400 | VALIDATION_ERROR | ID nie jest valid integer | ValidationError z Zod |
-| 500 | INTERNAL_ERROR | DB error | Log + generic error |
+| Kod | Error Code           | Scenariusz                      | Akcja                 |
+| --- | -------------------- | ------------------------------- | --------------------- |
+| 401 | UNAUTHORIZED         | Brak tokena/nieprawidłowy token | UnauthorizedError     |
+| 404 | PREDICTION_NOT_FOUND | ID nie istnieje                 | NotFoundError         |
+| 404 | PREDICTION_NOT_FOUND | ID należy do innego użytkownika | NotFoundError         |
+| 400 | VALIDATION_ERROR     | note > 500 chars                | ValidationError z Zod |
+| 400 | VALIDATION_ERROR     | ID nie jest valid integer       | ValidationError z Zod |
+| 500 | INTERNAL_ERROR       | DB error                        | Log + generic error   |
 
 ### 7.8 Rozważania dotyczące wydajności
 
@@ -2044,6 +2118,7 @@ const { note } = updatePredictionBodySchema.parse(maliciousBody)
 ### 7.9 Etapy wdrożenia
 
 1. **Rozszerz PredictionService** (dodaj do `src/lib/services/prediction.service.ts`):
+
    ```typescript
    export async function updatePredictionNote(
      supabase: SupabaseClient,
@@ -2052,72 +2127,68 @@ const { note } = updatePredictionBodySchema.parse(maliciousBody)
      note: string | null
    ): Promise<PredictionDTO | null> {
      // Sanitize note
-     const sanitizedNote = note ? sanitizeNote(note) : null
+     const sanitizedNote = note ? sanitizeNote(note) : null;
 
      // Update only note field
      const { data, error } = await supabase
-       .from('predictions')
+       .from("predictions")
        .update({ note: sanitizedNote })
-       .eq('id', predictionId)
-       .eq('user_id', userId) // Additional security check
+       .eq("id", predictionId)
+       .eq("user_id", userId) // Additional security check
        .select()
-       .single()
+       .single();
 
      if (error) {
        // Not found error
-       if (error.code === 'PGRST116') return null
-       throw error
+       if (error.code === "PGRST116") return null;
+       throw error;
      }
 
-     return data as PredictionDTO
+     return data as PredictionDTO;
    }
    ```
 
 2. **Stwórz validation schema** (dodaj do `src/lib/validation/schemas.ts`)
 
 3. **Rozszerz endpoint** (`src/pages/api/predictions/[id]/index.ts`):
+
    ```typescript
-   import { updatePredictionBodySchema } from '@/lib/validation/schemas'
-   import { updatePredictionNote } from '@/lib/services/prediction.service'
+   import { updatePredictionBodySchema } from "@/lib/validation/schemas";
+   import { updatePredictionNote } from "@/lib/services/prediction.service";
 
    export const PATCH: APIRoute = async ({ locals, params, request }) => {
      try {
        // Check authentication
        if (!locals.user) {
-         throw new UnauthorizedError()
+         throw new UnauthorizedError();
        }
 
        // Validate path param
-       const { id } = predictionIdParamSchema.parse(params)
+       const { id } = predictionIdParamSchema.parse(params);
 
        // Parse and validate body
-       const body = await request.json()
-       const { note } = updatePredictionBodySchema.parse(body)
+       const body = await request.json();
+       const { note } = updatePredictionBodySchema.parse(body);
 
        // Update prediction
-       const prediction = await updatePredictionNote(
-         locals.supabase,
-         locals.user.id,
-         id,
-         note || null
-       )
+       const prediction = await updatePredictionNote(locals.supabase, locals.user.id, id, note || null);
 
        if (!prediction) {
-         throw new NotFoundError('PREDICTION_NOT_FOUND', 'Prediction not found')
+         throw new NotFoundError("PREDICTION_NOT_FOUND", "Prediction not found");
        }
 
        return new Response(JSON.stringify({ data: prediction }), {
          status: 200,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      } catch (error) {
-       const { status, body } = formatError(error)
+       const { status, body } = formatError(error);
        return new Response(JSON.stringify(body), {
          status,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      }
-   }
+   };
    ```
 
 4. **Stwórz RLS policy** w migracji Supabase
@@ -2154,20 +2225,24 @@ Endpoint usuwa predykcję. Wymaga autentykacji i RLS zapewnia delete tylko włas
 ### 8.3 Wykorzystywane typy
 
 **Validation**:
+
 - `predictionIdParamSchema` - walidacja path param
 
 **Response**:
+
 - Success: 204 No Content (brak body)
 - Error: `ApiErrorResponse`
 
 ### 8.4 Szczegóły odpowiedzi
 
 **Success (204 No Content)**:
+
 ```
 (empty response body)
 ```
 
 **Errors**:
+
 - `401 UNAUTHORIZED`: Użytkownik nie jest zalogowany
 - `404 PREDICTION_NOT_FOUND`: Predykcja nie istnieje lub nie należy do użytkownika
 
@@ -2182,6 +2257,7 @@ Endpoint usuwa predykcję. Wymaga autentykacji i RLS zapewnia delete tylko włas
 7. **Response** zwraca 204 No Content (bez body)
 
 **Diagram**:
+
 ```
 Client → Middleware (JWT) → Endpoint → Validation
                                           ↓
@@ -2202,6 +2278,7 @@ Client → Middleware (JWT) → Endpoint → Validation
 - **Cascade deletes**: Handled automatycznie przez DB (jeśli są foreign keys)
 
 **RLS Policy** (do stworzenia w migracji):
+
 ```sql
 CREATE POLICY "Users can delete their own predictions"
   ON predictions FOR DELETE
@@ -2210,13 +2287,13 @@ CREATE POLICY "Users can delete their own predictions"
 
 ### 8.7 Obsługa błędów
 
-| Kod | Error Code | Scenariusz | Akcja |
-|-----|-----------|------------|-------|
-| 401 | UNAUTHORIZED | Brak tokena/nieprawidłowy token | UnauthorizedError |
-| 404 | PREDICTION_NOT_FOUND | ID nie istnieje | NotFoundError |
-| 404 | PREDICTION_NOT_FOUND | ID należy do innego użytkownika | NotFoundError |
-| 400 | VALIDATION_ERROR | ID nie jest valid integer | ValidationError z Zod |
-| 500 | INTERNAL_ERROR | DB error | Log + generic error |
+| Kod | Error Code           | Scenariusz                      | Akcja                 |
+| --- | -------------------- | ------------------------------- | --------------------- |
+| 401 | UNAUTHORIZED         | Brak tokena/nieprawidłowy token | UnauthorizedError     |
+| 404 | PREDICTION_NOT_FOUND | ID nie istnieje                 | NotFoundError         |
+| 404 | PREDICTION_NOT_FOUND | ID należy do innego użytkownika | NotFoundError         |
+| 400 | VALIDATION_ERROR     | ID nie jest valid integer       | ValidationError z Zod |
+| 500 | INTERNAL_ERROR       | DB error                        | Log + generic error   |
 
 ### 8.8 Rozważania dotyczące wydajności
 
@@ -2229,6 +2306,7 @@ CREATE POLICY "Users can delete their own predictions"
 ### 8.9 Etapy wdrożenia
 
 1. **Rozszerz PredictionService** (dodaj do `src/lib/services/prediction.service.ts`):
+
    ```typescript
    export async function deletePrediction(
      supabase: SupabaseClient,
@@ -2236,50 +2314,51 @@ CREATE POLICY "Users can delete their own predictions"
      predictionId: number
    ): Promise<boolean> {
      const { data, error } = await supabase
-       .from('predictions')
+       .from("predictions")
        .delete()
-       .eq('id', predictionId)
-       .eq('user_id', userId) // Additional security check
-       .select()
+       .eq("id", predictionId)
+       .eq("user_id", userId) // Additional security check
+       .select();
 
-     if (error) throw error
+     if (error) throw error;
 
      // Check if any row was deleted
-     return data && data.length > 0
+     return data && data.length > 0;
    }
    ```
 
 2. **Rozszerz endpoint** (`src/pages/api/predictions/[id]/index.ts`):
+
    ```typescript
-   import { deletePrediction } from '@/lib/services/prediction.service'
+   import { deletePrediction } from "@/lib/services/prediction.service";
 
    export const DELETE: APIRoute = async ({ locals, params }) => {
      try {
        // Check authentication
        if (!locals.user) {
-         throw new UnauthorizedError()
+         throw new UnauthorizedError();
        }
 
        // Validate path param
-       const { id } = predictionIdParamSchema.parse(params)
+       const { id } = predictionIdParamSchema.parse(params);
 
        // Delete prediction
-       const deleted = await deletePrediction(locals.supabase, locals.user.id, id)
+       const deleted = await deletePrediction(locals.supabase, locals.user.id, id);
 
        if (!deleted) {
-         throw new NotFoundError('PREDICTION_NOT_FOUND', 'Prediction not found')
+         throw new NotFoundError("PREDICTION_NOT_FOUND", "Prediction not found");
        }
 
        // Return 204 No Content
-       return new Response(null, { status: 204 })
+       return new Response(null, { status: 204 });
      } catch (error) {
-       const { status, body } = formatError(error)
+       const { status, body } = formatError(error);
        return new Response(JSON.stringify(body), {
          status,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      }
-   }
+   };
    ```
 
 3. **Stwórz RLS policy** w migracji Supabase
@@ -2316,15 +2395,18 @@ Endpoint pobiera finalne wyniki zakończonego meczu z football-data.org API i ca
 ### 9.3 Wykorzystywane typy
 
 **DTOs**:
+
 - `PredictionDTO` - response (z wypełnionymi home_score, away_score)
 - `ApiSuccessResponse<PredictionDTO>` - wrapper
 
 **Validation**:
+
 - `predictionIdParamSchema` - walidacja path param
 
 ### 9.4 Szczegóły odpowiedzi
 
 **Success (200 OK)**:
+
 ```json
 {
   "data": {
@@ -2338,7 +2420,7 @@ Endpoint pobiera finalne wyniki zakończonego meczu z football-data.org API i ca
     "prediction_result": {
       "home": 0.52,
       "draw": 0.28,
-      "away": 0.20
+      "away": 0.2
     },
     "note": "High confidence in home win",
     "home_score": 2,
@@ -2348,6 +2430,7 @@ Endpoint pobiera finalne wyniki zakończonego meczu z football-data.org API i ca
 ```
 
 **Errors**:
+
 - `401 UNAUTHORIZED`: Użytkownik nie jest zalogowany
 - `404 PREDICTION_NOT_FOUND`: Predykcja nie istnieje lub nie należy do użytkownika
 - `409 MATCH_NOT_FINISHED`: Mecz jeszcze się nie zakończył
@@ -2369,6 +2452,7 @@ Endpoint pobiera finalne wyniki zakończonego meczu z football-data.org API i ca
 5. **Response** zwraca `ApiSuccessResponse<PredictionDTO>`
 
 **Diagram**:
+
 ```
 Client → Middleware (JWT) → Endpoint → Validation
                                           ↓
@@ -2400,23 +2484,24 @@ Client → Middleware (JWT) → Endpoint → Validation
 
 ### 9.7 Obsługa błędów
 
-| Kod | Error Code | Scenariusz | Akcja |
-|-----|-----------|------------|-------|
-| 401 | UNAUTHORIZED | Brak tokena/nieprawidłowy token | UnauthorizedError |
-| 404 | PREDICTION_NOT_FOUND | ID nie istnieje lub należy do innego usera | NotFoundError |
-| 409 | MATCH_NOT_FINISHED | match_date jest w przyszłości | ConflictError |
-| 503 | EXTERNAL_API_ERROR | football-data.org timeout/error | ExternalServiceError |
-| 503 | EXTERNAL_API_ERROR | Match nie ma final score w API | ExternalServiceError |
-| 500 | INTERNAL_ERROR | DB error | Log + generic error |
+| Kod | Error Code           | Scenariusz                                 | Akcja                |
+| --- | -------------------- | ------------------------------------------ | -------------------- |
+| 401 | UNAUTHORIZED         | Brak tokena/nieprawidłowy token            | UnauthorizedError    |
+| 404 | PREDICTION_NOT_FOUND | ID nie istnieje lub należy do innego usera | NotFoundError        |
+| 409 | MATCH_NOT_FINISHED   | match_date jest w przyszłości              | ConflictError        |
+| 503 | EXTERNAL_API_ERROR   | football-data.org timeout/error            | ExternalServiceError |
+| 503 | EXTERNAL_API_ERROR   | Match nie ma final score w API             | ExternalServiceError |
+| 500 | INTERNAL_ERROR       | DB error                                   | Log + generic error  |
 
 **Match finished check**:
+
 ```typescript
 function isMatchFinished(matchDate: string): boolean {
-  const matchTime = new Date(matchDate).getTime()
-  const now = Date.now()
+  const matchTime = new Date(matchDate).getTime();
+  const now = Date.now();
   // Match musi być co najmniej 3 godziny w przeszłości (safety buffer)
-  const threeHours = 3 * 60 * 60 * 1000
-  return now - matchTime > threeHours
+  const threeHours = 3 * 60 * 60 * 1000;
+  return now - matchTime > threeHours;
 }
 ```
 
@@ -2440,6 +2525,7 @@ function isMatchFinished(matchDate: string): boolean {
   - One-time wait dla fresh fetch
 
 **Cost analysis**:
+
 - Without cache: 1000 users × 50 predictions = 50,000 API calls
 - With cache: 50,000 unique matches = 50,000 API calls (but distributed over time)
 - With cache + users checking repeatedly: ~50,000 API calls total vs millions without cache
@@ -2447,71 +2533,69 @@ function isMatchFinished(matchDate: string): boolean {
 ### 9.9 Etapy wdrożenia
 
 1. **Rozszerz FootballDataService** (dodaj do `src/lib/services/football-data.service.ts`):
+
    ```typescript
    export interface MatchResult {
-     home_score: number
-     away_score: number
+     home_score: number;
+     away_score: number;
    }
 
    export async function fetchMatchResult(matchId: string): Promise<MatchResult> {
-     const apiKey = import.meta.env.FOOTBALL_DATA_API_KEY
+     const apiKey = import.meta.env.FOOTBALL_DATA_API_KEY;
      if (!apiKey) {
-       throw new Error('FOOTBALL_DATA_API_KEY not configured')
+       throw new Error("FOOTBALL_DATA_API_KEY not configured");
      }
 
      try {
-       const response = await fetch(
-         `https://api.football-data.org/v4/matches/${matchId}`,
-         {
-           headers: {
-             'X-Auth-Token': apiKey,
-           },
-         }
-       )
+       const response = await fetch(`https://api.football-data.org/v4/matches/${matchId}`, {
+         headers: {
+           "X-Auth-Token": apiKey,
+         },
+       });
 
        if (!response.ok) {
-         throw new ExternalServiceError('Unable to fetch match result at this time')
+         throw new ExternalServiceError("Unable to fetch match result at this time");
        }
 
-       const data = await response.json()
+       const data = await response.json();
 
        // Check if match is finished
-       if (data.status !== 'FINISHED') {
-         throw new ConflictError('MATCH_NOT_FINISHED', 'Match result not available yet')
+       if (data.status !== "FINISHED") {
+         throw new ConflictError("MATCH_NOT_FINISHED", "Match result not available yet");
        }
 
        // Extract scores
-       const homeScore = data.score?.fullTime?.home
-       const awayScore = data.score?.fullTime?.away
+       const homeScore = data.score?.fullTime?.home;
+       const awayScore = data.score?.fullTime?.away;
 
-       if (homeScore === undefined || homeScore === null ||
-           awayScore === undefined || awayScore === null) {
-         throw new ExternalServiceError('Match result not available')
+       if (homeScore === undefined || homeScore === null || awayScore === undefined || awayScore === null) {
+         throw new ExternalServiceError("Match result not available");
        }
 
        return {
          home_score: homeScore,
          away_score: awayScore,
-       }
+       };
      } catch (error) {
        if (error instanceof ExternalServiceError || error instanceof ConflictError) {
-         throw error
+         throw error;
        }
-       throw new ExternalServiceError('Unable to fetch match result at this time')
+       throw new ExternalServiceError("Unable to fetch match result at this time");
      }
    }
    ```
 
 2. **Rozszerz PredictionService** (dodaj do `src/lib/services/prediction.service.ts`):
+
    ```typescript
-   import { fetchMatchResult } from './football-data.service'
-   import { ConflictError } from '@/lib/errors/api-errors'
+   import { fetchMatchResult } from "./football-data.service";
+   import { ConflictError } from "@/lib/errors/api-errors";
 
    function isMatchFinished(matchDate: string): boolean {
-     const matchTime = new Date(matchDate).getTime()
-     const now = Date.now()
-     const threeHours = 3 * 60 * 60 * 1000
-     return now - matchTime > threeHours
+     const matchTime = new Date(matchDate).getTime();
+     const now = Date.now();
+     const threeHours = 3 * 60 * 60 * 1000;
+     return now - matchTime > threeHours;
    }
 
    export async function fetchAndCacheResult(
@@ -2520,20 +2604,20 @@ function isMatchFinished(matchDate: string): boolean {
      predictionId: number
    ): Promise<PredictionDTO> {
      // Fetch prediction
-     const prediction = await getPredictionById(supabase, userId, predictionId)
+     const prediction = await getPredictionById(supabase, userId, predictionId);
 
      if (!prediction) {
-       throw new NotFoundError('PREDICTION_NOT_FOUND', 'Prediction not found')
+       throw new NotFoundError("PREDICTION_NOT_FOUND", "Prediction not found");
      }
 
      // Check if already cached
      if (prediction.home_score !== null && prediction.away_score !== null) {
-       return prediction // Early return with cached data
+       return prediction; // Early return with cached data
      }
 
      // Check if match is finished
      if (!isMatchFinished(prediction.match_date)) {
-       throw new ConflictError('MATCH_NOT_FINISHED', 'Match result not available yet')
+       throw new ConflictError("MATCH_NOT_FINISHED", "Match result not available yet");
      }
 
      // Extract match_id from prediction (stored in external match data)
@@ -2548,45 +2632,46 @@ function isMatchFinished(matchDate: string): boolean {
      // UWAGA: To wymaga rozszerzenia schematu predictions o match_id field
      // Alternatywnie: można użyć search API football-data.org
 
-     throw new Error('Implementation requires match_id field in predictions table')
+     throw new Error("Implementation requires match_id field in predictions table");
    }
    ```
 
 3. **Stwórz endpoint** (`src/pages/api/predictions/[id]/fetch-result.ts`):
-   ```typescript
-   export const prerender = false
 
-   import type { APIRoute } from 'astro'
-   import { predictionIdParamSchema } from '@/lib/validation/schemas'
-   import { fetchAndCacheResult } from '@/lib/services/prediction.service'
-   import { UnauthorizedError } from '@/lib/errors/api-errors'
-   import { formatError } from '@/lib/errors/formatter'
+   ```typescript
+   export const prerender = false;
+
+   import type { APIRoute } from "astro";
+   import { predictionIdParamSchema } from "@/lib/validation/schemas";
+   import { fetchAndCacheResult } from "@/lib/services/prediction.service";
+   import { UnauthorizedError } from "@/lib/errors/api-errors";
+   import { formatError } from "@/lib/errors/formatter";
 
    export const POST: APIRoute = async ({ locals, params }) => {
      try {
        // Check authentication
        if (!locals.user) {
-         throw new UnauthorizedError()
+         throw new UnauthorizedError();
        }
 
        // Validate path param
-       const { id } = predictionIdParamSchema.parse(params)
+       const { id } = predictionIdParamSchema.parse(params);
 
        // Fetch and cache result
-       const prediction = await fetchAndCacheResult(locals.supabase, locals.user.id, id)
+       const prediction = await fetchAndCacheResult(locals.supabase, locals.user.id, id);
 
        return new Response(JSON.stringify({ data: prediction }), {
          status: 200,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      } catch (error) {
-       const { status, body } = formatError(error)
+       const { status, body } = formatError(error);
        return new Response(JSON.stringify(body), {
          status,
-         headers: { 'Content-Type': 'application/json' }
-       })
+         headers: { "Content-Type": "application/json" },
+       });
      }
-   }
+   };
    ```
 
 4. **WAŻNE - Schema extension required**:
@@ -2596,9 +2681,11 @@ function isMatchFinished(matchDate: string): boolean {
    **Rozwiązania**:
 
    **Opcja A** (Preferowana): Dodaj `match_id` field do predictions table:
+
    ```sql
    ALTER TABLE predictions ADD COLUMN match_id TEXT;
    ```
+
    - Update POST /api/predictions endpoint żeby zapisywało match_id
    - Update predictions.generate żeby zwracało match_id który można zapisać
 
@@ -2625,18 +2712,21 @@ function isMatchFinished(matchDate: string): boolean {
 ### 10.1 Security Checklist
 
 #### Authentication & Authorization
+
 - [ ] JWT validation w middleware dla wszystkich protected endpoints
 - [ ] RLS policies włączone na wszystkich tabelach
 - [ ] user_id zawsze z session, nigdy z request body
 - [ ] Proper error messages (nie ujawniaj internal details)
 
 #### Input Validation
+
 - [ ] Zod schemas dla wszystkich request inputs (query, body, params)
 - [ ] Sanityzacja user-generated content (notes)
 - [ ] Type guards dla critical data (prediction_probabilities)
 - [ ] Whitelist validation dla enums (league codes, sort fields)
 
 #### API Security
+
 - [ ] External API keys w environment variables
 - [ ] HTTPS only w produkcji
 - [ ] CORS configuration (whitelist domains)
@@ -2644,6 +2734,7 @@ function isMatchFinished(matchDate: string): boolean {
 - [ ] Request size limits (prevent DoS)
 
 #### Data Protection
+
 - [ ] XSS prevention (sanitize notes)
 - [ ] SQL injection prevention (parameterized queries via Supabase)
 - [ ] Prompt injection prevention (sanitize inputs do AI)
@@ -2651,6 +2742,7 @@ function isMatchFinished(matchDate: string): boolean {
 - [ ] Proper error masking
 
 #### Infrastructure
+
 - [ ] Environment variables properly secured
 - [ ] Database connection pooling
 - [ ] Secrets rotation strategy
@@ -2659,64 +2751,70 @@ function isMatchFinished(matchDate: string): boolean {
 ### 10.2 Rate Limiting Strategy
 
 **Implementation options**:
+
 1. **Simple in-memory** (MVP): Track requests per IP in Map
 2. **Redis** (Production): Distributed rate limiting
 
 **Limits**:
+
 ```typescript
 const RATE_LIMITS = {
-  '/api/matches': { requests: 60, window: 60 * 1000 }, // 60/min
-  '/api/predictions/generate': { requests: 10, window: 60 * 1000 }, // 10/min (expensive)
-  '/api/predictions': { requests: 100, window: 60 * 1000 }, // 100/min
+  "/api/matches": { requests: 60, window: 60 * 1000 }, // 60/min
+  "/api/predictions/generate": { requests: 10, window: 60 * 1000 }, // 10/min (expensive)
+  "/api/predictions": { requests: 100, window: 60 * 1000 }, // 100/min
   default: { requests: 100, window: 60 * 1000 },
-}
+};
 ```
 
 **Implementation** w middleware:
+
 ```typescript
-const rateLimiter = new Map<string, { count: number; resetAt: number }>()
+const rateLimiter = new Map<string, { count: number; resetAt: number }>();
 
 function checkRateLimit(ip: string, endpoint: string): void {
-  const limit = RATE_LIMITS[endpoint] || RATE_LIMITS.default
-  const key = `${ip}:${endpoint}`
-  const now = Date.now()
+  const limit = RATE_LIMITS[endpoint] || RATE_LIMITS.default;
+  const key = `${ip}:${endpoint}`;
+  const now = Date.now();
 
-  const entry = rateLimiter.get(key)
+  const entry = rateLimiter.get(key);
 
   if (!entry || now > entry.resetAt) {
-    rateLimiter.set(key, { count: 1, resetAt: now + limit.window })
-    return
+    rateLimiter.set(key, { count: 1, resetAt: now + limit.window });
+    return;
   }
 
   if (entry.count >= limit.requests) {
-    throw new ApiError(429, 'RATE_LIMIT_EXCEEDED', 'Too many requests')
+    throw new ApiError(429, "RATE_LIMIT_EXCEEDED", "Too many requests");
   }
 
-  entry.count++
+  entry.count++;
 }
 ```
 
 ### 10.3 Monitoring & Logging
 
 **Metrics to track**:
+
 ```typescript
 interface ApiMetrics {
-  endpoint: string
-  method: string
-  statusCode: number
-  duration: number
-  timestamp: Date
-  userId?: string
-  error?: string
+  endpoint: string;
+  method: string;
+  statusCode: number;
+  duration: number;
+  timestamp: Date;
+  userId?: string;
+  error?: string;
 }
 ```
 
 **Logging levels**:
+
 - **INFO**: All API requests (endpoint, method, user, duration)
 - **WARN**: External API failures, cache misses, rate limit hits
 - **ERROR**: All errors with stack traces, user context
 
 **Monitoring tools** (dla produkcji):
+
 - **Sentry**: Error tracking and alerting
 - **DataDog/New Relic**: Performance monitoring
 - **Custom dashboard**: Track:
@@ -2728,17 +2826,21 @@ interface ApiMetrics {
   - Active users
 
 **Health check endpoint** (`/api/health`):
+
 ```typescript
 export const GET: APIRoute = async () => {
-  return new Response(JSON.stringify({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0',
-  }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' }
-  })
-}
+  return new Response(
+    JSON.stringify({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      version: "1.0.0",
+    }),
+    {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+};
 ```
 
 ### 10.4 Database Migrations Required
@@ -2790,6 +2892,7 @@ ALTER TABLE predictions ADD COLUMN IF NOT EXISTS match_id TEXT;
 ### 10.5 Environment Variables
 
 **Required `.env` file**:
+
 ```env
 # Supabase
 PUBLIC_SUPABASE_URL=your_supabase_url
@@ -2808,6 +2911,7 @@ NODE_ENV=production
 ### 10.6 Testing Strategy
 
 **Unit tests** (dla services):
+
 - CacheService: set, get, expiration
 - PredictionService: wszystkie metody
 - FootballDataService: mock external API
@@ -2815,6 +2919,7 @@ NODE_ENV=production
 - Validation schemas: edge cases
 
 **Integration tests** (dla endpoints):
+
 - Każdy endpoint: success cases
 - Każdy endpoint: error cases (401, 400, 404, etc.)
 - Authentication flow
@@ -2822,6 +2927,7 @@ NODE_ENV=production
 - Rate limiting
 
 **E2E tests**:
+
 - Full user journey: register → generate prediction → save → list → delete
 - Cache behavior
 - Limit enforcement (50 predictions)
@@ -2835,28 +2941,18 @@ Ten dokument zawiera kompleksowy plan implementacji dla wszystkich 9 endpointów
 ### Priorytety implementacji
 
 **Faza 1 - Core Infrastructure** (Week 1):
+
 1. Setup: Error classes, validation schemas, middleware
 2. Services: CacheService, ProfileService
 3. Endpoint: GET /api/profile
 
-**Faza 2 - External Integrations** (Week 2):
-4. Services: FootballDataService, AIPredictionService
-5. Endpoints: GET /api/matches, POST /api/predictions/generate
+**Faza 2 - External Integrations** (Week 2): 4. Services: FootballDataService, AIPredictionService 5. Endpoints: GET /api/matches, POST /api/predictions/generate
 
-**Faza 3 - Predictions CRUD** (Week 3):
-6. Service: PredictionService (complete)
-7. Endpoints: POST /api/predictions, GET /api/predictions, GET /api/predictions/:id
+**Faza 3 - Predictions CRUD** (Week 3): 6. Service: PredictionService (complete) 7. Endpoints: POST /api/predictions, GET /api/predictions, GET /api/predictions/:id
 
-**Faza 4 - Advanced Features** (Week 4):
-8. Endpoints: PATCH /api/predictions/:id, DELETE /api/predictions/:id
-9. Database migration: Add match_id field
-10. Endpoint: POST /api/predictions/:id/fetch-result
+**Faza 4 - Advanced Features** (Week 4): 8. Endpoints: PATCH /api/predictions/:id, DELETE /api/predictions/:id 9. Database migration: Add match_id field 10. Endpoint: POST /api/predictions/:id/fetch-result
 
-**Faza 5 - Security & Polish** (Week 5):
-11. RLS policies migration
-12. Rate limiting
-13. Monitoring & logging
-14. Testing (unit, integration, e2e)
+**Faza 5 - Security & Polish** (Week 5): 11. RLS policies migration 12. Rate limiting 13. Monitoring & logging 14. Testing (unit, integration, e2e)
 
 ### Kluczowe decyzje techniczne
 

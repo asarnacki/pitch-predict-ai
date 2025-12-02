@@ -1,43 +1,43 @@
-import { useState, useCallback } from 'react'
-import { predictionsService } from '@/services/api/predictions.service'
-import type { MatchDTO, UserChoice } from '@/types'
-import { ApiError } from '@/services/api/client'
-import { getLeagueCodeFromName } from '@/lib/utils'
+import { useState, useCallback } from "react";
+import { predictionsService } from "@/services/api/predictions.service";
+import type { MatchDTO, UserChoice } from "@/types";
+import { ApiError } from "@/services/api/client";
+import { getLeagueCodeFromName } from "@/lib/utils";
 
 export interface PredictionState {
-  status: 'idle' | 'loading' | 'success' | 'error'
+  status: "idle" | "loading" | "success" | "error";
   data: {
-    match_id: string
-    home_team: string
-    away_team: string
-    league: string
-    match_date: string
+    match_id: string;
+    home_team: string;
+    away_team: string;
+    league: string;
+    match_date: string;
     prediction: {
-      home_win: number
-      draw: number
-      away_win: number
-    }
-    generated_at: string
-  } | null
-  saveStatus: 'idle' | 'saving' | 'saved' | 'error'
-  error: string | null
+      home_win: number;
+      draw: number;
+      away_win: number;
+    };
+    generated_at: string;
+  } | null;
+  saveStatus: "idle" | "saving" | "saved" | "error";
+  error: string | null;
 }
 
 export function usePredictions() {
-  const [predictions, setPredictions] = useState<Record<string, PredictionState>>({})
+  const [predictions, setPredictions] = useState<Record<string, PredictionState>>({});
 
   const generatePrediction = useCallback(async (match: MatchDTO) => {
-    const matchId = match.id
+    const matchId = match.id;
 
     setPredictions((prev) => ({
       ...prev,
       [matchId]: {
-        status: 'loading',
+        status: "loading",
         data: null,
-        saveStatus: 'idle',
+        saveStatus: "idle",
         error: null,
       },
-    }))
+    }));
 
     try {
       const result = await predictionsService.generatePrediction({
@@ -46,50 +46,47 @@ export function usePredictions() {
         away_team: match.away_team.name,
         league: getLeagueCodeFromName(match.league),
         match_date: match.match_date,
-      })
+      });
 
       setPredictions((prev) => ({
         ...prev,
         [matchId]: {
-          status: 'success',
+          status: "success",
           data: result,
-          saveStatus: 'idle',
+          saveStatus: "idle",
           error: null,
         },
-      }))
+      }));
     } catch (error) {
-      const errorMessage =
-        error instanceof ApiError
-          ? error.message
-          : 'Nie udało się wygenerować predykcji'
+      const errorMessage = error instanceof ApiError ? error.message : "Nie udało się wygenerować predykcji";
 
       setPredictions((prev) => ({
         ...prev,
         [matchId]: {
-          status: 'error',
+          status: "error",
           data: null,
-          saveStatus: 'idle',
+          saveStatus: "idle",
           error: errorMessage,
         },
-      }))
+      }));
     }
-  }, [])
+  }, []);
 
   const savePrediction = useCallback(
     async (matchId: string, note: string | null, userChoice: UserChoice | null) => {
-      const prediction = predictions[matchId]
+      const prediction = predictions[matchId];
 
       if (!prediction?.data) {
-        return
+        return;
       }
 
       setPredictions((prev) => ({
         ...prev,
         [matchId]: {
           ...prev[matchId],
-          saveStatus: 'saving',
+          saveStatus: "saving",
         },
-      }))
+      }));
 
       try {
         const result = await predictionsService.savePrediction({
@@ -101,41 +98,38 @@ export function usePredictions() {
           prediction_result: prediction.data.prediction,
           user_choice: userChoice,
           note,
-        })
+        });
 
         setPredictions((prev) => ({
           ...prev,
           [matchId]: {
             ...prev[matchId],
-            saveStatus: 'saved',
+            saveStatus: "saved",
           },
-        }))
+        }));
 
-        return result
+        return result;
       } catch (error) {
-        const errorMessage =
-          error instanceof ApiError
-            ? error.message
-            : 'Nie udało się zapisać predykcji'
+        const errorMessage = error instanceof ApiError ? error.message : "Nie udało się zapisać predykcji";
 
         setPredictions((prev) => ({
           ...prev,
           [matchId]: {
             ...prev[matchId],
-            saveStatus: 'error',
+            saveStatus: "error",
             error: errorMessage,
           },
-        }))
+        }));
 
-        throw error
+        throw error;
       }
     },
     [predictions]
-  )
+  );
 
   return {
     predictions,
     generatePrediction,
     savePrediction,
-  }
+  };
 }

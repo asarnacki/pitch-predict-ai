@@ -1,37 +1,37 @@
-import { useEffect, useMemo, useRef, useState } from "react"
-import type { ReactNode } from "react"
-import { createPortal } from "react-dom"
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode, KeyboardEvent as ReactKeyboardEvent } from "react";
+import { createPortal } from "react-dom";
 
-import { cn } from "@/lib/utils"
-import { HIGButton } from "./button"
+import { cn } from "@/lib/utils";
+import { HIGButton } from "./button";
 
 export interface HIGModalAction {
-  label: string
-  onPress: () => void
-  destructive?: boolean
-  loading?: boolean
+  label: string;
+  onPress: () => void;
+  destructive?: boolean;
+  loading?: boolean;
 }
 
 export interface HIGModalProps {
   actions?: {
-    primary?: HIGModalAction
-    secondary?: HIGModalAction
-    tertiary?: HIGModalAction
-  }
-  description?: ReactNode
-  dismissible?: boolean
-  onClose: () => void
-  open: boolean
-  title?: ReactNode
-  width?: "sm" | "md" | "lg"
-  children?: ReactNode
+    primary?: HIGModalAction;
+    secondary?: HIGModalAction;
+    tertiary?: HIGModalAction;
+  };
+  description?: ReactNode;
+  dismissible?: boolean;
+  onClose: () => void;
+  open: boolean;
+  title?: ReactNode;
+  width?: "sm" | "md" | "lg";
+  children?: ReactNode;
 }
 
 const WIDTH_STYLES: Record<NonNullable<HIGModalProps["width"]>, string> = {
   sm: "max-w-[22rem]",
   md: "max-w-[32rem]",
   lg: "max-w-[42rem]",
-}
+};
 
 export const HIGModal = ({
   actions,
@@ -43,80 +43,82 @@ export const HIGModal = ({
   title,
   width = "md",
 }: HIGModalProps) => {
-  const [mounted, setMounted] = useState(false)
-  const modalRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) {
-      return
+      return;
     }
 
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && dismissible) {
-        event.stopPropagation()
-        onClose()
+        event.stopPropagation();
+        onClose();
       }
-    }
+    };
 
-    document.addEventListener("keydown", handleKey)
+    document.addEventListener("keydown", handleKey);
 
     return () => {
-      document.removeEventListener("keydown", handleKey)
-    }
-  }, [dismissible, onClose, open])
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [dismissible, onClose, open]);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) {
-      return
+      return;
     }
 
-    const previouslyFocused = document.activeElement as HTMLElement | null
-    const modalNode = modalRef.current
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const modalNode = modalRef.current;
 
-    const focusableSelectors = [
-      "button",
-      "[href]",
-      "input",
-      "select",
-      "textarea",
-      "[tabindex]:not([tabindex='-1'])",
-    ]
+    const focusableSelectors = ["button", "[href]", "input", "select", "textarea", "[tabindex]:not([tabindex='-1'])"];
 
-    const focusable = modalNode?.querySelector<HTMLElement>(focusableSelectors.join(","))
+    const focusable = modalNode?.querySelector<HTMLElement>(focusableSelectors.join(","));
 
-    focusable?.focus({ preventScroll: true })
+    focusable?.focus({ preventScroll: true });
 
-    const originalOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.overflow = originalOverflow
-      previouslyFocused?.focus({ preventScroll: true })
-    }
-  }, [open])
+      document.body.style.overflow = originalOverflow;
+      previouslyFocused?.focus({ preventScroll: true });
+    };
+  }, [open]);
 
   const portalTarget = useMemo(() => {
     if (typeof document === "undefined") {
-      return null
+      return null;
     }
-    return document.body
-  }, [])
+    return document.body;
+  }, []);
 
   if (!mounted || !portalTarget || !open) {
-    return null
+    return null;
   }
 
   const handleOverlayClick = () => {
-    if (!dismissible) return
-    onClose()
-  }
+    if (!dismissible) return;
+    onClose();
+  };
+
+  const handleOverlayKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (!dismissible) return;
+
+    if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      onClose();
+    }
+  };
 
   const renderAction = (action?: HIGModalAction, priority: "primary" | "secondary" | "tertiary") => {
-    if (!action) return null
+    if (!action) return null;
 
     const variant = action.destructive
       ? "destructive"
@@ -124,7 +126,7 @@ export const HIGModal = ({
         ? "prominent"
         : priority === "secondary"
           ? "standard"
-          : "plain"
+          : "plain";
 
     return (
       <HIGButton
@@ -135,17 +137,18 @@ export const HIGModal = ({
       >
         {action.label}
       </HIGButton>
-    )
-  }
+    );
+  };
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center px-4"
-      role="presentation"
-    >
+    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" role="presentation">
       <div
         className="absolute inset-0 bg-[color:color-mix(in_oklch,var(--hig-color-surface)_70%,black)]/40 backdrop-blur-[length:var(--hig-token-blur)]"
         onClick={handleOverlayClick}
+        role="button"
+        tabIndex={dismissible ? 0 : -1}
+        onKeyDown={handleOverlayKeyDown}
+        aria-label="Zamknij okno modalne"
       />
       <div
         ref={modalRef}
@@ -156,7 +159,7 @@ export const HIGModal = ({
           "relative z-[1] flex w-full flex-col gap-4 rounded-[var(--hig-token-radius-lg)]",
           "bg-[color:var(--hig-color-surface)] px-6 py-5 text-[color:var(--hig-color-label-primary)]",
           "shadow-[var(--hig-token-shadow)] ring-1 ring-[color:var(--hig-color-separator)]",
-          WIDTH_STYLES[width],
+          WIDTH_STYLES[width]
         )}
       >
         {dismissible ? (
@@ -176,9 +179,7 @@ export const HIGModal = ({
         ) : null}
 
         {description ? (
-          <div className="text-[0.95rem] text-[color:var(--hig-color-label-secondary)]">
-            {description}
-          </div>
+          <div className="text-[0.95rem] text-[color:var(--hig-color-label-secondary)]">{description}</div>
         ) : null}
 
         {children ? <div className="text-[0.98rem] leading-[1.5]">{children}</div> : null}
@@ -192,8 +193,6 @@ export const HIGModal = ({
         ) : null}
       </div>
     </div>,
-    portalTarget,
-  )
-}
-
-
+    portalTarget
+  );
+};

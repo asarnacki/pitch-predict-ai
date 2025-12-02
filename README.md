@@ -11,6 +11,7 @@ The application focuses on delivering one core value: objective, data-based matc
 ## Tech Stack
 
 ### Frontend
+
 - **Astro 5** - Fast, efficient static site generation with minimal JavaScript
 - **React 19** - Interactive components where needed
 - **TypeScript 5** - Static typing for better IDE support and code quality
@@ -18,6 +19,7 @@ The application focuses on delivering one core value: objective, data-based matc
 - **Shadcn/ui** - Accessible React component library
 
 ### Backend
+
 - **Supabase** - Comprehensive backend solution providing:
   - PostgreSQL database
   - Multi-language SDKs
@@ -25,21 +27,25 @@ The application focuses on delivering one core value: objective, data-based matc
   - Row Level Security (RLS)
 
 ### AI Integration
+
 - **OpenRouter.ai** - Access to multiple AI models (OpenAI, Anthropic, Google, etc.)
   - Cost-effective model selection
   - API key financial limits
   - Wide range of available models
 
 ### Data Source
+
 - **football-data.org** - Match data and statistics API
 
 ### DevOps & Hosting
+
 - **GitHub Actions** - CI/CD pipelines
 - **DigitalOcean** - Application hosting via Docker containers
 
 ## Getting Started Locally
 
 ### Prerequisites
+
 - Node.js 22.14.0 (use `.nvmrc` file)
 - npm or yarn package manager
 - Supabase account and project
@@ -49,17 +55,20 @@ The application focuses on delivering one core value: objective, data-based matc
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone git@github.com:asarnacki/pitch-predict-ai.git
 cd pitch-predict-ai
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 # Create .env file with required variables
 SUPABASE_URL=your_supabase_url
@@ -69,6 +78,7 @@ FOOTBALL_DATA_API_KEY=your_football_data_api_key
 ```
 
 4. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -88,6 +98,7 @@ npm run dev
 ## Project Scope
 
 ### MVP Features
+
 - **User Authentication**: Registration, login, logout, password reset
 - **Match Predictions**: AI-powered predictions for Premier League, La Liga, and Bundesliga matches
 - **Watched Matches**: Save, edit, and manage up to 50 predictions per user
@@ -95,6 +106,7 @@ npm run dev
 - **Caching**: Optimized API calls to reduce costs and improve performance
 
 ### Excluded from MVP
+
 - Payment systems and subscriptions
 - Advanced statistical analyses
 - Live match predictions
@@ -138,6 +150,7 @@ Development progress is tracked in `.summaries/` folder:
 - **`session-summary-template.md`** - Template for new summaries
 
 **Why Session Summaries?**
+
 - 🔄 Context continuity between coding sessions
 - 📊 Progress tracking (currently **14/14 endpoints** + Full-Stack Auth + Interactive UI + UX Polish)
 - 🐛 Problems encountered and solutions
@@ -151,12 +164,14 @@ Development progress is tracked in `.summaries/` folder:
 ### Implementation Progress
 
 #### ✅ Backend Complete
+
 - **Core API**: 9/9 endpoints (profile, matches, predictions CRUD, AI generation)
 - **Authentication**: 5/5 endpoints (login, register, logout, password reset/update)
 - **Middleware**: Cookie-based session management + route protection
 - **Database**: PostgreSQL with user_choice field for prediction tracking
 
 #### ✅ Frontend Complete
+
 - **Prediction Panel**: Interactive AI predictions with user choice selection
 - **Authentication UI**: Login, register, password reset pages
 - **Saved Predictions**: View, filter, and manage saved predictions (/predictions page)
@@ -165,6 +180,7 @@ Development progress is tracked in `.summaries/` folder:
 - **Responsive**: Mobile-first design (360px - 1440px+)
 
 #### 🔜 MVP Polish
+
 - Loading states for async operations
 - Custom delete confirmation dialogs
 - Polish translations for user_choice labels
@@ -173,6 +189,7 @@ Development progress is tracked in `.summaries/` folder:
 - Verify match result feature (US-010)
 
 ### Key Metrics
+
 - **Authentication Stability**: Target 100% successful login/registration operations
 - **Prediction Availability**: >95% successful prediction generation
 - **API Response Time**: Average prediction generation under 3 seconds

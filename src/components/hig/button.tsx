@@ -1,24 +1,24 @@
-import { forwardRef } from "react"
-import type { ButtonHTMLAttributes, ReactNode } from "react"
+import { forwardRef } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-type ButtonVariant = "prominent" | "standard" | "plain" | "destructive"
-type ButtonSize = "sm" | "md" | "lg"
+type ButtonVariant = "prominent" | "standard" | "plain" | "destructive";
+type ButtonSize = "sm" | "md" | "lg";
 
 export interface HIGButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  icon?: ReactNode
-  iconPosition?: "leading" | "trailing"
-  loading?: boolean
-  size?: ButtonSize
-  variant?: ButtonVariant
+  icon?: ReactNode;
+  iconPosition?: "leading" | "trailing";
+  loading?: boolean;
+  size?: ButtonSize;
+  variant?: ButtonVariant;
 }
 
 const SIZE_STYLES: Record<ButtonSize, string> = {
   sm: "h-9 px-3 text-[0.9rem]",
   md: "h-11 px-4 text-[1rem]",
   lg: "h-12 px-5 text-[1.05rem]",
-}
+};
 
 const VARIANT_STYLES: Record<ButtonVariant, string> = {
   prominent:
@@ -29,7 +29,7 @@ const VARIANT_STYLES: Record<ButtonVariant, string> = {
     "bg-transparent text-[color:var(--hig-color-tint)] hover:bg-[color:color-mix(in_oklch,var(--hig-color-tint)_8%,transparent)] active:bg-[color:color-mix(in_oklch,var(--hig-color-tint)_12%,transparent)]",
   destructive:
     "bg-[color:var(--hig-color-danger)] text-[color:var(--hig-color-tint-foreground)] shadow-[var(--hig-token-shadow)] hover:bg-[color:color-mix(in_oklch,var(--hig-color-danger)_92%,white)] active:bg-[color:color-mix(in_oklch,var(--hig-color-danger)_88%,black)] disabled:bg-[color:color-mix(in_oklch,var(--hig-color-danger)_60%,white)]",
-}
+};
 
 export const HIGButton = forwardRef<HTMLButtonElement, HIGButtonProps>(
   (
@@ -44,9 +44,9 @@ export const HIGButton = forwardRef<HTMLButtonElement, HIGButtonProps>(
       disabled,
       ...props
     },
-    ref,
+    ref
   ) => {
-    const isDisabled = disabled || loading
+    const isDisabled = disabled || loading;
 
     return (
       <button
@@ -59,7 +59,7 @@ export const HIGButton = forwardRef<HTMLButtonElement, HIGButtonProps>(
           "active:translate-y-[1px]",
           SIZE_STYLES[size],
           VARIANT_STYLES[variant],
-          className,
+          className
         )}
         aria-busy={loading}
         disabled={isDisabled}
@@ -67,10 +67,7 @@ export const HIGButton = forwardRef<HTMLButtonElement, HIGButtonProps>(
       >
         {icon && iconPosition === "leading" ? (
           <span
-            className={cn(
-              "flex h-5 w-5 items-center justify-center text-[color:inherit]",
-              loading && "opacity-0",
-            )}
+            className={cn("flex h-5 w-5 items-center justify-center text-[color:inherit]", loading && "opacity-0")}
             aria-hidden
           >
             {icon}
@@ -92,10 +89,8 @@ export const HIGButton = forwardRef<HTMLButtonElement, HIGButtonProps>(
           </span>
         ) : null}
       </button>
-    )
-  },
-)
+    );
+  }
+);
 
-HIGButton.displayName = "HIGButton"
-
-
+HIGButton.displayName = "HIGButton";

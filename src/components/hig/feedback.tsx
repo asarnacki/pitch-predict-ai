@@ -1,8 +1,8 @@
-import type { HTMLAttributes, ReactNode } from "react"
+import type { HTMLAttributes, ReactNode } from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-type FeedbackTone = "informative" | "success" | "warning" | "destructive"
+type FeedbackTone = "informative" | "success" | "warning" | "destructive";
 
 const TONE_TO_COLOR: Record<FeedbackTone, { base: string; text: string }> = {
   informative: {
@@ -21,21 +21,21 @@ const TONE_TO_COLOR: Record<FeedbackTone, { base: string; text: string }> = {
     base: "bg-[color:color-mix(in_oklch,var(--hig-color-danger)_22%,transparent)]",
     text: "text-[color:var(--hig-color-label-primary)]",
   },
-}
+};
 
 const TONE_PILL: Record<FeedbackTone, string> = {
   informative: "bg-[color:var(--hig-color-tint)]",
   success: "bg-[color:var(--hig-color-success)]",
   warning: "bg-[color:var(--hig-color-neutral)]",
   destructive: "bg-[color:var(--hig-color-danger)]",
-}
+};
 
 export interface HIGFeedbackBannerProps extends HTMLAttributes<HTMLDivElement> {
-  actions?: ReactNode
-  description?: ReactNode
-  icon?: ReactNode
-  tone?: FeedbackTone
-  title?: ReactNode
+  actions?: ReactNode;
+  description?: ReactNode;
+  icon?: ReactNode;
+  tone?: FeedbackTone;
+  title?: ReactNode;
 }
 
 export const HIGFeedbackBanner = ({
@@ -53,7 +53,7 @@ export const HIGFeedbackBanner = ({
         "flex w-full flex-col gap-3 rounded-[var(--hig-token-radius)] px-4 py-3",
         "ring-1 ring-[color:var(--hig-color-separator)] shadow-[var(--hig-token-shadow)]",
         TONE_TO_COLOR[tone].base,
-        className,
+        className
       )}
       {...props}
     >
@@ -63,7 +63,7 @@ export const HIGFeedbackBanner = ({
             className={cn(
               "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
               TONE_PILL[tone],
-              "text-white/95",
+              "text-white/95"
             )}
           >
             {icon}
@@ -78,14 +78,14 @@ export const HIGFeedbackBanner = ({
         {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
       </div>
     </section>
-  )
-}
+  );
+};
 
-HIGFeedbackBanner.displayName = "HIGFeedbackBanner"
+HIGFeedbackBanner.displayName = "HIGFeedbackBanner";
 
 export interface HIGBadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  tone?: FeedbackTone
-  icon?: ReactNode
+  tone?: FeedbackTone;
+  icon?: ReactNode;
 }
 
 export const HIGBadge = ({ className, children, icon, tone = "informative", ...props }: HIGBadgeProps) => {
@@ -95,16 +95,14 @@ export const HIGBadge = ({ className, children, icon, tone = "informative", ...p
         "inline-flex items-center gap-1 rounded-full px-3 py-1 text-[0.8rem] font-medium",
         "tracking-[0.06em] uppercase text-[color:var(--hig-color-tint-foreground)]",
         TONE_PILL[tone],
-        className,
+        className
       )}
       {...props}
     >
       {icon ? <span className="grid h-4 w-4 place-items-center">{icon}</span> : null}
       {children}
     </span>
-  )
-}
+  );
+};
 
-HIGBadge.displayName = "HIGBadge"
-
-
+HIGBadge.displayName = "HIGBadge";
