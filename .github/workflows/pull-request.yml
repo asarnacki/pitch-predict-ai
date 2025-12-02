@@ -74,10 +74,11 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            // Since this job only runs on success(), all previous jobs passed
             const jobs = [
-              { name: 'Lint', result: needs.lint.result },
-              { name: 'Unit tests', result: needs['unit-test'].result },
-              { name: 'Playwright e2e tests', result: needs['e2e-test'].result },
+              { name: 'Lint', result: 'success' },
+              { name: 'Unit tests', result: 'success' },
+              { name: 'Playwright e2e tests', result: 'success' },
             ];
 
             const getEmoji = (status) => {
@@ -94,5 +95,7 @@ jobs:
 
             await github.rest.issues.createComment({
               issue_number: context.payload.pull_request?.number ?? context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               body,
             });
