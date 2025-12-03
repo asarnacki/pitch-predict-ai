@@ -1,6 +1,6 @@
 // @ts-check
 import { defineConfig } from "astro/config";
-
+import process from "node:process";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
@@ -10,6 +10,9 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
   output: "server",
   integrations: [react(), sitemap()],
+  server: {
+    port: process.env.PORT ? parseInt(process.env.PORT) : 4321,
+  },
   vite: {
     plugins: [tailwindcss()],
   },
