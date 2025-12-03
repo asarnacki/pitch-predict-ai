@@ -40,7 +40,7 @@ The application focuses on delivering one core value: objective, data-based matc
 ### DevOps & Hosting
 
 - **GitHub Actions** - CI/CD pipelines
-- **DigitalOcean** - Application hosting via Docker containers
+- **Cloudflare Pages** - Application hosting via Edge Functions (migrated from DigitalOcean)
 
 ## Getting Started Locally
 
