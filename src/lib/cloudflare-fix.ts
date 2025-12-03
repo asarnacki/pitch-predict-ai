@@ -9,7 +9,6 @@ export default function cloudflareFix(): AstroIntegration {
           vite: {
             resolve: {
               alias: {
-                // Fix for React 19 on Cloudflare Workers
                 "react-dom/server": "react-dom/server.edge",
               },
             },

@@ -6,7 +6,6 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import cloudflare from "@astrojs/cloudflare";
 
-// Fix for React 19 on Cloudflare
 const cloudflareReactFix = {
   name: "cloudflare-react-fix",
   hooks: {
