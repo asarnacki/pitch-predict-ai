@@ -6,10 +6,28 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import cloudflare from "@astrojs/cloudflare";
 
+// Fix for React 19 on Cloudflare
+const cloudflareReactFix = {
+  name: "cloudflare-react-fix",
+  hooks: {
+    "astro:config:setup": ({ updateConfig }) => {
+      updateConfig({
+        vite: {
+          resolve: {
+            alias: {
+              "react-dom/server": "react-dom/server.edge",
+            },
+          },
+        },
+      });
+    },
+  },
+};
+
 // https://astro.build/config
 export default defineConfig({
   output: "server",
-  integrations: [react(), sitemap()],
+  integrations: [react(), sitemap(), cloudflareReactFix],
   server: {
     port: process.env.PORT ? parseInt(process.env.PORT) : 4321,
   },
