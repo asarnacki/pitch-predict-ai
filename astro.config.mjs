@@ -33,10 +33,6 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  // Use memory driver to avoid KV binding requirement (we use Supabase cookies for auth)
-  session: {
-    driver: "memory",
-  },
   adapter: cloudflare({
     platformProxy: {
       enabled: true,
