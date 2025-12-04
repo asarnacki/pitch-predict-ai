@@ -37,5 +37,7 @@ export default defineConfig({
     platformProxy: {
       enabled: true,
     },
+    // Disable automatic KV sessions (requires KV binding setup)
+    sessionKVBindingName: undefined,
   }),
 });

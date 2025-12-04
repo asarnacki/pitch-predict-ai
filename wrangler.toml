@@ -1,13 +1,7 @@
 name = "pitch-predict-ai"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-12-03"
+compatibility_flags = ["nodejs_compat"]
 
 [vars]
 # Environment variables should be set in the Cloudflare Pages dashboard
-# but you can define defaults here if needed
-
-[env.preview]
-# Preview environment settings
-
-[env.production]
-# Production environment settings
