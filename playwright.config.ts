@@ -6,16 +6,35 @@ import dotenv from "dotenv";
  * Load environment variables from .env.test (local) or process.env (CI)
  * In local development: loads from .env.test
  * In GitHub Actions: uses environment secrets passed to the job
+ * Merges both sources with process.env as fallback
  */
-const testEnv = dotenv.config({ path: path.resolve(process.cwd(), ".env.test") }).parsed || {
-  SUPABASE_URL: process.env.SUPABASE_URL,
-  SUPABASE_KEY: process.env.SUPABASE_KEY,
-  OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
-  FOOTBALL_DATA_API_KEY: process.env.FOOTBALL_DATA_API_KEY,
-  E2E_USERNAME_ID: process.env.E2E_USERNAME_ID,
-  E2E_USERNAME: process.env.E2E_USERNAME,
-  E2E_PASSWORD: process.env.E2E_PASSWORD,
+const loadedFromFile = dotenv.config({ path: path.resolve(process.cwd(), ".env.test") }).parsed || {};
+const testEnv = {
+  SUPABASE_URL: loadedFromFile.SUPABASE_URL || process.env.SUPABASE_URL,
+  SUPABASE_KEY: loadedFromFile.SUPABASE_KEY || process.env.SUPABASE_KEY,
+  OPENROUTER_API_KEY: loadedFromFile.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY,
+  FOOTBALL_DATA_API_KEY: loadedFromFile.FOOTBALL_DATA_API_KEY || process.env.FOOTBALL_DATA_API_KEY,
+  E2E_USERNAME_ID: loadedFromFile.E2E_USERNAME_ID || process.env.E2E_USERNAME_ID,
+  E2E_USERNAME: loadedFromFile.E2E_USERNAME || process.env.E2E_USERNAME,
+  E2E_PASSWORD: loadedFromFile.E2E_PASSWORD || process.env.E2E_PASSWORD,
 };
+
+// Debug logging for CI
+if (process.env.CI) {
+  console.log("DEBUG Playwright testEnv:", {
+    fromFile: Object.keys(loadedFromFile),
+    fromProcessEnv: {
+      SUPABASE_URL: !!process.env.SUPABASE_URL,
+      SUPABASE_KEY: !!process.env.SUPABASE_KEY,
+      OPENROUTER_API_KEY: !!process.env.OPENROUTER_API_KEY,
+      FOOTBALL_DATA_API_KEY: !!process.env.FOOTBALL_DATA_API_KEY,
+    },
+    final: {
+      SUPABASE_URL: !!testEnv.SUPABASE_URL,
+      SUPABASE_KEY: !!testEnv.SUPABASE_KEY,
+    },
+  });
+}
 
 /**
  * Playwright E2E Test Configuration
