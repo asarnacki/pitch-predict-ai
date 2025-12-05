@@ -10,7 +10,6 @@ pages_build_output_dir = "dist"
 # id = "your-kv-namespace-id"
 # preview_id = "your-preview-kv-namespace-id"
 
-# Environment variables (for local development)
-# [vars]
-# SUPABASE_URL = "your-url"
-# SUPABASE_ANON_KEY = "your-key"
+# Environment variables (non-secret, public values)
+[vars]
+SUPABASE_URL = "https://asxbzbjneetjnvioithi.supabase.co"
