@@ -39,7 +39,13 @@ export const POST: APIRoute = async ({ locals, params }) => {
 
     const { id } = predictionIdParamSchema.parse(params);
 
-    const prediction = await fetchAndCacheResult(locals.supabase, locals.user.id, id);
+    // Get API key from Cloudflare Workers runtime or fallback to import.meta.env
+    const apiKey = locals.runtime?.env?.FOOTBALL_DATA_API_KEY || import.meta.env.FOOTBALL_DATA_API_KEY;
+    if (!apiKey) {
+      throw new Error("FOOTBALL_DATA_API_KEY not configured");
+    }
+
+    const prediction = await fetchAndCacheResult(locals.supabase, locals.user.id, id, apiKey);
 
     return new Response(JSON.stringify({ data: prediction }), {
       status: 200,

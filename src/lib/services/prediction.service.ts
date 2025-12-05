@@ -306,7 +306,8 @@ function isMatchFinished(matchDate: string): boolean {
 export async function fetchAndCacheResult(
   supabase: TypedSupabaseClient,
   userId: string,
-  predictionId: number
+  predictionId: number,
+  apiKey: string
 ): Promise<PredictionDTO> {
   const prediction = await getPredictionById(supabase, userId, predictionId);
 
@@ -327,7 +328,7 @@ export async function fetchAndCacheResult(
   }
 
   // Fetch result from external API
-  const result = await fetchMatchResult(prediction.match_id);
+  const result = await fetchMatchResult(prediction.match_id, apiKey);
 
   // Update prediction with scores
   const { data, error } = await supabase

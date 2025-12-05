@@ -12,8 +12,11 @@ const leagueCodeToName: Record<string, string> = {
   BL1: "Bundesliga",
 };
 
-export async function fetchUpcomingMatches(leagueCode: string, limit: number): Promise<MatchDTO[]> {
-  const apiKey = import.meta.env.FOOTBALL_DATA_API_KEY;
+export async function fetchUpcomingMatches(
+  leagueCode: string,
+  limit: number,
+  apiKey: string
+): Promise<MatchDTO[]> {
   if (!apiKey) {
     throw new Error("FOOTBALL_DATA_API_KEY not configured");
   }
@@ -72,8 +75,7 @@ export async function fetchUpcomingMatches(leagueCode: string, limit: number): P
   }
 }
 
-export async function fetchMatchResult(matchId: string): Promise<MatchResult> {
-  const apiKey = import.meta.env.FOOTBALL_DATA_API_KEY;
+export async function fetchMatchResult(matchId: string, apiKey: string): Promise<MatchResult> {
   if (!apiKey) {
     throw new Error("FOOTBALL_DATA_API_KEY not configured");
   }

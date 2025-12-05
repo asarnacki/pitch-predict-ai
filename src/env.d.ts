@@ -14,6 +14,7 @@ declare global {
           SUPABASE_URL: string;
           SUPABASE_KEY: string;
           OPENROUTER_API_KEY?: string;
+          FOOTBALL_DATA_API_KEY?: string;
         };
       };
     }
@@ -24,6 +25,7 @@ interface ImportMetaEnv {
   readonly SUPABASE_URL: string;
   readonly SUPABASE_KEY: string;
   readonly OPENROUTER_API_KEY: string;
+  readonly FOOTBALL_DATA_API_KEY: string;
 }
 
 interface ImportMeta {
