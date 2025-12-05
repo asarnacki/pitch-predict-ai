@@ -12,11 +12,7 @@ const leagueCodeToName: Record<string, string> = {
   BL1: "Bundesliga",
 };
 
-export async function fetchUpcomingMatches(
-  leagueCode: string,
-  limit: number,
-  apiKey: string
-): Promise<MatchDTO[]> {
+export async function fetchUpcomingMatches(leagueCode: string, limit: number, apiKey: string): Promise<MatchDTO[]> {
   if (!apiKey) {
     throw new Error("FOOTBALL_DATA_API_KEY not configured");
   }
