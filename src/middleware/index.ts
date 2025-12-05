@@ -1,5 +1,4 @@
 import { defineMiddleware } from "astro:middleware";
-import process from "node:process";
 
 import { createServerClient } from "../db/supabase.server.ts";
 
@@ -15,20 +14,11 @@ import { createServerClient } from "../db/supabase.server.ts";
  * - All other routes require authentication
  */
 export const onRequest = defineMiddleware(async (context, next) => {
-  // DEBUG: Log what's available
-  console.log("DEBUG middleware env sources:", {
-    runtime: !!context.locals.runtime?.env,
-    importMetaURL: !!import.meta.env.SUPABASE_URL,
-    importMetaKEY: !!import.meta.env.SUPABASE_KEY,
-    processURL: !!process.env.SUPABASE_URL,
-    processKEY: !!process.env.SUPABASE_KEY,
-    processEnvKeys: Object.keys(process.env).filter((k) => k.includes("SUPABASE")),
-  });
-
-  // Get env from Cloudflare Workers runtime, import.meta.env, or process.env (for E2E tests)
+  // Get env from Cloudflare Workers runtime or import.meta.env
+  // (import.meta.env loads from .env, .env.local, or .env.test depending on --mode)
   const env = context.locals.runtime?.env || {
-    SUPABASE_URL: import.meta.env.SUPABASE_URL || process.env.SUPABASE_URL,
-    SUPABASE_KEY: import.meta.env.SUPABASE_KEY || process.env.SUPABASE_KEY,
+    SUPABASE_URL: import.meta.env.SUPABASE_URL,
+    SUPABASE_KEY: import.meta.env.SUPABASE_KEY,
   };
 
   const supabase = createServerClient(context.cookies, env);

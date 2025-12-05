@@ -3,10 +3,19 @@ import path from "path";
 import dotenv from "dotenv";
 
 /**
- * Load environment variables from .env.test
- * These will be used both for tests and passed to the dev server
+ * Load environment variables from .env.test (local) or process.env (CI)
+ * In local development: loads from .env.test
+ * In GitHub Actions: uses environment secrets passed to the job
  */
-const testEnv = dotenv.config({ path: path.resolve(process.cwd(), ".env.test") }).parsed || {};
+const testEnv = dotenv.config({ path: path.resolve(process.cwd(), ".env.test") }).parsed || {
+  SUPABASE_URL: process.env.SUPABASE_URL,
+  SUPABASE_KEY: process.env.SUPABASE_KEY,
+  OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+  FOOTBALL_DATA_API_KEY: process.env.FOOTBALL_DATA_API_KEY,
+  E2E_USERNAME_ID: process.env.E2E_USERNAME_ID,
+  E2E_USERNAME: process.env.E2E_USERNAME,
+  E2E_PASSWORD: process.env.E2E_PASSWORD,
+};
 
 /**
  * Playwright E2E Test Configuration
@@ -66,10 +75,10 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: "PORT=3001 npm run dev",
+    command: "PORT=3001 astro dev --mode test",
     url: "http://localhost:3001",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
-    env: testEnv, // Pass .env.test variables to the server
+    env: testEnv, // Pass .env.test variables to the server (backup for process.env)
   },
 });

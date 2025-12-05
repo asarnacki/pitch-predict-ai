@@ -1,7 +1,6 @@
 export const prerender = false;
 
 import type { APIRoute } from "astro";
-import process from "node:process";
 import { generatePredictionBodySchema } from "@/lib/validation/schemas";
 import { generatePrediction } from "@/lib/services/ai-prediction.service";
 import { cache } from "@/lib/services/cache.service";
@@ -23,9 +22,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    // Get API key from Cloudflare Workers runtime, import.meta.env, or process.env (for E2E tests)
-    const apiKey =
-      locals.runtime?.env?.OPENROUTER_API_KEY || import.meta.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
+    // Get API key from Cloudflare Workers runtime or import.meta.env
+    const apiKey = locals.runtime?.env?.OPENROUTER_API_KEY || import.meta.env.OPENROUTER_API_KEY;
     if (!apiKey) {
       throw new Error("OPENROUTER_API_KEY not configured");
     }

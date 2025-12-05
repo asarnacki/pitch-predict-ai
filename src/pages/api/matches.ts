@@ -1,7 +1,6 @@
 export const prerender = false;
 
 import type { APIRoute } from "astro";
-import process from "node:process";
 import { getMatchesQuerySchema } from "@/lib/validation/schemas";
 import { fetchUpcomingMatches } from "@/lib/services/football-data.service";
 import { cache } from "@/lib/services/cache.service";
@@ -28,11 +27,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    // Get API key from Cloudflare Workers runtime, import.meta.env, or process.env (for E2E tests)
-    const apiKey =
-      locals.runtime?.env?.FOOTBALL_DATA_API_KEY ||
-      import.meta.env.FOOTBALL_DATA_API_KEY ||
-      process.env.FOOTBALL_DATA_API_KEY;
+    // Get API key from Cloudflare Workers runtime or import.meta.env
+    const apiKey = locals.runtime?.env?.FOOTBALL_DATA_API_KEY || import.meta.env.FOOTBALL_DATA_API_KEY;
     if (!apiKey) {
       throw new Error("FOOTBALL_DATA_API_KEY not configured");
     }
