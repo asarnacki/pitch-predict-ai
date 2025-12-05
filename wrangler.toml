@@ -1,7 +1,16 @@
 name = "pitch-predict-ai"
-main = "dist/_worker.js"
-compatibility_date = "2024-12-03"
-compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2024-11-01"
 
-[vars]
-# Environment variables should be set in the Cloudflare Pages dashboard
+# Pages configuration
+pages_build_output_dir = "dist"
+
+# KV Namespaces (uncomment if you need KV for sessions)
+# [[kv_namespaces]]
+# binding = "SESSION"
+# id = "your-kv-namespace-id"
+# preview_id = "your-preview-kv-namespace-id"
+
+# Environment variables (for local development)
+# [vars]
+# SUPABASE_URL = "your-url"
+# SUPABASE_ANON_KEY = "your-key"
