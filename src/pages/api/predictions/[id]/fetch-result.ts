@@ -39,8 +39,8 @@ export const POST: APIRoute = async ({ locals, params }) => {
 
     const { id } = predictionIdParamSchema.parse(params);
 
-    // Get API key from Cloudflare Workers runtime or fallback to import.meta.env
-    const apiKey = locals.runtime?.env?.FOOTBALL_DATA_API_KEY || import.meta.env.FOOTBALL_DATA_API_KEY;
+    // Get API key from Cloudflare Workers runtime, import.meta.env, or process.env (for E2E tests)
+    const apiKey = locals.runtime?.env?.FOOTBALL_DATA_API_KEY || import.meta.env.FOOTBALL_DATA_API_KEY || process.env.FOOTBALL_DATA_API_KEY;
     if (!apiKey) {
       throw new Error("FOOTBALL_DATA_API_KEY not configured");
     }
