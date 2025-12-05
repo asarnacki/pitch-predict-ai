@@ -23,7 +23,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     // Get API key from Cloudflare Workers runtime, import.meta.env, or process.env (for E2E tests)
-    const apiKey = locals.runtime?.env?.OPENROUTER_API_KEY || import.meta.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
+    const apiKey =
+      locals.runtime?.env?.OPENROUTER_API_KEY || import.meta.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
       throw new Error("OPENROUTER_API_KEY not configured");
     }
