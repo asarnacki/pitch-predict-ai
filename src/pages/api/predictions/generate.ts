@@ -1,6 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from "astro";
+import process from "node:process";
 import { generatePredictionBodySchema } from "@/lib/validation/schemas";
 import { generatePrediction } from "@/lib/services/ai-prediction.service";
 import { cache } from "@/lib/services/cache.service";

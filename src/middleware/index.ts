@@ -1,4 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
+import process from "node:process";
 
 import { createServerClient } from "../db/supabase.server.ts";
 

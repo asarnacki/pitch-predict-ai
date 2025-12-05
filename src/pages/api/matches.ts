@@ -1,6 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from "astro";
+import process from "node:process";
 import { getMatchesQuerySchema } from "@/lib/validation/schemas";
 import { fetchUpcomingMatches } from "@/lib/services/football-data.service";
 import { cache } from "@/lib/services/cache.service";

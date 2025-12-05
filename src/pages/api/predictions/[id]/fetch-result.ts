@@ -26,6 +26,7 @@
 export const prerender = false;
 
 import type { APIRoute } from "astro";
+import process from "node:process";
 import { predictionIdParamSchema } from "@/lib/validation/schemas";
 import { fetchAndCacheResult } from "@/lib/services/prediction.service";
 import { UnauthorizedError } from "@/lib/errors/api-errors";
