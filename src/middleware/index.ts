@@ -14,7 +14,8 @@ import { createServerClient } from "../db/supabase.server.ts";
  * - All other routes require authentication
  */
 export const onRequest = defineMiddleware(async (context, next) => {
-  // Get env from Cloudflare Workers runtime or fallback to import.meta.env
+  // Get env from Cloudflare Workers runtime or import.meta.env
+  // (import.meta.env loads from .env, .env.local, or .env.test depending on --mode)
   const env = context.locals.runtime?.env || {
     SUPABASE_URL: import.meta.env.SUPABASE_URL,
     SUPABASE_KEY: import.meta.env.SUPABASE_KEY,

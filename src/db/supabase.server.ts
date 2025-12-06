@@ -13,10 +13,7 @@ import type { Database } from "./database.types.ts";
  * @param env - Runtime environment variables (from Cloudflare Workers or import.meta.env)
  * @returns Configured Supabase client instance
  */
-export function createServerClient(
-  cookies: AstroCookies,
-  env: { SUPABASE_URL: string; SUPABASE_KEY: string }
-) {
+export function createServerClient(cookies: AstroCookies, env: { SUPABASE_URL: string; SUPABASE_KEY: string }) {
   const supabaseUrl = env.SUPABASE_URL;
   const supabaseAnonKey = env.SUPABASE_KEY;
 

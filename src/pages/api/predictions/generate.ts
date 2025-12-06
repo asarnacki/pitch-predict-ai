@@ -7,7 +7,7 @@ import { cache } from "@/lib/services/cache.service";
 import { formatError } from "@/lib/errors/formatter";
 import { BUSINESS_RULES, type GeneratePredictionResponseDTO } from "@/types";
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const body = await request.json();
     const matchData = generatePredictionBodySchema.parse(body);
@@ -22,7 +22,13 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const prediction = await generatePrediction(matchData);
+    // Get API key from Cloudflare Workers runtime or import.meta.env
+    const apiKey = locals.runtime?.env?.OPENROUTER_API_KEY || import.meta.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      throw new Error("OPENROUTER_API_KEY not configured");
+    }
+
+    const prediction = await generatePrediction(matchData, apiKey);
 
     const responseData: GeneratePredictionResponseDTO = {
       ...matchData,

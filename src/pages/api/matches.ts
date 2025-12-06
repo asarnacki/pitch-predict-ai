@@ -7,7 +7,7 @@ import { cache } from "@/lib/services/cache.service";
 import { formatError } from "@/lib/errors/formatter";
 import { BUSINESS_RULES, type MatchesResponseDTO } from "@/types";
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request, locals }) => {
   try {
     const url = new URL(request.url);
     const queryParams = {
@@ -27,7 +27,13 @@ export const GET: APIRoute = async ({ request }) => {
       });
     }
 
-    const matches = await fetchUpcomingMatches(league, limit);
+    // Get API key from Cloudflare Workers runtime or import.meta.env
+    const apiKey = locals.runtime?.env?.FOOTBALL_DATA_API_KEY || import.meta.env.FOOTBALL_DATA_API_KEY;
+    if (!apiKey) {
+      throw new Error("FOOTBALL_DATA_API_KEY not configured");
+    }
+
+    const matches = await fetchUpcomingMatches(league, limit, apiKey);
 
     const responseData: MatchesResponseDTO = {
       league,

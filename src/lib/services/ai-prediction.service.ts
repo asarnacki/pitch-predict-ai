@@ -10,11 +10,14 @@ function sanitizeInput(input: string): string {
     .slice(0, 100);
 }
 
-export async function generatePrediction(matchData: GeneratePredictionRequestDTO): Promise<PredictionProbabilities> {
-  const apiKey = import.meta.env.OPENROUTER_API_KEY;
-  const model = import.meta.env.OPENROUTER_MODEL || "meta-llama/llama-3.1-70b-instruct";
-
+export async function generatePrediction(
+  matchData: GeneratePredictionRequestDTO,
+  apiKey: string,
+  model?: string
+): Promise<PredictionProbabilities> {
   if (!apiKey) throw new Error("OPENROUTER_API_KEY not configured");
+
+  const modelToUse = model || "meta-llama/llama-3.1-70b-instruct";
 
   // Sanitize inputs
   const homeTeam = sanitizeInput(matchData.home_team);
@@ -42,7 +45,7 @@ Provide probabilities for home win, draw, and away win.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model,
+        model: modelToUse,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
