@@ -7,6 +7,8 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import cloudflare from "@astrojs/cloudflare";
 
+const isBuild = process.env.npm_lifecycle_event === "build";
+
 // https://astro.build/config
 export default defineConfig({
   output: "server",
@@ -16,6 +18,13 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    resolve: {
+      alias: isBuild
+        ? {
+            "react-dom/server": "react-dom/server.edge",
+          }
+        : {},
+    },
   },
   adapter: cloudflare({
     platformProxy: {
