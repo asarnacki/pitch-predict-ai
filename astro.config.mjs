@@ -8,7 +8,7 @@ import tailwindcss from "@tailwindcss/vite";
 import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   output: "server",
   integrations: [react(), sitemap()],
   server: {
@@ -16,10 +16,18 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    resolve: {
+      alias:
+        command === "build"
+          ? {
+              "react-dom/server": "react-dom/server.edge",
+            }
+          : {},
+    },
   },
   adapter: cloudflare({
     platformProxy: {
       enabled: true,
     },
   }),
-});
+}));
