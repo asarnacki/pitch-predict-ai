@@ -17,6 +17,11 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
+  name: Create Astro env file
+  run: |
+    echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+    echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+
   unit-test:
     name: Unit tests
     needs: lint
