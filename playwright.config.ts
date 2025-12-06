@@ -94,10 +94,12 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: "PORT=3001 astro dev --mode test",
+    // In CI: use normal dev (loads from process.env)
+    // In local: use --mode test (loads from .env.test)
+    command: process.env.CI ? "PORT=3001 astro dev" : "PORT=3001 astro dev --mode test",
     url: "http://localhost:3001",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
-    env: testEnv, // Pass .env.test variables to the server (backup for process.env)
+    env: testEnv, // Pass env variables to the server process
   },
 });
