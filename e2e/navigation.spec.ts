@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { LoginPage, NavigationPage } from "./page-objects";
+import { LoginPage } from "./page-objects";
 
 test.describe("Navigation", () => {
   test("should navigate from login to register page", async ({ page }) => {
