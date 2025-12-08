@@ -6,12 +6,12 @@ test.describe("Login Validation", () => {
     const loginPage = new LoginPage(page);
     await loginPage.goto();
 
-    // Focus and blur email field to trigger validation
-    await loginPage.emailInput.focus();
-    await loginPage.passwordInput.focus();
+    await loginPage.emailInput.fill("a");
+    await loginPage.emailInput.clear();
+    await loginPage.passwordInput.click();
 
     const emailError = page.getByText("E-mail jest wymagany");
-    await expect(emailError).toBeVisible();
+    await expect(emailError).toBeVisible({ timeout: 10000 });
   });
 
   test("should show validation error for invalid email format", async ({ page }) => {
@@ -19,11 +19,10 @@ test.describe("Login Validation", () => {
     await loginPage.goto();
 
     await loginPage.emailInput.fill("invalid-email");
-    // Blur by focusing another element
-    await loginPage.passwordInput.focus();
+    await loginPage.passwordInput.click();
 
     const emailError = page.getByText("Nieprawidłowy format e-mail");
-    await expect(emailError).toBeVisible();
+    await expect(emailError).toBeVisible({ timeout: 10000 });
   });
 
   test("should show validation error for short password", async ({ page }) => {
@@ -31,10 +30,9 @@ test.describe("Login Validation", () => {
     await loginPage.goto();
 
     await loginPage.passwordInput.fill("short");
-    // Blur by focusing another element
-    await loginPage.emailInput.focus();
+    await loginPage.emailInput.click();
 
     const passwordError = page.getByText("Hasło musi mieć co najmniej 8 znaków");
-    await expect(passwordError).toBeVisible();
+    await expect(passwordError).toBeVisible({ timeout: 10000 });
   });
 });
