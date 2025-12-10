@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button";
 import { BUSINESS_RULES } from "@/types";
 import type { UserChoice } from "@/types";
 import type { PredictionState } from "./hooks/usePredictions";
-import { savePredictionSchema, type SavePredictionFormData } from "@/lib/validation/prediction.schemas";
+import {
+  savePredictionSchema,
+  type SavePredictionFormData,
+  type SavePredictionFormInput,
+} from "@/lib/validation/prediction.schemas";
 
 export interface SavePredictionFormHandle {
   setUserChoice: (choice: UserChoice | null) => void;
@@ -17,12 +21,13 @@ export interface SavePredictionFormHandle {
 interface SavePredictionFormProps {
   matchId: string;
   saveStatus: PredictionState["saveStatus"];
+  isAuthenticated: boolean;
   onSave: (matchId: string, note: string | null, userChoice: UserChoice | null) => void;
 }
 
 export const SavePredictionForm = forwardRef<SavePredictionFormHandle, SavePredictionFormProps>(
-  function SavePredictionForm({ matchId, saveStatus, onSave }, ref) {
-    const form = useForm<SavePredictionFormData>({
+  function SavePredictionForm({ matchId, saveStatus, isAuthenticated, onSave }, ref) {
+    const form = useForm<SavePredictionFormInput, undefined, SavePredictionFormData>({
       resolver: zodResolver(savePredictionSchema),
       defaultValues: {
         note: "",
@@ -68,10 +73,25 @@ export const SavePredictionForm = forwardRef<SavePredictionFormHandle, SavePredi
 
     const isSaving = saveStatus === "saving";
     const isSaved = saveStatus === "saved";
-    const isDisabled = isSaving || isSaved;
+    const isAuthDisabled = !isAuthenticated;
+    const isDisabled = isSaving || isSaved || isAuthDisabled;
 
     return (
       <form onSubmit={formHandleSubmit(onSubmit)} className="mt-6 pt-6 border-t space-y-4">
+        {isAuthDisabled && (
+          <div className="rounded-md border border-dashed border-muted-foreground/40 bg-muted/50 px-3 py-2 text-xs sm:text-sm text-muted-foreground">
+            Zapisywanie predykcji dostępne po zalogowaniu.{" "}
+            <a href="/login" className="underline underline-offset-4">
+              Zaloguj się
+            </a>{" "}
+            lub{" "}
+            <a href="/register" className="underline underline-offset-4">
+              utwórz konto
+            </a>{" "}
+            aby odblokować notatki i zapisy.
+          </div>
+        )}
+
         <div className="space-y-2">
           <label htmlFor={`note-${matchId}`} className="text-xs sm:text-sm font-medium block">
             Dodaj notatkę (opcjonalnie)
@@ -81,7 +101,9 @@ export const SavePredictionForm = forwardRef<SavePredictionFormHandle, SavePredi
             placeholder="Dodaj swoją notatkę do tej predykcji..."
             maxLength={BUSINESS_RULES.MAX_NOTE_LENGTH}
             disabled={isDisabled}
-            className="resize-none text-sm"
+            className={`resize-none text-sm ${
+              isDisabled ? "cursor-not-allowed" : "cursor-text"
+            } ${isAuthDisabled ? "bg-muted text-muted-foreground" : ""}`}
             rows={3}
             {...register("note")}
           />
@@ -96,7 +118,9 @@ export const SavePredictionForm = forwardRef<SavePredictionFormHandle, SavePredi
         <Button
           type="submit"
           disabled={isDisabled}
-          className="w-full text-sm sm:text-base"
+          className={`w-full text-sm sm:text-base cursor-pointer disabled:cursor-not-allowed disabled:pointer-events-auto ${
+            isAuthDisabled ? "border border-dashed bg-muted text-muted-foreground" : ""
+          }`}
           variant={isSaved ? "secondary" : "default"}
         >
           {isSaving ? "Zapisywanie..." : isSaved ? "✓ Zapisano" : "Zapisz predykcję"}

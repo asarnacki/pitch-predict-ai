@@ -4,7 +4,11 @@ import { LeagueSelector } from "./LeagueSelector";
 import { MatchList } from "./MatchList";
 import { EmptyState } from "./EmptyState";
 
-export function PredictionPanel() {
+interface PredictionPanelProps {
+  isAuthenticated?: boolean;
+}
+
+export function PredictionPanel({ isAuthenticated = false }: PredictionPanelProps) {
   const {
     league,
     matches,
@@ -46,6 +50,7 @@ export function PredictionPanel() {
             matches={matches}
             isLoading={isLoading}
             predictionsState={predictions}
+            isAuthenticated={isAuthenticated}
             onGeneratePrediction={generatePrediction}
             onSavePrediction={savePrediction}
           />

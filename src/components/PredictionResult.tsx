@@ -8,10 +8,11 @@ import type { PredictionState } from "./hooks/usePredictions";
 interface PredictionResultProps {
   match: MatchDTO;
   predictionState?: PredictionState;
+  isAuthenticated: boolean;
   onSave: (matchId: string, note: string | null, userChoice: UserChoice | null) => void;
 }
 
-export function PredictionResult({ match, predictionState, onSave }: PredictionResultProps) {
+export function PredictionResult({ match, predictionState, isAuthenticated, onSave }: PredictionResultProps) {
   const [userChoice, setUserChoice] = useState<UserChoice | null>(null);
   const formRef = useRef<SavePredictionFormHandle>(null);
 
@@ -88,11 +89,13 @@ export function PredictionResult({ match, predictionState, onSave }: PredictionR
           Wygenerowano: {formattedGeneratedDate}
         </div>
 
-        {/* Save form is always shown. If user is not authenticated, */}
-        {/* the backend API will return 401 and an error will be displayed. */}
-        {/* For better UX, we could pass user prop from Astro.locals and show */}
-        {/* "Login to save" message instead of the form for unauthenticated users. */}
-        <SavePredictionForm ref={formRef} matchId={match.id} saveStatus={predictionState.saveStatus} onSave={onSave} />
+        <SavePredictionForm
+          ref={formRef}
+          matchId={match.id}
+          saveStatus={predictionState.saveStatus}
+          isAuthenticated={isAuthenticated}
+          onSave={onSave}
+        />
       </div>
     );
   }
