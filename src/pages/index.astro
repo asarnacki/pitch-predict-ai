@@ -2,9 +2,11 @@
 import Layout from "../layouts/Layout.astro";
 import { PredictionPanel } from "../components/PredictionPanel";
 import { Toaster } from "../components/ui/sonner";
+
+const user = Astro.locals.user ?? null;
 ---
 
 <Layout>
-  <PredictionPanel client:load />
+  <PredictionPanel client:load isAuthenticated={Boolean(user)} />
   <Toaster client:load />
 </Layout>

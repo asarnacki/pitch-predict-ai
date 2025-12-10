@@ -16,3 +16,4 @@ export const savePredictionSchema = z.object({
 });
 
 export type SavePredictionFormData = z.infer<typeof savePredictionSchema>;
+export type SavePredictionFormInput = z.input<typeof savePredictionSchema>;

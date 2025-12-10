@@ -9,6 +9,7 @@ interface MatchListProps {
   matches: MatchDTO[];
   isLoading: boolean;
   predictionsState: Record<string, PredictionState>;
+  isAuthenticated: boolean;
   onGeneratePrediction: (match: MatchDTO) => void;
   onSavePrediction: (matchId: string, note: string | null, userChoice: UserChoice | null) => void;
 }
@@ -17,6 +18,7 @@ export function MatchList({
   matches,
   isLoading,
   predictionsState,
+  isAuthenticated,
   onGeneratePrediction,
   onSavePrediction,
 }: MatchListProps) {
@@ -68,6 +70,7 @@ export function MatchList({
           key={match.id}
           match={match}
           predictionState={predictionsState[match.id]}
+          isAuthenticated={isAuthenticated}
           onSavePrediction={onSavePrediction}
         />
       ))}

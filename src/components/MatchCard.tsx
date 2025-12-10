@@ -6,10 +6,11 @@ import type { PredictionState } from "./hooks/usePredictions";
 interface MatchCardProps {
   match: MatchDTO;
   predictionState?: PredictionState;
+  isAuthenticated: boolean;
   onSavePrediction: (matchId: string, note: string | null, userChoice: UserChoice | null) => void;
 }
 
-export function MatchCard({ match, predictionState, onSavePrediction }: MatchCardProps) {
+export function MatchCard({ match, predictionState, isAuthenticated, onSavePrediction }: MatchCardProps) {
   const matchDate = new Date(match.match_date);
   const formattedDate = matchDate.toLocaleDateString("pl-PL", {
     day: "numeric",
@@ -57,7 +58,12 @@ export function MatchCard({ match, predictionState, onSavePrediction }: MatchCar
         </div>
       </AccordionTrigger>
       <AccordionContent className="px-4 sm:px-6 py-4 sm:py-6 bg-accent/10">
-        <PredictionResult match={match} predictionState={predictionState} onSave={onSavePrediction} />
+        <PredictionResult
+          match={match}
+          predictionState={predictionState}
+          isAuthenticated={isAuthenticated}
+          onSave={onSavePrediction}
+        />
       </AccordionContent>
     </AccordionItem>
   );
