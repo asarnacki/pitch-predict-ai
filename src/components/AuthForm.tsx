@@ -2,6 +2,8 @@ import { useAuthForm, type AuthFormMode } from "./hooks/useAuthForm";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
+import { useEffect, useState } from "react";
 
 interface AuthFormProps {
   mode: AuthFormMode;
@@ -9,6 +11,8 @@ interface AuthFormProps {
 }
 
 export function AuthForm({ mode, onSuccess }: AuthFormProps) {
+  const t = useTranslation();
+  const [hydrated, setHydrated] = useState(false);
   const { form, isSubmitting, apiError, handleSubmit } = useAuthForm({
     mode,
     onSuccess,
@@ -24,32 +28,36 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
     switch (mode) {
       case "login":
         return {
-          title: "Zaloguj się",
-          buttonText: "Zaloguj się",
+          title: t.auth.login.title,
+          buttonText: t.auth.login.submit,
+          processingText: t.auth.login.processing,
           showEmail: true,
           showPassword: true,
           showConfirmPassword: false,
         };
       case "register":
         return {
-          title: "Zarejestruj się",
-          buttonText: "Zarejestruj się",
+          title: t.auth.register.title,
+          buttonText: t.auth.register.submit,
+          processingText: t.auth.register.processing,
           showEmail: true,
           showPassword: true,
           showConfirmPassword: true,
         };
       case "reset-password":
         return {
-          title: "Resetuj hasło",
-          buttonText: "Wyślij link resetujący",
+          title: t.auth.resetPassword.title,
+          buttonText: t.auth.resetPassword.submit,
+          processingText: t.auth.resetPassword.processing,
           showEmail: true,
           showPassword: false,
           showConfirmPassword: false,
         };
       case "update-password":
         return {
-          title: "Ustaw nowe hasło",
-          buttonText: "Zmień hasło",
+          title: t.auth.updatePassword.title,
+          buttonText: t.auth.updatePassword.submit,
+          processingText: t.auth.updatePassword.processing,
           showEmail: false,
           showPassword: true,
           showConfirmPassword: true,
@@ -59,20 +67,23 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
 
   const config = getFormConfig();
 
+  // Mark as hydrated for E2E stability (Astro islands can be visible before listeners are attached)
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto" data-testid="auth-form" data-hydrated={hydrated ? "true" : "false"}>
       <div className="bg-card border rounded-lg shadow-lg p-6 sm:p-8 space-y-6">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" data-testid="auth-form-heading">
             {config.title}
           </h1>
           {mode === "reset-password" && (
-            <p className="text-sm text-muted-foreground">
-              Podaj swój adres e-mail, a wyślemy Ci link do zresetowania hasła
-            </p>
+            <p className="text-sm text-muted-foreground">{t.auth.resetPassword.description}</p>
           )}
           {mode === "update-password" && (
-            <p className="text-sm text-muted-foreground">Wprowadź nowe hasło dla swojego konta</p>
+            <p className="text-sm text-muted-foreground">{t.auth.updatePassword.description}</p>
           )}
         </div>
 
@@ -80,7 +91,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
           {/* Email field */}
           {config.showEmail && (
             <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="email">{t.auth.login.email}</Label>
               <Input
                 id="email"
                 type="email"
@@ -98,14 +109,14 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
           {config.showPassword && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Hasło</Label>
+                <Label htmlFor="password">{t.auth.login.password}</Label>
                 {mode === "login" && (
                   <a
                     href="/reset-password"
                     className="text-xs text-primary hover:underline"
                     data-testid="auth-reset-password-link"
                   >
-                    Zapomniałeś hasła?
+                    {t.auth.login.forgotPassword}
                   </a>
                 )}
               </div>
@@ -125,7 +136,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
           {/* Confirm Password field */}
           {config.showConfirmPassword && (
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Potwierdź hasło</Label>
+              <Label htmlFor="confirmPassword">{t.auth.register.confirmPassword}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -159,7 +170,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
             size="lg"
             data-testid={`${mode}-submit-button`}
           >
-            {isSubmitting ? "Przetwarzanie..." : config.buttonText}
+            {isSubmitting ? config.processingText : config.buttonText}
           </Button>
         </form>
 
@@ -167,25 +178,25 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
         <div className="text-center space-y-2">
           {mode === "login" && (
             <p className="text-sm text-muted-foreground">
-              Nie masz konta?{" "}
+              {t.auth.login.noAccount}{" "}
               <a href="/register" className="text-primary hover:underline font-medium" data-testid="auth-register-link">
-                Zarejestruj się
+                {t.auth.login.registerLink}
               </a>
             </p>
           )}
           {mode === "register" && (
             <p className="text-sm text-muted-foreground">
-              Masz już konto?{" "}
+              {t.auth.register.hasAccount}{" "}
               <a href="/login" className="text-primary hover:underline font-medium" data-testid="auth-login-link">
-                Zaloguj się
+                {t.auth.register.loginLink}
               </a>
             </p>
           )}
           {mode === "reset-password" && (
             <p className="text-sm text-muted-foreground">
-              Pamiętasz hasło?{" "}
+              {t.auth.resetPassword.rememberPassword}{" "}
               <a href="/login" className="text-primary hover:underline font-medium" data-testid="auth-login-link">
-                Zaloguj się
+                {t.auth.resetPassword.loginLink}
               </a>
             </p>
           )}

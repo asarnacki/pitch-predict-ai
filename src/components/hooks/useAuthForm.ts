@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 
 import {
   loginSchema,
@@ -48,6 +49,7 @@ export function useAuthForm({
 }): UseAuthFormReturn<AuthFormData> {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const t = useTranslation();
 
   const getResolver = () => {
     switch (mode) {
@@ -79,31 +81,30 @@ export function useAuthForm({
         switch (mode) {
           case "login":
             await authService.login(data.email, data.password);
-            toast.success("Zalogowano pomyślnie!");
+            toast.success(t.auth.toast.loginSuccess);
             window.location.href = "/";
             break;
 
           case "register":
             await authService.register(data.email, data.password);
-            toast.success("Rejestracja zakończona pomyślnie!");
+            toast.success(t.auth.toast.registerSuccess);
             window.location.href = "/";
             break;
 
           case "reset-password":
             await authService.resetPassword(data.email);
-            toast.success("Link do resetowania hasła został wysłany na e-mail");
+            toast.success(t.auth.toast.resetPasswordSuccess);
             if (onSuccess) onSuccess();
             break;
 
           case "update-password":
             await authService.updatePassword(data.password);
-            toast.success("Hasło zostało zmienione pomyślnie!");
+            toast.success(t.auth.toast.updatePasswordSuccess);
             window.location.href = "/login";
             break;
         }
       } catch (error) {
-        const errorMessage =
-          error instanceof ApiError ? error.message : "Wystąpił błąd połączenia. Sprawdź połączenie internetowe.";
+        const errorMessage = error instanceof ApiError ? error.message : t.auth.errors.connection;
 
         setApiError(errorMessage);
         toast.error(errorMessage);
@@ -111,7 +112,7 @@ export function useAuthForm({
         setIsSubmitting(false);
       }
     },
-    [mode, onSuccess]
+    [mode, onSuccess, t]
   );
 
   return {

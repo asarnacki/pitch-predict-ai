@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { matchesService, type LeagueCode } from "@/services/api/matches.service";
 import type { MatchDTO } from "@/types";
 import { ApiError } from "@/services/api/client";
+import { useTranslation } from "@/lib/i18n";
 
 interface MatchesState {
   league: LeagueCode;
@@ -11,6 +12,7 @@ interface MatchesState {
 }
 
 export function useMatches(initialLeague: LeagueCode = "PREMIER_LEAGUE") {
+  const t = useTranslation();
   const [state, setState] = useState<MatchesState>({
     league: initialLeague,
     matchesCache: {
@@ -22,35 +24,38 @@ export function useMatches(initialLeague: LeagueCode = "PREMIER_LEAGUE") {
     error: null,
   });
 
-  const fetchMatches = useCallback(async (targetLeague: LeagueCode) => {
-    setState((prev) => ({
-      ...prev,
-      status: "loading",
-      error: null,
-    }));
-
-    try {
-      const matches = await matchesService.fetchMatches(targetLeague, 5);
-
+  const fetchMatches = useCallback(
+    async (targetLeague: LeagueCode) => {
       setState((prev) => ({
         ...prev,
-        matchesCache: {
-          ...prev.matchesCache,
-          [targetLeague]: matches,
-        },
-        status: "success",
+        status: "loading",
         error: null,
       }));
-    } catch (error) {
-      const errorMessage = error instanceof ApiError ? error.message : "Nie udało się pobrać meczów";
 
-      setState((prev) => ({
-        ...prev,
-        status: "error",
-        error: errorMessage,
-      }));
-    }
-  }, []);
+      try {
+        const matches = await matchesService.fetchMatches(targetLeague, 5);
+
+        setState((prev) => ({
+          ...prev,
+          matchesCache: {
+            ...prev.matchesCache,
+            [targetLeague]: matches,
+          },
+          status: "success",
+          error: null,
+        }));
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : t.predictions.errors.fetchMatchesFailed;
+
+        setState((prev) => ({
+          ...prev,
+          status: "error",
+          error: errorMessage,
+        }));
+      }
+    },
+    [t]
+  );
 
   const changeLeague = useCallback(
     (newLeague: LeagueCode) => {

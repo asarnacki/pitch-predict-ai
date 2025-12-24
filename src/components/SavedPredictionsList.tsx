@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/Spinner";
@@ -22,6 +22,7 @@ import type {
   PredictionProbabilities,
 } from "@/types";
 import { isPredictionProbabilities } from "@/types";
+import { useLanguage, useTranslation } from "@/lib/i18n";
 
 const LIMIT = 10;
 
@@ -34,31 +35,36 @@ export function SavedPredictionsList() {
   const [total, setTotal] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [predictionToDelete, setPredictionToDelete] = useState<PredictionDTO | null>(null);
+  const t = useTranslation();
+  const { language } = useLanguage();
 
-  const fetchPredictions = async (newOffset: number) => {
-    setStatus("loading");
-    setError(null);
+  const fetchPredictions = useCallback(
+    async (newOffset: number) => {
+      setStatus("loading");
+      setError(null);
 
-    try {
-      const response = await fetch(`/api/predictions?limit=${LIMIT}&offset=${newOffset}&sort=created_at&order=desc`);
+      try {
+        const response = await fetch(`/api/predictions?limit=${LIMIT}&offset=${newOffset}&sort=created_at&order=desc`);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Nie udało się pobrać predykcji");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || t.predictions.errors.fetchPredictionsFailed);
+        }
+
+        const result: ApiSuccessResponse<PaginatedPredictionsResponseDTO> = await response.json();
+
+        setPredictions(result.data.predictions);
+        setHasMore(result.data.pagination.has_more);
+        setTotal(result.data.pagination.total);
+        setOffset(newOffset);
+        setStatus("success");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : t.common.error);
+        setStatus("error");
       }
-
-      const result: ApiSuccessResponse<PaginatedPredictionsResponseDTO> = await response.json();
-
-      setPredictions(result.data.predictions);
-      setHasMore(result.data.pagination.has_more);
-      setTotal(result.data.pagination.total);
-      setOffset(newOffset);
-      setStatus("success");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Wystąpił błąd");
-      setStatus("error");
-    }
-  };
+    },
+    [t]
+  );
 
   const handleDeleteClick = (prediction: PredictionDTO) => {
     setPredictionToDelete(prediction);
@@ -75,15 +81,15 @@ export function SavedPredictionsList() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Nie udało się usunąć predykcji");
+        throw new Error(errorData.error?.message || t.predictions.errors.deleteFailed);
       }
 
-      toast.success("Predykcja usunięta pomyślnie");
+      toast.success(t.predictions.toasts.deletedSuccess);
       setDeleteDialogOpen(false);
       setPredictionToDelete(null);
       fetchPredictions(offset);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Nie udało się usunąć predykcji");
+      toast.error(err instanceof Error ? err.message : t.predictions.toasts.deletedError);
       setDeleteDialogOpen(false);
       setPredictionToDelete(null);
     }
@@ -101,13 +107,13 @@ export function SavedPredictionsList() {
 
   useEffect(() => {
     fetchPredictions(0);
-  }, []);
+  }, [fetchPredictions]);
 
   if (status === "loading" && predictions.length === 0) {
     return (
       <div className="py-12 flex flex-col items-center justify-center gap-4">
         <Spinner className="h-10 w-10 text-primary" />
-        <p className="text-base text-muted-foreground">Ładowanie predykcji...</p>
+        <p className="text-base text-muted-foreground">{t.predictions.ui.loadingList}</p>
       </div>
     );
   }
@@ -115,9 +121,9 @@ export function SavedPredictionsList() {
   if (status === "error") {
     return (
       <EmptyState
-        title="Błąd"
-        description={error || "Nie udało się pobrać predykcji"}
-        actionLabel="Spróbuj ponownie"
+        title={t.common.error}
+        description={error || t.predictions.errors.fetchPredictionsFailed}
+        actionLabel={t.common.retry}
         onAction={() => fetchPredictions(offset)}
       />
     );
@@ -126,9 +132,9 @@ export function SavedPredictionsList() {
   if (status === "success" && predictions.length === 0) {
     return (
       <EmptyState
-        title="Nie masz jeszcze zapisanych predykcji"
-        description="Wygeneruj i zapisz swoją pierwszą predykcję na stronie głównej"
-        actionLabel="Przejdź do głównej"
+        title={t.predictions.ui.emptyTitle}
+        description={t.predictions.ui.emptyDescription}
+        actionLabel={t.predictions.ui.goHome}
         onAction={() => (window.location.href = "/")}
       />
     );
@@ -141,12 +147,12 @@ export function SavedPredictionsList() {
     if (!prediction.user_choice) return "";
 
     if (prediction.user_choice === "home") {
-      return `${prediction.home_team} wygrywa`;
+      return `${prediction.home_team} - ${t.predictions.ui.chart.homeWin}`;
     }
     if (prediction.user_choice === "draw") {
-      return "Remis";
+      return t.predictions.ui.chart.draw;
     }
-    return `${prediction.away_team} wygrywa`;
+    return `${prediction.away_team} - ${t.predictions.ui.chart.awayWin}`;
   };
 
   const getUserChoicePercentage = (
@@ -163,18 +169,18 @@ export function SavedPredictionsList() {
   // Render funkcja dla kart predykcji
   const renderPredictionCard = (prediction: PredictionDTO, predictionResult: PredictionProbabilities | null) => {
     const matchDate = new Date(prediction.match_date);
-    const formattedDate = matchDate.toLocaleDateString("pl-PL", {
+    const formattedDate = matchDate.toLocaleDateString(language === "pl" ? "pl-PL" : "en-US", {
       day: "numeric",
       month: "long",
       year: "numeric",
     });
-    const formattedTime = matchDate.toLocaleTimeString("pl-PL", {
+    const formattedTime = matchDate.toLocaleTimeString(language === "pl" ? "pl-PL" : "en-US", {
       hour: "2-digit",
       minute: "2-digit",
     });
 
     const createdDate = new Date(prediction.created_at);
-    const formattedCreatedDate = createdDate.toLocaleDateString("pl-PL", {
+    const formattedCreatedDate = createdDate.toLocaleDateString(language === "pl" ? "pl-PL" : "en-US", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -211,7 +217,9 @@ export function SavedPredictionsList() {
             <div className="flex items-start gap-3">
               <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Twój wybór</div>
+                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                  {t.predictions.ui.yourChoice}
+                </div>
                 <div className="flex items-baseline gap-2 flex-wrap">
                   <span className="font-bold text-base text-primary">{getUserChoiceLabel(prediction)}</span>
                   {predictionResult && (
@@ -224,26 +232,34 @@ export function SavedPredictionsList() {
               </div>
             </div>
           ) : (
-            <div className="text-sm text-muted-foreground italic">Brak wybranej predykcji</div>
+            <div className="text-sm text-muted-foreground italic">{t.predictions.ui.noChoice}</div>
           )}
 
           {predictionResult && (
             <div className="pt-3 border-t space-y-2">
-              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Predykcja AI</div>
+              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                {t.predictions.ui.aiTitle}
+              </div>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="text-center p-2.5 rounded bg-muted/50 space-y-1">
                   <Home className="h-4 w-4 mx-auto text-muted-foreground" />
-                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">Gospodarz</div>
+                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">
+                    {t.predictions.ui.chart.home}
+                  </div>
                   <div className="font-bold text-sm">{Math.round(predictionResult.home * 100)}%</div>
                 </div>
                 <div className="text-center p-2.5 rounded bg-muted/50 space-y-1">
                   <Minus className="h-4 w-4 mx-auto text-muted-foreground" />
-                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">Remis</div>
+                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">
+                    {t.predictions.ui.chart.draw}
+                  </div>
                   <div className="font-bold text-sm">{Math.round(predictionResult.draw * 100)}%</div>
                 </div>
                 <div className="text-center p-2.5 rounded bg-muted/50 space-y-1">
                   <Plane className="h-4 w-4 mx-auto text-muted-foreground" />
-                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">Gość</div>
+                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">
+                    {t.predictions.ui.chart.away}
+                  </div>
                   <div className="font-bold text-sm">{Math.round(predictionResult.away * 100)}%</div>
                 </div>
               </div>
@@ -252,12 +268,16 @@ export function SavedPredictionsList() {
 
           {prediction.note && (
             <div className="pt-3 border-t">
-              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Notatka</div>
+              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                {t.predictions.ui.note}
+              </div>
               <p className="text-sm text-foreground">{prediction.note}</p>
             </div>
           )}
 
-          <div className="pt-2 text-xs text-muted-foreground">Zapisano: {formattedCreatedDate}</div>
+          <div className="pt-2 text-xs text-muted-foreground">
+            {t.predictions.ui.savedAt} {formattedCreatedDate}
+          </div>
         </div>
       </div>
     );
@@ -280,15 +300,15 @@ export function SavedPredictionsList() {
         <div className="flex items-center justify-center gap-4 pt-2">
           <Button variant="outline" size="sm" onClick={handlePrevPage} disabled={offset === 0 || status === "loading"}>
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Poprzednia
+            {t.predictions.ui.previous}
           </Button>
 
           <span className="text-sm text-muted-foreground">
-            Strona {currentPage} z {totalPages}
+            {t.predictions.ui.page} {currentPage} {t.predictions.ui.of} {totalPages}
           </span>
 
           <Button variant="outline" size="sm" onClick={handleNextPage} disabled={!hasMore || status === "loading"}>
-            Następna
+            {t.predictions.ui.next}
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
@@ -298,7 +318,7 @@ export function SavedPredictionsList() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Usuń predykcję?</AlertDialogTitle>
+            <AlertDialogTitle>{t.predictions.ui.deleteTitle}</AlertDialogTitle>
             <AlertDialogDescription>
               {predictionToDelete && (
                 <>
@@ -308,24 +328,24 @@ export function SavedPredictionsList() {
                     </span>
                   </div>
                   <div className="text-muted-foreground">
-                    {new Date(predictionToDelete.match_date).toLocaleDateString("pl-PL", {
+                    {new Date(predictionToDelete.match_date).toLocaleDateString(language === "pl" ? "pl-PL" : "en-US", {
                       day: "numeric",
                       month: "long",
                       year: "numeric",
                     })}
                   </div>
-                  <div className="mt-3 font-medium text-foreground">Tej operacji nie można cofnąć.</div>
+                  <div className="mt-3 font-medium text-foreground">{t.predictions.ui.deleteCannotUndo}</div>
                 </>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Anuluj</AlertDialogCancel>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Usuń
+              {t.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
