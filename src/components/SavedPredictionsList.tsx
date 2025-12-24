@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/Spinner";
@@ -38,30 +38,33 @@ export function SavedPredictionsList() {
   const t = useTranslation();
   const { language } = useLanguage();
 
-  const fetchPredictions = async (newOffset: number) => {
-    setStatus("loading");
-    setError(null);
+  const fetchPredictions = useCallback(
+    async (newOffset: number) => {
+      setStatus("loading");
+      setError(null);
 
-    try {
-      const response = await fetch(`/api/predictions?limit=${LIMIT}&offset=${newOffset}&sort=created_at&order=desc`);
+      try {
+        const response = await fetch(`/api/predictions?limit=${LIMIT}&offset=${newOffset}&sort=created_at&order=desc`);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || t.predictions.errors.fetchPredictionsFailed);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || t.predictions.errors.fetchPredictionsFailed);
+        }
+
+        const result: ApiSuccessResponse<PaginatedPredictionsResponseDTO> = await response.json();
+
+        setPredictions(result.data.predictions);
+        setHasMore(result.data.pagination.has_more);
+        setTotal(result.data.pagination.total);
+        setOffset(newOffset);
+        setStatus("success");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : t.common.error);
+        setStatus("error");
       }
-
-      const result: ApiSuccessResponse<PaginatedPredictionsResponseDTO> = await response.json();
-
-      setPredictions(result.data.predictions);
-      setHasMore(result.data.pagination.has_more);
-      setTotal(result.data.pagination.total);
-      setOffset(newOffset);
-      setStatus("success");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t.common.error);
-      setStatus("error");
-    }
-  };
+    },
+    [t]
+  );
 
   const handleDeleteClick = (prediction: PredictionDTO) => {
     setPredictionToDelete(prediction);
@@ -104,7 +107,7 @@ export function SavedPredictionsList() {
 
   useEffect(() => {
     fetchPredictions(0);
-  }, []);
+  }, [fetchPredictions]);
 
   if (status === "loading" && predictions.length === 0) {
     return (
@@ -214,7 +217,9 @@ export function SavedPredictionsList() {
             <div className="flex items-start gap-3">
               <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">{t.predictions.ui.yourChoice}</div>
+                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                  {t.predictions.ui.yourChoice}
+                </div>
                 <div className="flex items-baseline gap-2 flex-wrap">
                   <span className="font-bold text-base text-primary">{getUserChoiceLabel(prediction)}</span>
                   {predictionResult && (
@@ -232,21 +237,29 @@ export function SavedPredictionsList() {
 
           {predictionResult && (
             <div className="pt-3 border-t space-y-2">
-              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.predictions.ui.aiTitle}</div>
+              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                {t.predictions.ui.aiTitle}
+              </div>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="text-center p-2.5 rounded bg-muted/50 space-y-1">
                   <Home className="h-4 w-4 mx-auto text-muted-foreground" />
-                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">{t.predictions.ui.chart.home}</div>
+                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">
+                    {t.predictions.ui.chart.home}
+                  </div>
                   <div className="font-bold text-sm">{Math.round(predictionResult.home * 100)}%</div>
                 </div>
                 <div className="text-center p-2.5 rounded bg-muted/50 space-y-1">
                   <Minus className="h-4 w-4 mx-auto text-muted-foreground" />
-                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">{t.predictions.ui.chart.draw}</div>
+                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">
+                    {t.predictions.ui.chart.draw}
+                  </div>
                   <div className="font-bold text-sm">{Math.round(predictionResult.draw * 100)}%</div>
                 </div>
                 <div className="text-center p-2.5 rounded bg-muted/50 space-y-1">
                   <Plane className="h-4 w-4 mx-auto text-muted-foreground" />
-                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">{t.predictions.ui.chart.away}</div>
+                  <div className="font-medium text-muted-foreground text-[10px] leading-tight">
+                    {t.predictions.ui.chart.away}
+                  </div>
                   <div className="font-bold text-sm">{Math.round(predictionResult.away * 100)}%</div>
                 </div>
               </div>
@@ -255,7 +268,9 @@ export function SavedPredictionsList() {
 
           {prediction.note && (
             <div className="pt-3 border-t">
-              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">{t.predictions.ui.note}</div>
+              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                {t.predictions.ui.note}
+              </div>
               <p className="text-sm text-foreground">{prediction.note}</p>
             </div>
           )}

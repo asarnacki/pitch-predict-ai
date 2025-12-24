@@ -28,51 +28,54 @@ export function usePredictions() {
   const t = useTranslation();
   const [predictions, setPredictions] = useState<Record<string, PredictionState>>({});
 
-  const generatePrediction = useCallback(async (match: MatchDTO) => {
-    const matchId = match.id;
-
-    setPredictions((prev) => ({
-      ...prev,
-      [matchId]: {
-        status: "loading",
-        data: null,
-        saveStatus: "idle",
-        error: null,
-      },
-    }));
-
-    try {
-      const result = await predictionsService.generatePrediction({
-        match_id: match.id,
-        home_team: match.home_team.name,
-        away_team: match.away_team.name,
-        league: getLeagueCodeFromName(match.league),
-        match_date: match.match_date,
-      });
+  const generatePrediction = useCallback(
+    async (match: MatchDTO) => {
+      const matchId = match.id;
 
       setPredictions((prev) => ({
         ...prev,
         [matchId]: {
-          status: "success",
-          data: result,
+          status: "loading",
+          data: null,
           saveStatus: "idle",
           error: null,
         },
       }));
-    } catch (error) {
-      const errorMessage = error instanceof ApiError ? error.message : t.predictions.errors.generateFailed;
 
-      setPredictions((prev) => ({
-        ...prev,
-        [matchId]: {
-          status: "error",
-          data: null,
-          saveStatus: "idle",
-          error: errorMessage,
-        },
-      }));
-    }
-  }, [t]);
+      try {
+        const result = await predictionsService.generatePrediction({
+          match_id: match.id,
+          home_team: match.home_team.name,
+          away_team: match.away_team.name,
+          league: getLeagueCodeFromName(match.league),
+          match_date: match.match_date,
+        });
+
+        setPredictions((prev) => ({
+          ...prev,
+          [matchId]: {
+            status: "success",
+            data: result,
+            saveStatus: "idle",
+            error: null,
+          },
+        }));
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : t.predictions.errors.generateFailed;
+
+        setPredictions((prev) => ({
+          ...prev,
+          [matchId]: {
+            status: "error",
+            data: null,
+            saveStatus: "idle",
+            error: errorMessage,
+          },
+        }));
+      }
+    },
+    [t]
+  );
 
   const savePrediction = useCallback(
     async (matchId: string, note: string | null, userChoice: UserChoice | null) => {

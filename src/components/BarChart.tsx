@@ -102,7 +102,9 @@ export function BarChart({
         }}
       >
         <div className="flex items-center justify-between gap-2">
-          <span className={`${getLabelClasses("home")} truncate`}>{homeTeam} ({t.predictions.ui.chart.homeWin})</span>
+          <span className={`${getLabelClasses("home")} truncate`}>
+            {homeTeam} ({t.predictions.ui.chart.homeWin})
+          </span>
           <span className={getPercentageClasses("home", "text-primary")}>{homePercent}%</span>
         </div>
         <div className={getContainerClasses()}>
@@ -146,7 +148,9 @@ export function BarChart({
         }}
       >
         <div className="flex items-center justify-between gap-2">
-          <span className={`${getLabelClasses("away")} truncate`}>{awayTeam} ({t.predictions.ui.chart.awayWin})</span>
+          <span className={`${getLabelClasses("away")} truncate`}>
+            {awayTeam} ({t.predictions.ui.chart.awayWin})
+          </span>
           <span className={getPercentageClasses("away", "text-green-600 dark:text-green-400")}>{awayPercent}%</span>
         </div>
         <div className={getContainerClasses()}>

@@ -24,35 +24,38 @@ export function useMatches(initialLeague: LeagueCode = "PREMIER_LEAGUE") {
     error: null,
   });
 
-  const fetchMatches = useCallback(async (targetLeague: LeagueCode) => {
-    setState((prev) => ({
-      ...prev,
-      status: "loading",
-      error: null,
-    }));
-
-    try {
-      const matches = await matchesService.fetchMatches(targetLeague, 5);
-
+  const fetchMatches = useCallback(
+    async (targetLeague: LeagueCode) => {
       setState((prev) => ({
         ...prev,
-        matchesCache: {
-          ...prev.matchesCache,
-          [targetLeague]: matches,
-        },
-        status: "success",
+        status: "loading",
         error: null,
       }));
-    } catch (error) {
-      const errorMessage = error instanceof ApiError ? error.message : t.predictions.errors.fetchMatchesFailed;
 
-      setState((prev) => ({
-        ...prev,
-        status: "error",
-        error: errorMessage,
-      }));
-    }
-  }, [t]);
+      try {
+        const matches = await matchesService.fetchMatches(targetLeague, 5);
+
+        setState((prev) => ({
+          ...prev,
+          matchesCache: {
+            ...prev.matchesCache,
+            [targetLeague]: matches,
+          },
+          status: "success",
+          error: null,
+        }));
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : t.predictions.errors.fetchMatchesFailed;
+
+        setState((prev) => ({
+          ...prev,
+          status: "error",
+          error: errorMessage,
+        }));
+      }
+    },
+    [t]
+  );
 
   const changeLeague = useCallback(
     (newLeague: LeagueCode) => {

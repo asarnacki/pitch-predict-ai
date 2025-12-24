@@ -104,8 +104,7 @@ export function useAuthForm({
             break;
         }
       } catch (error) {
-        const errorMessage =
-          error instanceof ApiError ? error.message : t.auth.errors.connection;
+        const errorMessage = error instanceof ApiError ? error.message : t.auth.errors.connection;
 
         setApiError(errorMessage);
         toast.error(errorMessage);

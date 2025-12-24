@@ -125,7 +125,11 @@ export const SavePredictionForm = forwardRef<SavePredictionFormHandle, SavePredi
           }`}
           variant={isSaved ? "secondary" : "default"}
         >
-          {isSaving ? t.predictions.ui.saveForm.saving : isSaved ? t.predictions.ui.saveForm.saved : t.predictions.savePrediction}
+          {isSaving
+            ? t.predictions.ui.saveForm.saving
+            : isSaved
+              ? t.predictions.ui.saveForm.saved
+              : t.predictions.savePrediction}
         </Button>
       </form>
     );
