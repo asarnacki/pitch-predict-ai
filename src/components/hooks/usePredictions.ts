@@ -3,6 +3,7 @@ import { predictionsService } from "@/services/api/predictions.service";
 import type { MatchDTO, UserChoice } from "@/types";
 import { ApiError } from "@/services/api/client";
 import { getLeagueCodeFromName } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export interface PredictionState {
   status: "idle" | "loading" | "success" | "error";
@@ -24,6 +25,7 @@ export interface PredictionState {
 }
 
 export function usePredictions() {
+  const t = useTranslation();
   const [predictions, setPredictions] = useState<Record<string, PredictionState>>({});
 
   const generatePrediction = useCallback(async (match: MatchDTO) => {
@@ -58,7 +60,7 @@ export function usePredictions() {
         },
       }));
     } catch (error) {
-      const errorMessage = error instanceof ApiError ? error.message : "Nie udało się wygenerować predykcji";
+      const errorMessage = error instanceof ApiError ? error.message : t.predictions.errors.generateFailed;
 
       setPredictions((prev) => ({
         ...prev,
@@ -70,7 +72,7 @@ export function usePredictions() {
         },
       }));
     }
-  }, []);
+  }, [t]);
 
   const savePrediction = useCallback(
     async (matchId: string, note: string | null, userChoice: UserChoice | null) => {
@@ -110,7 +112,7 @@ export function usePredictions() {
 
         return result;
       } catch (error) {
-        const errorMessage = error instanceof ApiError ? error.message : "Nie udało się zapisać predykcji";
+        const errorMessage = error instanceof ApiError ? error.message : t.predictions.errors.saveFailed;
 
         setPredictions((prev) => ({
           ...prev,
@@ -124,7 +126,7 @@ export function usePredictions() {
         throw error;
       }
     },
-    [predictions]
+    [predictions, t]
   );
 
   return {

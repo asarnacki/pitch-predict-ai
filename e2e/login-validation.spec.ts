@@ -5,6 +5,7 @@ test.describe("Login Validation", () => {
   test("should show validation error for empty email on blur", async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.goto();
+    await expect(page.getByTestId("auth-form")).toHaveAttribute("data-hydrated", "true");
 
     await loginPage.emailInput.fill("a");
     await loginPage.emailInput.clear();
@@ -17,6 +18,7 @@ test.describe("Login Validation", () => {
   test("should show validation error for invalid email format", async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.goto();
+    await expect(page.getByTestId("auth-form")).toHaveAttribute("data-hydrated", "true");
 
     await loginPage.emailInput.fill("invalid-email");
     await loginPage.passwordInput.click();
@@ -28,6 +30,7 @@ test.describe("Login Validation", () => {
   test("should show validation error for short password", async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.goto();
+    await expect(page.getByTestId("auth-form")).toHaveAttribute("data-hydrated", "true");
 
     await loginPage.passwordInput.fill("short");
     await loginPage.emailInput.click();

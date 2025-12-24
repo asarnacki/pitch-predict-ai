@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/lib/i18n";
+import { useEffect, useState } from "react";
 
 interface AuthFormProps {
   mode: AuthFormMode;
@@ -11,6 +12,7 @@ interface AuthFormProps {
 
 export function AuthForm({ mode, onSuccess }: AuthFormProps) {
   const t = useTranslation();
+  const [hydrated, setHydrated] = useState(false);
   const { form, isSubmitting, apiError, handleSubmit } = useAuthForm({
     mode,
     onSuccess,
@@ -65,8 +67,13 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
 
   const config = getFormConfig();
 
+  // Mark as hydrated for E2E stability (Astro islands can be visible before listeners are attached)
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto" data-testid="auth-form" data-hydrated={hydrated ? "true" : "false"}>
       <div className="bg-card border rounded-lg shadow-lg p-6 sm:p-8 space-y-6">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" data-testid="auth-form-heading">

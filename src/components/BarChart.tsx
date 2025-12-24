@@ -1,4 +1,5 @@
 import type { PredictionProbabilities, UserChoice } from "@/types";
+import { useTranslation } from "@/lib/i18n";
 
 interface BarChartProps {
   prediction: PredictionProbabilities;
@@ -17,6 +18,7 @@ export function BarChart({
   selectedChoice = null,
   onChoiceSelect,
 }: BarChartProps) {
+  const t = useTranslation();
   const homePercent = Math.round(prediction.home * 100);
   const drawPercent = Math.round(prediction.draw * 100);
   const awayPercent = Math.round(prediction.away * 100);
@@ -100,7 +102,7 @@ export function BarChart({
         }}
       >
         <div className="flex items-center justify-between gap-2">
-          <span className={`${getLabelClasses("home")} truncate`}>{homeTeam} (Wygrana gospodarzy)</span>
+          <span className={`${getLabelClasses("home")} truncate`}>{homeTeam} ({t.predictions.ui.chart.homeWin})</span>
           <span className={getPercentageClasses("home", "text-primary")}>{homePercent}%</span>
         </div>
         <div className={getContainerClasses()}>
@@ -122,7 +124,7 @@ export function BarChart({
         }}
       >
         <div className="flex items-center justify-between gap-2">
-          <span className={getLabelClasses("draw")}>Remis</span>
+          <span className={getLabelClasses("draw")}>{t.predictions.ui.chart.draw}</span>
           <span className={getPercentageClasses("draw", "text-blue-600 dark:text-blue-400")}>{drawPercent}%</span>
         </div>
         <div className={getContainerClasses()}>
@@ -144,7 +146,7 @@ export function BarChart({
         }}
       >
         <div className="flex items-center justify-between gap-2">
-          <span className={`${getLabelClasses("away")} truncate`}>{awayTeam} (Wygrana gości)</span>
+          <span className={`${getLabelClasses("away")} truncate`}>{awayTeam} ({t.predictions.ui.chart.awayWin})</span>
           <span className={getPercentageClasses("away", "text-green-600 dark:text-green-400")}>{awayPercent}%</span>
         </div>
         <div className={getContainerClasses()}>

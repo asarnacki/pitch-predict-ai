@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { matchesService, type LeagueCode } from "@/services/api/matches.service";
 import type { MatchDTO } from "@/types";
 import { ApiError } from "@/services/api/client";
+import { useTranslation } from "@/lib/i18n";
 
 interface MatchesState {
   league: LeagueCode;
@@ -11,6 +12,7 @@ interface MatchesState {
 }
 
 export function useMatches(initialLeague: LeagueCode = "PREMIER_LEAGUE") {
+  const t = useTranslation();
   const [state, setState] = useState<MatchesState>({
     league: initialLeague,
     matchesCache: {
@@ -42,7 +44,7 @@ export function useMatches(initialLeague: LeagueCode = "PREMIER_LEAGUE") {
         error: null,
       }));
     } catch (error) {
-      const errorMessage = error instanceof ApiError ? error.message : "Nie udało się pobrać meczów";
+      const errorMessage = error instanceof ApiError ? error.message : t.predictions.errors.fetchMatchesFailed;
 
       setState((prev) => ({
         ...prev,
@@ -50,7 +52,7 @@ export function useMatches(initialLeague: LeagueCode = "PREMIER_LEAGUE") {
         error: errorMessage,
       }));
     }
-  }, []);
+  }, [t]);
 
   const changeLeague = useCallback(
     (newLeague: LeagueCode) => {
