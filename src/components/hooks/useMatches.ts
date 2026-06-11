@@ -6,7 +6,7 @@ import { useTranslation } from "@/lib/i18n";
 
 interface MatchesState {
   league: LeagueCode;
-  matchesCache: Record<LeagueCode, MatchDTO[]>;
+  matchesCache: Record<LeagueCode, MatchDTO[] | null>;
   status: "idle" | "loading" | "success" | "error";
   error: string | null;
 }
@@ -16,9 +16,10 @@ export function useMatches(initialLeague: LeagueCode = "PREMIER_LEAGUE") {
   const [state, setState] = useState<MatchesState>({
     league: initialLeague,
     matchesCache: {
-      PREMIER_LEAGUE: [],
-      LA_LIGA: [],
-      BUNDESLIGA: [],
+      PREMIER_LEAGUE: null,
+      LA_LIGA: null,
+      BUNDESLIGA: null,
+      WC: null,
     },
     status: "idle",
     error: null,
@@ -57,33 +58,26 @@ export function useMatches(initialLeague: LeagueCode = "PREMIER_LEAGUE") {
     [t]
   );
 
-  const changeLeague = useCallback(
-    (newLeague: LeagueCode) => {
-      setState((prev) => ({
-        ...prev,
-        league: newLeague,
-      }));
-
-      if (state.matchesCache[newLeague].length === 0) {
-        fetchMatches(newLeague);
-      }
-    },
-    [state.matchesCache, fetchMatches]
-  );
+  const changeLeague = useCallback((newLeague: LeagueCode) => {
+    setState((prev) => ({
+      ...prev,
+      league: newLeague,
+    }));
+  }, []);
 
   const refetch = useCallback(() => {
     fetchMatches(state.league);
   }, [state.league, fetchMatches]);
 
   useEffect(() => {
-    if (state.matchesCache[state.league].length === 0) {
+    if (state.matchesCache[state.league] === null && state.status !== "loading") {
       fetchMatches(state.league);
     }
-  }, [fetchMatches, state.league, state.matchesCache]);
+  }, [fetchMatches, state.league, state.matchesCache, state.status]);
 
   return {
     league: state.league,
-    matches: state.matchesCache[state.league],
+    matches: state.matchesCache[state.league] ?? [],
     status: state.status,
     error: state.error,
     changeLeague,

@@ -2,6 +2,7 @@ import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/
 import { PredictionResult } from "./PredictionResult";
 import type { MatchDTO, UserChoice } from "@/types";
 import type { PredictionState } from "./hooks/usePredictions";
+import { useLanguage } from "@/lib/i18n";
 
 interface MatchCardProps {
   match: MatchDTO;
@@ -11,13 +12,15 @@ interface MatchCardProps {
 }
 
 export function MatchCard({ match, predictionState, isAuthenticated, onSavePrediction }: MatchCardProps) {
+  const { language } = useLanguage();
+  const locale = language === "pl" ? "pl-PL" : "en-US";
   const matchDate = new Date(match.match_date);
-  const formattedDate = matchDate.toLocaleDateString("pl-PL", {
+  const formattedDate = matchDate.toLocaleDateString(locale, {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
-  const formattedTime = matchDate.toLocaleTimeString("pl-PL", {
+  const formattedTime = matchDate.toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
   });

@@ -3,7 +3,7 @@ import { BUSINESS_RULES, LEAGUE_CODES } from "@/types";
 
 // GET /api/matches
 export const getMatchesQuerySchema = z.object({
-  league: z.enum([LEAGUE_CODES.PREMIER_LEAGUE, LEAGUE_CODES.LA_LIGA, LEAGUE_CODES.BUNDESLIGA]),
+  league: z.enum([LEAGUE_CODES.PREMIER_LEAGUE, LEAGUE_CODES.LA_LIGA, LEAGUE_CODES.BUNDESLIGA, LEAGUE_CODES.WC]),
   limit: z.coerce
     .number()
     .int()
@@ -18,7 +18,7 @@ export const generatePredictionBodySchema = z.object({
   match_id: z.string().min(1),
   home_team: z.string().min(1),
   away_team: z.string().min(1),
-  league: z.enum([LEAGUE_CODES.PREMIER_LEAGUE, LEAGUE_CODES.LA_LIGA, LEAGUE_CODES.BUNDESLIGA]),
+  league: z.enum([LEAGUE_CODES.PREMIER_LEAGUE, LEAGUE_CODES.LA_LIGA, LEAGUE_CODES.BUNDESLIGA, LEAGUE_CODES.WC]),
   match_date: z.string().datetime(),
 });
 
