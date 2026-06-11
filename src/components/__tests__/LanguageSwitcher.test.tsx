@@ -15,66 +15,65 @@ describe("LanguageSwitcher", () => {
       </LanguageProvider>
     );
 
-    const button = screen.getByTestId("language-switcher");
+    const button = screen.getByTestId("language-switcher-trigger");
     expect(button).toBeInTheDocument();
   });
 
-  it("should display current language badge", () => {
+  it("should show current language label", () => {
     render(
       <LanguageProvider>
         <LanguageSwitcher />
       </LanguageProvider>
     );
 
-    const button = screen.getByTestId("language-switcher");
-    // Should show "pl" badge initially
-    expect(button).toHaveTextContent("pl");
+    const button = screen.getByTestId("language-switcher-trigger");
+    expect(button).toHaveTextContent(/Polski/i);
   });
 
-  it("should toggle language when clicked", () => {
+  it("should change language when option selected", () => {
     render(
       <LanguageProvider>
         <LanguageSwitcher />
       </LanguageProvider>
     );
 
-    const button = screen.getByTestId("language-switcher");
+    const button = screen.getByTestId("language-switcher-trigger");
 
     // Initial state
-    expect(button).toHaveTextContent("pl");
+    expect(button).toHaveTextContent(/Polski/i);
 
-    // Click to switch to EN
+    // Open dropdown and select EN
     fireEvent.click(button);
-    expect(button).toHaveTextContent("en");
+    fireEvent.click(screen.getByTestId("language-option-en"));
+    expect(button).toHaveTextContent(/English/i);
 
-    // Click again to switch back to PL
+    // Open dropdown and select PL
     fireEvent.click(button);
-    expect(button).toHaveTextContent("pl");
+    fireEvent.click(screen.getByTestId("language-option-pl"));
+    expect(button).toHaveTextContent(/Polski/i);
   });
 
-  it("should have proper aria-label", () => {
+  it("should have proper aria attributes", () => {
     render(
       <LanguageProvider>
         <LanguageSwitcher />
       </LanguageProvider>
     );
 
-    const button = screen.getByTestId("language-switcher");
-    // Initial language is PL, so should show "Switch language to English"
-    expect(button).toHaveAttribute("aria-label", "Switch language to English");
+    const button = screen.getByTestId("language-switcher-trigger");
+    expect(button).toHaveAttribute("aria-haspopup", "listbox");
+    expect(button).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("should update aria-label after language change", () => {
+  it("should update aria-expanded when opened", () => {
     render(
       <LanguageProvider>
         <LanguageSwitcher />
       </LanguageProvider>
     );
 
-    const button = screen.getByTestId("language-switcher");
-
-    // Click to switch to EN
+    const button = screen.getByTestId("language-switcher-trigger");
     fireEvent.click(button);
-    expect(button).toHaveAttribute("aria-label", "Switch language to Polski");
+    expect(button).toHaveAttribute("aria-expanded", "true");
   });
 });

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { LogIn, UserPlus, LogOut, User as UserIcon, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
+import { useTranslation } from "@/lib/i18n";
 
 interface UserNavProps {
   user: User | null;
@@ -10,6 +11,7 @@ interface UserNavProps {
 
 export function UserNav({ user }: UserNavProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const t = useTranslation();
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -26,11 +28,11 @@ export function UserNav({ user }: UserNavProps) {
         throw new Error("Logout failed");
       }
 
-      toast.success("Wylogowano pomyślnie");
+      toast.success(t.nav.logoutSuccess);
       // Redirect to home page
       window.location.href = "/";
     } catch {
-      toast.error("Nie udało się wylogować. Spróbuj ponownie.");
+      toast.error(t.nav.logoutError);
       setIsLoggingOut(false);
     }
   };
@@ -42,13 +44,13 @@ export function UserNav({ user }: UserNavProps) {
         <Button variant="ghost" size="sm" asChild className="text-xs sm:text-sm">
           <a href="/login" data-testid="nav-login-link">
             <LogIn className="sm:mr-2 size-4" />
-            <span className="hidden sm:inline">Zaloguj się</span>
+            <span className="hidden sm:inline">{t.nav.login}</span>
           </a>
         </Button>
         <Button variant="default" size="sm" asChild className="text-xs sm:text-sm">
           <a href="/register" data-testid="nav-register-link">
             <UserPlus className="sm:mr-2 size-4" />
-            <span className="hidden sm:inline">Zarejestruj się</span>
+            <span className="hidden sm:inline">{t.nav.register}</span>
           </a>
         </Button>
       </nav>
@@ -61,7 +63,7 @@ export function UserNav({ user }: UserNavProps) {
       <Button variant="ghost" size="sm" asChild className="text-xs sm:text-sm">
         <a href="/predictions" data-testid="nav-predictions-link">
           <Bookmark className="sm:mr-2 size-4" />
-          <span className="hidden sm:inline">Zapisane</span>
+          <span className="hidden sm:inline">{t.nav.saved}</span>
         </a>
       </Button>
       <div className="flex items-center gap-2 px-3 py-1.5 bg-accent/50 rounded-md" data-testid="nav-user-email">
@@ -77,7 +79,7 @@ export function UserNav({ user }: UserNavProps) {
         data-testid="nav-logout-button"
       >
         <LogOut className="sm:mr-2 size-4" />
-        <span className="hidden sm:inline">{isLoggingOut ? "Wylogowywanie..." : "Wyloguj się"}</span>
+        <span className="hidden sm:inline">{isLoggingOut ? t.nav.logoutProcessing : t.nav.logout}</span>
       </Button>
     </nav>
   );

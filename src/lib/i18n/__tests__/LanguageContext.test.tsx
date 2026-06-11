@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { LanguageProvider, useLanguage } from "../LanguageContext";
+import { LanguageProvider, useLanguage, __testing } from "../LanguageContext";
 
 // Test component that uses the language context
 function TestComponent() {
@@ -28,6 +28,8 @@ describe("LanguageContext", () => {
     localStorage.clear();
     // Reset HTML lang attribute
     document.documentElement.lang = "en";
+    // Reset singleton
+    __testing.resetLanguage("pl");
   });
 
   afterEach(() => {

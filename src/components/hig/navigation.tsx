@@ -1,6 +1,7 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export interface HIGNavigationBarProps extends HTMLAttributes<HTMLElement> {
   leading?: ReactNode;
@@ -63,6 +64,7 @@ export interface HIGTabBarProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const HIGTabBar = ({ activeKey, className, items, onChange, ...props }: HIGTabBarProps) => {
+  const t = useTranslation();
   return (
     <nav
       className={cn(
@@ -71,7 +73,7 @@ export const HIGTabBar = ({ activeKey, className, items, onChange, ...props }: H
         className
       )}
       {...props}
-      aria-label="Główne sekcje"
+      aria-label={t.common.mainSectionsAria}
     >
       {items.map((item) => {
         const isActive = item.key === activeKey;

@@ -50,7 +50,7 @@ export interface MatchesResponseDTO {
  * Query parameters for GET /api/matches
  */
 export interface GetMatchesQueryParams {
-  league: "PL" | "PD" | "BL1"; // Premier League, La Liga, Bundesliga
+  league: "PL" | "PD" | "BL1" | "WC"; // Premier League, La Liga, Bundesliga, World Cup
   limit?: number; // 1-50, default: 20
 }
 
@@ -220,6 +220,7 @@ export const LEAGUE_CODES = {
   PREMIER_LEAGUE: "PL",
   LA_LIGA: "PD",
   BUNDESLIGA: "BL1",
+  WC: "WC",
 } as const;
 
 /**
@@ -229,6 +230,7 @@ export const LEAGUE_NAMES = {
   PREMIER_LEAGUE: "Premier League",
   LA_LIGA: "La Liga",
   BUNDESLIGA: "Bundesliga",
+  WC: "World Cup",
 } as const;
 
 /**
@@ -238,6 +240,7 @@ export const LEAGUE_NAME_TO_CODE: Record<string, string> = {
   "Premier League": LEAGUE_CODES.PREMIER_LEAGUE,
   "La Liga": LEAGUE_CODES.LA_LIGA,
   Bundesliga: LEAGUE_CODES.BUNDESLIGA,
+  "World Cup": LEAGUE_CODES.WC,
 };
 
 /**

@@ -10,6 +10,7 @@ const leagueCodeToName: Record<string, string> = {
   PL: "Premier League",
   PD: "La Liga",
   BL1: "Bundesliga",
+  WC: "World Cup",
 };
 
 export async function fetchUpcomingMatches(leagueCode: string, limit: number, apiKey: string): Promise<MatchDTO[]> {

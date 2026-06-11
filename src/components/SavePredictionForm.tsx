@@ -12,6 +12,7 @@ import {
   type SavePredictionFormData,
   type SavePredictionFormInput,
 } from "@/lib/validation/prediction.schemas";
+import { useTranslation } from "@/lib/i18n";
 
 export interface SavePredictionFormHandle {
   setUserChoice: (choice: UserChoice | null) => void;
@@ -27,6 +28,7 @@ interface SavePredictionFormProps {
 
 export const SavePredictionForm = forwardRef<SavePredictionFormHandle, SavePredictionFormProps>(
   function SavePredictionForm({ matchId, saveStatus, isAuthenticated, onSave }, ref) {
+    const t = useTranslation();
     const form = useForm<SavePredictionFormInput, undefined, SavePredictionFormData>({
       resolver: zodResolver(savePredictionSchema),
       defaultValues: {
@@ -59,13 +61,13 @@ export const SavePredictionForm = forwardRef<SavePredictionFormHandle, SavePredi
 
     useEffect(() => {
       if (saveStatus === "saved") {
-        toast.success("Predykcja zapisana pomyślnie!");
+        toast.success(t.predictions.toasts.savedSuccess);
         // Reset form after successful save
         form.reset();
       } else if (saveStatus === "error") {
-        toast.error("Nie udało się zapisać predykcji");
+        toast.error(t.predictions.toasts.savedError);
       }
-    }, [saveStatus, form]);
+    }, [saveStatus, form, t]);
 
     const onSubmit = (data: SavePredictionFormData) => {
       onSave(matchId, data.note, data.userChoice);
@@ -80,25 +82,25 @@ export const SavePredictionForm = forwardRef<SavePredictionFormHandle, SavePredi
       <form onSubmit={formHandleSubmit(onSubmit)} className="mt-6 pt-6 border-t space-y-4">
         {isAuthDisabled && (
           <div className="rounded-md border border-dashed border-muted-foreground/40 bg-muted/50 px-3 py-2 text-xs sm:text-sm text-muted-foreground">
-            Zapisywanie predykcji dostępne po zalogowaniu.{" "}
+            {t.predictions.ui.saveForm.loginRequiredPrefix}{" "}
             <a href="/login" className="underline underline-offset-4">
-              Zaloguj się
+              {t.nav.login}
             </a>{" "}
-            lub{" "}
+            {t.common.or}{" "}
             <a href="/register" className="underline underline-offset-4">
-              utwórz konto
+              {t.predictions.ui.saveForm.createAccountLink}
             </a>{" "}
-            aby odblokować notatki i zapisy.
+            {t.predictions.ui.saveForm.unlockFeatures}
           </div>
         )}
 
         <div className="space-y-2">
           <label htmlFor={`note-${matchId}`} className="text-xs sm:text-sm font-medium block">
-            Dodaj notatkę (opcjonalnie)
+            {t.predictions.ui.saveForm.addNoteLabel}
           </label>
           <Textarea
             id={`note-${matchId}`}
-            placeholder="Dodaj swoją notatkę do tej predykcji..."
+            placeholder={t.predictions.ui.saveForm.addNotePlaceholder}
             maxLength={BUSINESS_RULES.MAX_NOTE_LENGTH}
             disabled={isDisabled}
             className={`resize-none text-sm ${
@@ -110,7 +112,7 @@ export const SavePredictionForm = forwardRef<SavePredictionFormHandle, SavePredi
           {errors.note && <p className="text-xs text-destructive">{errors.note.message}</p>}
           <div className="flex justify-end items-center text-xs text-muted-foreground">
             <span>
-              {noteValue.length}/{BUSINESS_RULES.MAX_NOTE_LENGTH} znaków
+              {noteValue.length}/{BUSINESS_RULES.MAX_NOTE_LENGTH} {t.common.characters}
             </span>
           </div>
         </div>
@@ -123,7 +125,11 @@ export const SavePredictionForm = forwardRef<SavePredictionFormHandle, SavePredi
           }`}
           variant={isSaved ? "secondary" : "default"}
         >
-          {isSaving ? "Zapisywanie..." : isSaved ? "✓ Zapisano" : "Zapisz predykcję"}
+          {isSaving
+            ? t.predictions.ui.saveForm.saving
+            : isSaved
+              ? t.predictions.ui.saveForm.saved
+              : t.predictions.savePrediction}
         </Button>
       </form>
     );

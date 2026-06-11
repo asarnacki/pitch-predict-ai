@@ -1,0 +1,161 @@
+{
+  "common": {
+    "appName": "PitchPredict AI",
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "or": "or",
+    "characters": "chars",
+    "toggleThemeAria": "Toggle theme",
+    "mainSectionsAria": "Main sections",
+    "closeModalOverlayAria": "Close modal window",
+    "closeAria": "Close"
+  },
+  "nav": {
+    "home": "Home",
+    "predictions": "Predictions",
+    "login": "Log in",
+    "register": "Sign up",
+    "logout": "Log out",
+    "profile": "Profile",
+    "saved": "Saved",
+    "logoutProcessing": "Logging out...",
+    "logoutSuccess": "Logged out successfully",
+    "logoutError": "Failed to log out. Please try again."
+  },
+  "auth": {
+    "login": {
+      "title": "Log in",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Log in",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign up",
+      "processing": "Processing..."
+    },
+    "register": {
+      "title": "Sign up",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "submit": "Sign up",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Log in",
+      "processing": "Processing..."
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "description": "Enter your email address and we'll send you a password reset link",
+      "email": "Email",
+      "submit": "Send reset link",
+      "rememberPassword": "Remember your password?",
+      "loginLink": "Log in",
+      "processing": "Processing..."
+    },
+    "updatePassword": {
+      "title": "Set new password",
+      "description": "Enter a new password for your account",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "submit": "Change password",
+      "processing": "Processing..."
+    },
+    "toast": {
+      "loginSuccess": "Logged in successfully!",
+      "registerSuccess": "Registration completed successfully!",
+      "resetPasswordSuccess": "Password reset link has been sent to your email",
+      "updatePasswordSuccess": "Password has been changed successfully!"
+    },
+    "errors": {
+      "connection": "Connection error. Please check your internet connection."
+    }
+  },
+  "predictions": {
+    "title": "PitchPredict AI",
+    "subtitle": "Generate AI predictions for upcoming matches",
+    "generatePrediction": "Generate prediction",
+    "savePrediction": "Save prediction",
+    "noMatches": "No upcoming matches",
+    "noMatchesDescription": "There are currently no scheduled matches in this league",
+    "errorTitle": "Failed to fetch matches",
+    "errorDescription": "An error occurred while fetching the match list",
+    "retryButton": "Try again",
+    "savedPredictions": "Saved predictions",
+    "myPredictions": "My predictions",
+    "errors": {
+      "fetchMatchesFailed": "Failed to fetch matches",
+      "generateFailed": "Failed to generate prediction",
+      "saveFailed": "Failed to save prediction",
+      "fetchPredictionsFailed": "Failed to fetch predictions",
+      "deleteFailed": "Failed to delete prediction"
+    },
+    "toasts": {
+      "savedSuccess": "Prediction saved successfully!",
+      "savedError": "Failed to save prediction",
+      "deletedSuccess": "Prediction deleted successfully",
+      "deletedError": "Failed to delete prediction"
+    },
+    "ui": {
+      "clickToGenerate": "Click to generate AI prediction",
+      "generating": "Generating AI prediction...",
+      "errorTitle": "An error occurred",
+      "retryHint": "Open the card again to retry",
+      "aiTitle": "AI Prediction",
+      "selectHint": "Click on a bar to select your prediction (optional)",
+      "generatedAt": "Generated at:",
+      "loadingList": "Loading predictions...",
+      "emptyTitle": "You don't have any saved predictions yet",
+      "emptyDescription": "Generate and save your first prediction on the home page",
+      "goHome": "Go to home",
+      "yourChoice": "Your choice",
+      "noChoice": "No prediction selected",
+      "note": "Note",
+      "savedAt": "Saved:",
+      "page": "Page",
+      "of": "of",
+      "previous": "Previous",
+      "next": "Next",
+      "deleteTitle": "Delete prediction?",
+      "deleteCannotUndo": "This action cannot be undone.",
+      "chart": {
+        "homeWin": "Home win",
+        "draw": "Draw",
+        "awayWin": "Away win",
+        "home": "Home",
+        "away": "Away"
+      },
+      "saveForm": {
+        "loginRequiredPrefix": "Saving predictions available after login.",
+        "createAccountLink": "create an account",
+        "unlockFeatures": "to unlock notes and saving.",
+        "addNoteLabel": "Add note (optional)",
+        "addNotePlaceholder": "Add your note for this prediction...",
+        "saving": "Saving...",
+        "saved": "✓ Saved"
+      }
+    }
+  },
+  "match": {
+    "homeTeam": "Home team",
+    "awayTeam": "Away team",
+    "date": "Date",
+    "time": "Time",
+    "prediction": "Prediction",
+    "probability": "Probability",
+    "analysis": "Analysis"
+  },
+  "league": {
+    "selectLeague": "Select league",
+    "premierLeague": "Premier League",
+    "laLiga": "La Liga",
+    "bundesliga": "Bundesliga",
+    "serieA": "Serie A",
+    "ligue1": "Ligue 1"
+  }
+}

@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/utils";
 import { HIGButton } from "./button";
+import { useTranslation } from "@/lib/i18n";
 
 export interface HIGModalAction {
   label: string;
@@ -43,6 +44,7 @@ export const HIGModal = ({
   title,
   width = "md",
 }: HIGModalProps) => {
+  const t = useTranslation();
   const [mounted, setMounted] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -148,7 +150,7 @@ export const HIGModal = ({
         role="button"
         tabIndex={dismissible ? 0 : -1}
         onKeyDown={handleOverlayKeyDown}
-        aria-label="Zamknij okno modalne"
+        aria-label={t.common.closeModalOverlayAria}
       />
       <div
         ref={modalRef}
@@ -166,7 +168,7 @@ export const HIGModal = ({
           <button
             onClick={onClose}
             className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--hig-color-label-tertiary)] transition hover:bg-[color:color-mix(in_oklch,var(--hig-color-label-tertiary)_10%,transparent)]"
-            aria-label="Zamknij"
+            aria-label={t.common.closeAria}
           >
             <span className="text-[1.1rem] leading-none">×</span>
           </button>

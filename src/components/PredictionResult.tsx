@@ -4,6 +4,7 @@ import { BarChart } from "./BarChart";
 import { SavePredictionForm, type SavePredictionFormHandle } from "./SavePredictionForm";
 import type { MatchDTO, UserChoice } from "@/types";
 import type { PredictionState } from "./hooks/usePredictions";
+import { useLanguage, useTranslation } from "@/lib/i18n";
 
 interface PredictionResultProps {
   match: MatchDTO;
@@ -15,6 +16,8 @@ interface PredictionResultProps {
 export function PredictionResult({ match, predictionState, isAuthenticated, onSave }: PredictionResultProps) {
   const [userChoice, setUserChoice] = useState<UserChoice | null>(null);
   const formRef = useRef<SavePredictionFormHandle>(null);
+  const t = useTranslation();
+  const { language } = useLanguage();
 
   const handleChoiceSelect = (choice: UserChoice) => {
     const newChoice = userChoice === choice ? null : choice;
@@ -28,7 +31,7 @@ export function PredictionResult({ match, predictionState, isAuthenticated, onSa
   if (!predictionState || predictionState.status === "idle") {
     return (
       <div className="py-8 text-center">
-        <p className="text-sm sm:text-base text-muted-foreground">Kliknij, aby wygenerować predykcję AI</p>
+        <p className="text-sm sm:text-base text-muted-foreground">{t.predictions.ui.clickToGenerate}</p>
       </div>
     );
   }
@@ -37,7 +40,7 @@ export function PredictionResult({ match, predictionState, isAuthenticated, onSa
     return (
       <div className="py-12 flex flex-col items-center justify-center gap-4">
         <Spinner className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
-        <p className="text-sm sm:text-base text-muted-foreground">Generowanie predykcji AI...</p>
+        <p className="text-sm sm:text-base text-muted-foreground">{t.predictions.ui.generating}</p>
       </div>
     );
   }
@@ -46,11 +49,11 @@ export function PredictionResult({ match, predictionState, isAuthenticated, onSa
     return (
       <div className="py-8 text-center">
         <div className="max-w-md mx-auto space-y-3">
-          <div className="text-destructive font-medium text-sm sm:text-base">Wystąpił błąd</div>
+          <div className="text-destructive font-medium text-sm sm:text-base">{t.predictions.ui.errorTitle}</div>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            {predictionState.error || "Nie udało się wygenerować predykcji"}
+            {predictionState.error || t.predictions.errors.generateFailed}
           </p>
-          <p className="text-xs text-muted-foreground mt-4">Otwórz kartę ponownie, aby spróbować jeszcze raz</p>
+          <p className="text-xs text-muted-foreground mt-4">{t.predictions.ui.retryHint}</p>
         </div>
       </div>
     );
@@ -60,7 +63,7 @@ export function PredictionResult({ match, predictionState, isAuthenticated, onSa
     const { prediction, home_team, away_team, generated_at } = predictionState.data;
 
     const generatedDate = new Date(generated_at);
-    const formattedGeneratedDate = generatedDate.toLocaleString("pl-PL", {
+    const formattedGeneratedDate = generatedDate.toLocaleString(language === "pl" ? "pl-PL" : "en-US", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -71,10 +74,8 @@ export function PredictionResult({ match, predictionState, isAuthenticated, onSa
     return (
       <div className="space-y-6">
         <div>
-          <h4 className="text-base sm:text-lg font-semibold mb-2">Predykcja AI</h4>
-          <p className="text-xs sm:text-sm text-muted-foreground mb-4">
-            Kliknij na słupek, aby wybrać swoją predykcję (opcjonalnie)
-          </p>
+          <h4 className="text-base sm:text-lg font-semibold mb-2">{t.predictions.ui.aiTitle}</h4>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-4">{t.predictions.ui.selectHint}</p>
           <BarChart
             prediction={prediction}
             homeTeam={home_team}
@@ -86,7 +87,7 @@ export function PredictionResult({ match, predictionState, isAuthenticated, onSa
         </div>
 
         <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
-          Wygenerowano: {formattedGeneratedDate}
+          {t.predictions.ui.generatedAt} {formattedGeneratedDate}
         </div>
 
         <SavePredictionForm

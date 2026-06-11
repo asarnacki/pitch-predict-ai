@@ -1,13 +1,5 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Language } from "./types";
-
-interface LanguageContextType {
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  toggleLanguage: () => void;
-}
-
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 const LANGUAGE_STORAGE_KEY = "pitchpredict-language";
 
@@ -37,37 +29,85 @@ interface LanguageProviderProps {
   children: ReactNode;
 }
 
-export function LanguageProvider({ children }: LanguageProviderProps) {
-  const [language, setLanguageState] = useState<Language>(getInitialLanguage);
+// Singleton state to share across Astro islands (each `client:*` is a separate React root).
+let currentLanguage: Language = "pl";
+const listeners = new Set<(lang: Language) => void>();
 
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
-    // Update html lang attribute
-    document.documentElement.lang = lang;
-  };
-
-  const toggleLanguage = () => {
-    const newLang: Language = language === "pl" ? "en" : "pl";
-    setLanguage(newLang);
-  };
-
-  // Set initial lang attribute on mount
-  useEffect(() => {
-    document.documentElement.lang = language;
-  }, [language]);
-
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+// Initialize on client
+if (typeof window !== "undefined") {
+  currentLanguage = getInitialLanguage();
+  document.documentElement.lang = currentLanguage;
 }
 
-export function useLanguage(): LanguageContextType {
-  const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
+const notify = () => {
+  listeners.forEach((l) => l(currentLanguage));
+};
+
+const setLanguageGlobal = (lang: Language) => {
+  if (currentLanguage === lang) return;
+
+  currentLanguage = lang;
+  if (typeof window !== "undefined") {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+    document.documentElement.lang = lang;
   }
-  return context;
+  notify();
+};
+
+const toggleLanguageGlobal = () => {
+  const newLang: Language = currentLanguage === "pl" ? "en" : "pl";
+  setLanguageGlobal(newLang);
+};
+
+export interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  toggleLanguage: () => void;
+}
+
+/**
+ * Test-only helpers.
+ * The language state is module-level (singleton), so unit tests must be able to reset it.
+ */
+export const __testing = {
+  resetLanguage(lang: Language = "pl") {
+    currentLanguage = lang;
+    listeners.clear();
+
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(LANGUAGE_STORAGE_KEY);
+      document.documentElement.lang = lang;
+    }
+  },
+};
+
+export function useLanguage(): LanguageContextType {
+  const [language, setLanguageState] = useState<Language>(currentLanguage);
+
+  useEffect(() => {
+    setLanguageState(currentLanguage);
+
+    const listener = (lang: Language) => {
+      setLanguageState(lang);
+    };
+
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  }, []);
+
+  return {
+    language,
+    setLanguage: setLanguageGlobal,
+    toggleLanguage: toggleLanguageGlobal,
+  };
+}
+
+/**
+ * Backward compatible provider (no longer required).
+ * Kept so existing tests/components can still wrap with it.
+ */
+export function LanguageProvider({ children }: LanguageProviderProps) {
+  return <>{children}</>;
 }

@@ -1,0 +1,161 @@
+{
+  "common": {
+    "appName": "PitchPredict AI",
+    "loading": "Ładowanie...",
+    "error": "Błąd",
+    "retry": "Spróbuj ponownie",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "close": "Zamknij",
+    "or": "lub",
+    "characters": "znaków",
+    "toggleThemeAria": "Przełącz motyw",
+    "mainSectionsAria": "Główne sekcje",
+    "closeModalOverlayAria": "Zamknij okno modalne",
+    "closeAria": "Zamknij"
+  },
+  "nav": {
+    "home": "Strona główna",
+    "predictions": "Predykcje",
+    "login": "Zaloguj się",
+    "register": "Zarejestruj się",
+    "logout": "Wyloguj się",
+    "profile": "Profil",
+    "saved": "Zapisane",
+    "logoutProcessing": "Wylogowywanie...",
+    "logoutSuccess": "Wylogowano pomyślnie",
+    "logoutError": "Nie udało się wylogować. Spróbuj ponownie."
+  },
+  "auth": {
+    "login": {
+      "title": "Zaloguj się",
+      "email": "E-mail",
+      "password": "Hasło",
+      "submit": "Zaloguj się",
+      "forgotPassword": "Zapomniałeś hasła?",
+      "noAccount": "Nie masz konta?",
+      "registerLink": "Zarejestruj się",
+      "processing": "Przetwarzanie..."
+    },
+    "register": {
+      "title": "Zarejestruj się",
+      "email": "E-mail",
+      "password": "Hasło",
+      "confirmPassword": "Potwierdź hasło",
+      "submit": "Zarejestruj się",
+      "hasAccount": "Masz już konto?",
+      "loginLink": "Zaloguj się",
+      "processing": "Przetwarzanie..."
+    },
+    "resetPassword": {
+      "title": "Resetuj hasło",
+      "description": "Podaj swój adres e-mail, a wyślemy Ci link do zresetowania hasła",
+      "email": "E-mail",
+      "submit": "Wyślij link resetujący",
+      "rememberPassword": "Pamiętasz hasło?",
+      "loginLink": "Zaloguj się",
+      "processing": "Przetwarzanie..."
+    },
+    "updatePassword": {
+      "title": "Ustaw nowe hasło",
+      "description": "Wprowadź nowe hasło dla swojego konta",
+      "password": "Hasło",
+      "confirmPassword": "Potwierdź hasło",
+      "submit": "Zmień hasło",
+      "processing": "Przetwarzanie..."
+    },
+    "toast": {
+      "loginSuccess": "Zalogowano pomyślnie!",
+      "registerSuccess": "Rejestracja zakończona pomyślnie!",
+      "resetPasswordSuccess": "Link do resetowania hasła został wysłany na e-mail",
+      "updatePasswordSuccess": "Hasło zostało zmienione pomyślnie!"
+    },
+    "errors": {
+      "connection": "Wystąpił błąd połączenia. Sprawdź połączenie internetowe."
+    }
+  },
+  "predictions": {
+    "title": "PitchPredict AI",
+    "subtitle": "Wygeneruj predykcje AI dla nadchodzących meczów",
+    "generatePrediction": "Generuj predykcję",
+    "savePrediction": "Zapisz predykcję",
+    "noMatches": "Brak nadchodzących meczów",
+    "noMatchesDescription": "Obecnie nie ma zaplanowanych meczów w tej lidze",
+    "errorTitle": "Nie udało się pobrać meczów",
+    "errorDescription": "Wystąpił błąd podczas pobierania listy meczów",
+    "retryButton": "Spróbuj ponownie",
+    "savedPredictions": "Zapisane predykcje",
+    "myPredictions": "Moje predykcje",
+    "errors": {
+      "fetchMatchesFailed": "Nie udało się pobrać meczów",
+      "generateFailed": "Nie udało się wygenerować predykcji",
+      "saveFailed": "Nie udało się zapisać predykcji",
+      "fetchPredictionsFailed": "Nie udało się pobrać predykcji",
+      "deleteFailed": "Nie udało się usunąć predykcji"
+    },
+    "toasts": {
+      "savedSuccess": "Predykcja zapisana pomyślnie!",
+      "savedError": "Nie udało się zapisać predykcji",
+      "deletedSuccess": "Predykcja usunięta pomyślnie",
+      "deletedError": "Nie udało się usunąć predykcji"
+    },
+    "ui": {
+      "clickToGenerate": "Kliknij, aby wygenerować predykcję AI",
+      "generating": "Generowanie predykcji AI...",
+      "errorTitle": "Wystąpił błąd",
+      "retryHint": "Otwórz kartę ponownie, aby spróbować jeszcze raz",
+      "aiTitle": "Predykcja AI",
+      "selectHint": "Kliknij na słupek, aby wybrać swoją predykcję (opcjonalnie)",
+      "generatedAt": "Wygenerowano:",
+      "loadingList": "Ładowanie predykcji...",
+      "emptyTitle": "Nie masz jeszcze zapisanych predykcji",
+      "emptyDescription": "Wygeneruj i zapisz swoją pierwszą predykcję na stronie głównej",
+      "goHome": "Przejdź do głównej",
+      "yourChoice": "Twój wybór",
+      "noChoice": "Brak wybranej predykcji",
+      "note": "Notatka",
+      "savedAt": "Zapisano:",
+      "page": "Strona",
+      "of": "z",
+      "previous": "Poprzednia",
+      "next": "Następna",
+      "deleteTitle": "Usuń predykcję?",
+      "deleteCannotUndo": "Tej operacji nie można cofnąć.",
+      "chart": {
+        "homeWin": "Wygrana gospodarzy",
+        "draw": "Remis",
+        "awayWin": "Wygrana gości",
+        "home": "Gospodarz",
+        "away": "Gość"
+      },
+      "saveForm": {
+        "loginRequiredPrefix": "Zapisywanie predykcji dostępne po zalogowaniu.",
+        "createAccountLink": "utwórz konto",
+        "unlockFeatures": "aby odblokować notatki i zapisy.",
+        "addNoteLabel": "Dodaj notatkę (opcjonalnie)",
+        "addNotePlaceholder": "Dodaj swoją notatkę do tej predykcji...",
+        "saving": "Zapisywanie...",
+        "saved": "✓ Zapisano"
+      }
+    }
+  },
+  "match": {
+    "homeTeam": "Drużyna gospodarzy",
+    "awayTeam": "Drużyna gości",
+    "date": "Data",
+    "time": "Godzina",
+    "prediction": "Predykcja",
+    "probability": "Prawdopodobieństwo",
+    "analysis": "Analiza"
+  },
+  "league": {
+    "selectLeague": "Wybierz ligę",
+    "premierLeague": "Premier League",
+    "laLiga": "La Liga",
+    "bundesliga": "Bundesliga",
+    "serieA": "Serie A",
+    "ligue1": "Ligue 1"
+  }
+}
