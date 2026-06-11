@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/Spinner";
@@ -38,30 +38,33 @@ export function SavedPredictionsList() {
   const t = useTranslation();
   const { language } = useLanguage();
 
-  const fetchPredictions = async (newOffset: number) => {
-    setStatus("loading");
-    setError(null);
+  const fetchPredictions = useCallback(
+    async (newOffset: number) => {
+      setStatus("loading");
+      setError(null);
 
-    try {
-      const response = await fetch(`/api/predictions?limit=${LIMIT}&offset=${newOffset}&sort=created_at&order=desc`);
+      try {
+        const response = await fetch(`/api/predictions?limit=${LIMIT}&offset=${newOffset}&sort=created_at&order=desc`);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || t.predictions.errors.fetchPredictionsFailed);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || t.predictions.errors.fetchPredictionsFailed);
+        }
+
+        const result: ApiSuccessResponse<PaginatedPredictionsResponseDTO> = await response.json();
+
+        setPredictions(result.data.predictions);
+        setHasMore(result.data.pagination.has_more);
+        setTotal(result.data.pagination.total);
+        setOffset(newOffset);
+        setStatus("success");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : t.common.error);
+        setStatus("error");
       }
-
-      const result: ApiSuccessResponse<PaginatedPredictionsResponseDTO> = await response.json();
-
-      setPredictions(result.data.predictions);
-      setHasMore(result.data.pagination.has_more);
-      setTotal(result.data.pagination.total);
-      setOffset(newOffset);
-      setStatus("success");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t.common.error);
-      setStatus("error");
-    }
-  };
+    },
+    [t]
+  );
 
   const handleDeleteClick = (prediction: PredictionDTO) => {
     setPredictionToDelete(prediction);
@@ -104,7 +107,7 @@ export function SavedPredictionsList() {
 
   useEffect(() => {
     fetchPredictions(0);
-  }, []);
+  }, [fetchPredictions]);
 
   if (status === "loading" && predictions.length === 0) {
     return (

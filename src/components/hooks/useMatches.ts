@@ -58,15 +58,12 @@ export function useMatches(initialLeague: LeagueCode = "PREMIER_LEAGUE") {
     [t]
   );
 
-  const changeLeague = useCallback(
-    (newLeague: LeagueCode) => {
-      setState((prev) => ({
-        ...prev,
-        league: newLeague,
-      }));
-    },
-    []
-  );
+  const changeLeague = useCallback((newLeague: LeagueCode) => {
+    setState((prev) => ({
+      ...prev,
+      league: newLeague,
+    }));
+  }, []);
 
   const refetch = useCallback(() => {
     fetchMatches(state.league);

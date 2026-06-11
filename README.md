@@ -108,6 +108,21 @@ npm run dev
 - **Responsive Design** - Mobile-first approach (360px - 1440px+)
 - **Dark/Light Mode** - Theme toggle with smooth transitions
 - **Form Validation** - Client and server-side validation with Zod
+- **Internationalization (i18n)** - UI translations stored in JSON locales (`pl` / `en`)
+
+## Internationalization (i18n)
+
+The app supports Polish and English UI via JSON locale files:
+
+- `src/lib/i18n/locales/pl.json`
+- `src/lib/i18n/locales/en.json`
+
+Key points:
+
+- **Type-safe translations**: the `Translation` type is inferred from the base locale JSON.
+- **Language switcher**: implemented as a dropdown (`src/components/LanguageSwitcher.tsx`).
+- **Astro islands compatibility**: language state is shared across islands via a module-level singleton store (not React Context across roots).
+- **Stable E2E tests**: interactive React islands expose `data-hydrated="true"` once hydrated; Playwright waits for this attribute before interacting.
 
 ## API Endpoints
 
