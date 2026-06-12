@@ -1,4 +1,4 @@
-import { computed, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { matchesService, type LeagueCode } from "@/services/api/matches.service";
 import type { MatchDTO } from "@/types";
 import { ApiError } from "@/services/api/client";
@@ -45,18 +45,18 @@ export function useMatches(initialLeague: LeagueCode = "PREMIER_LEAGUE") {
     fetchMatches(league.value);
   };
 
-  // TODO(human): trigger fetching matches reactively.
-  //
-  // The React version used a useEffect that ran on every state change and called
-  // fetchMatches(league) when matchesCache[league] === null && status !== "loading".
-  // That effect once caused an infinite refetch loop (fixed in commit fb1e5da).
-  //
-  // Implement the Vue equivalent here so that:
-  //  - matches are fetched for the initial league when the component mounts (also on
-  //    the very first render — this composable is only used client-side),
-  //  - switching to a league that has not been fetched yet (cache is null) triggers a fetch,
-  //  - switching back to an already-fetched league does NOT refetch (cache hit),
-  //  - a league whose fetch failed can be retried via the existing refetch().
+  const fetchIfMissing = (targetLeague: LeagueCode) => {
+    if (matchesCache.value[targetLeague] === null) {
+      fetchMatches(targetLeague);
+    }
+  };
+
+  // onMounted (not an immediate watch) so the initial fetch never runs during SSR.
+  // Watching only `league` — the cache check lives in the callback body, not in the
+  // watch source, which is what prevents the infinite refetch loop the React
+  // useEffect version once had (fixed in fb1e5da).
+  onMounted(() => fetchIfMissing(league.value));
+  watch(league, (newLeague) => fetchIfMissing(newLeague));
 
   return {
     league,

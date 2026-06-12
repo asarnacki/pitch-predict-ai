@@ -25,7 +25,14 @@ export class LoginPage {
     await this.page.goto("/login");
   }
 
+  async waitForHydration() {
+    // Astro islands are visible before listeners are attached; AuthForm flips
+    // data-hydrated to "true" in onMounted exactly for this wait.
+    await this.page.locator('[data-testid="auth-form"][data-hydrated="true"]').waitFor();
+  }
+
   async fillCredentials(email: string, password: string) {
+    await this.waitForHydration();
     await this.emailInput.fill(email);
     await this.passwordInput.fill(password);
   }
