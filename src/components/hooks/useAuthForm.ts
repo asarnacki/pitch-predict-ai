@@ -1,124 +1,91 @@
-import { useState, useCallback } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { ref } from "vue";
+import { useForm, type TypedSchema } from "vee-validate";
+import { toTypedSchema } from "@vee-validate/zod";
+import { toast } from "vue-sonner";
 import { useTranslation } from "@/lib/i18n";
 
-import {
-  loginSchema,
-  registerSchema,
-  resetPasswordSchema,
-  updatePasswordSchema,
-  type LoginFormData,
-  type RegisterFormData,
-  type ResetPasswordFormData,
-  type UpdatePasswordFormData,
-} from "@/lib/validation/auth.schemas";
+import { loginSchema, registerSchema, resetPasswordSchema, updatePasswordSchema } from "@/lib/validation/auth.schemas";
 
 import { authService } from "@/services/api/auth.service";
 import { ApiError } from "@/services/api/client";
 
 export type AuthFormMode = "login" | "register" | "reset-password" | "update-password";
 
-interface UseAuthFormReturn<T> {
-  form: ReturnType<typeof useForm<T>>;
-  isSubmitting: boolean;
-  apiError: string | null;
-  handleSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
+export interface AuthFormValues {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
 }
 
-type AuthFormData = LoginFormData | RegisterFormData | ResetPasswordFormData | UpdatePasswordFormData;
-
-export function useAuthForm(options: { mode: "login"; onSuccess?: () => void }): UseAuthFormReturn<LoginFormData>;
-export function useAuthForm(options: { mode: "register"; onSuccess?: () => void }): UseAuthFormReturn<RegisterFormData>;
-export function useAuthForm(options: {
-  mode: "reset-password";
-  onSuccess?: () => void;
-}): UseAuthFormReturn<ResetPasswordFormData>;
-export function useAuthForm(options: {
-  mode: "update-password";
-  onSuccess?: () => void;
-}): UseAuthFormReturn<UpdatePasswordFormData>;
-
-export function useAuthForm({
-  mode,
-  onSuccess,
-}: {
-  mode: AuthFormMode;
-  onSuccess?: () => void;
-}): UseAuthFormReturn<AuthFormData> {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
+export function useAuthForm({ mode, onSuccess }: { mode: AuthFormMode; onSuccess?: () => void }) {
+  const isSubmitting = ref(false);
+  const apiError = ref<string | null>(null);
   const t = useTranslation();
 
-  const getResolver = () => {
+  const getSchema = () => {
     switch (mode) {
       case "login":
-        return zodResolver(loginSchema);
+        return loginSchema;
       case "register":
-        return zodResolver(registerSchema);
+        return registerSchema;
       case "reset-password":
-        return zodResolver(resetPasswordSchema);
+        return resetPasswordSchema;
       case "update-password":
-        return zodResolver(updatePasswordSchema);
+        return updatePasswordSchema;
       default:
-        return zodResolver(loginSchema);
+        return loginSchema;
     }
   };
 
-  const form = useForm({
-    resolver: getResolver(),
-    mode: "onBlur",
+  const form = useForm<AuthFormValues>({
+    validationSchema: toTypedSchema(getSchema()) as TypedSchema<AuthFormValues>,
   });
 
-  const handleSubmit = useCallback(
-    async (data: AuthFormData) => {
-      setIsSubmitting(true);
-      setApiError(null);
+  const handleSubmit = form.handleSubmit(async (data) => {
+    isSubmitting.value = true;
+    apiError.value = null;
 
-      try {
-        // Call appropriate auth service method based on mode
-        switch (mode) {
-          case "login":
-            await authService.login(data.email, data.password);
-            toast.success(t.auth.toast.loginSuccess);
-            window.location.href = "/";
-            break;
+    try {
+      // Call appropriate auth service method based on mode
+      switch (mode) {
+        case "login":
+          await authService.login(data.email ?? "", data.password ?? "");
+          toast.success(t.value.auth.toast.loginSuccess);
+          window.location.href = "/";
+          break;
 
-          case "register":
-            await authService.register(data.email, data.password);
-            toast.success(t.auth.toast.registerSuccess);
-            window.location.href = "/";
-            break;
+        case "register":
+          await authService.register(data.email ?? "", data.password ?? "");
+          toast.success(t.value.auth.toast.registerSuccess);
+          window.location.href = "/";
+          break;
 
-          case "reset-password":
-            await authService.resetPassword(data.email);
-            toast.success(t.auth.toast.resetPasswordSuccess);
-            if (onSuccess) onSuccess();
-            break;
+        case "reset-password":
+          await authService.resetPassword(data.email ?? "");
+          toast.success(t.value.auth.toast.resetPasswordSuccess);
+          if (onSuccess) onSuccess();
+          break;
 
-          case "update-password":
-            await authService.updatePassword(data.password);
-            toast.success(t.auth.toast.updatePasswordSuccess);
-            window.location.href = "/login";
-            break;
-        }
-      } catch (error) {
-        const errorMessage = error instanceof ApiError ? error.message : t.auth.errors.connection;
-
-        setApiError(errorMessage);
-        toast.error(errorMessage);
-      } finally {
-        setIsSubmitting(false);
+        case "update-password":
+          await authService.updatePassword(data.password ?? "");
+          toast.success(t.value.auth.toast.updatePasswordSuccess);
+          window.location.href = "/login";
+          break;
       }
-    },
-    [mode, onSuccess, t]
-  );
+    } catch (error) {
+      const errorMessage = error instanceof ApiError ? error.message : t.value.auth.errors.connection;
+
+      apiError.value = errorMessage;
+      toast.error(errorMessage);
+    } finally {
+      isSubmitting.value = false;
+    }
+  });
 
   return {
     form,
     isSubmitting,
     apiError,
-    handleSubmit: form.handleSubmit(handleSubmit),
+    handleSubmit,
   };
 }

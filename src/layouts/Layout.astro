@@ -1,9 +1,8 @@
 ---
 import "../styles/global.css";
-import { ThemeToggle } from "../components/ThemeToggle";
-import { UserNav } from "../components/UserNav";
-import { LanguageSwitcher } from "../components/LanguageSwitcher";
-import { LanguageProviderWrapper } from "../components/LanguageProviderWrapper";
+import ThemeToggle from "../components/ThemeToggle.vue";
+import UserNav from "../components/UserNav.vue";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 
 interface Props {
   title?: string;
@@ -28,21 +27,19 @@ const user = Astro.locals.user ?? null;
     </script>
   </head>
   <body>
-    <LanguageProviderWrapper client:load>
-      <header class="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-          <a href="/" class="text-xl sm:text-2xl font-bold tracking-tight" data-testid="nav-logo"> PitchPredict AI </a>
-          <div class="flex items-center gap-3 sm:gap-4">
-            <UserNav client:load user={user} />
-            <LanguageSwitcher client:load />
-            <ThemeToggle client:load />
-          </div>
+    <header class="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
+      <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <a href="/" class="text-xl sm:text-2xl font-bold tracking-tight" data-testid="nav-logo"> PitchPredict AI </a>
+        <div class="flex items-center gap-3 sm:gap-4">
+          <UserNav client:load user={user} />
+          <LanguageSwitcher client:load />
+          <ThemeToggle client:load />
         </div>
-      </header>
-      <div class="pt-16">
-        <slot />
       </div>
-    </LanguageProviderWrapper>
+    </header>
+    <div class="pt-16">
+      <slot />
+    </div>
   </body>
 </html>
 

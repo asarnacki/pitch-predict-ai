@@ -1,85 +1,68 @@
-import { useState, useEffect, useCallback } from "react";
+import { computed, ref } from "vue";
 import { matchesService, type LeagueCode } from "@/services/api/matches.service";
 import type { MatchDTO } from "@/types";
 import { ApiError } from "@/services/api/client";
 import { useTranslation } from "@/lib/i18n";
 
-interface MatchesState {
-  league: LeagueCode;
-  matchesCache: Record<LeagueCode, MatchDTO[] | null>;
-  status: "idle" | "loading" | "success" | "error";
-  error: string | null;
-}
-
 export function useMatches(initialLeague: LeagueCode = "PREMIER_LEAGUE") {
   const t = useTranslation();
-  const [state, setState] = useState<MatchesState>({
-    league: initialLeague,
-    matchesCache: {
-      PREMIER_LEAGUE: null,
-      LA_LIGA: null,
-      BUNDESLIGA: null,
-      WC: null,
-    },
-    status: "idle",
-    error: null,
+
+  const league = ref<LeagueCode>(initialLeague);
+  const matchesCache = ref<Record<LeagueCode, MatchDTO[] | null>>({
+    PREMIER_LEAGUE: null,
+    LA_LIGA: null,
+    BUNDESLIGA: null,
+    WC: null,
   });
+  const status = ref<"idle" | "loading" | "success" | "error">("idle");
+  const error = ref<string | null>(null);
 
-  const fetchMatches = useCallback(
-    async (targetLeague: LeagueCode) => {
-      setState((prev) => ({
-        ...prev,
-        status: "loading",
-        error: null,
-      }));
+  const matches = computed(() => matchesCache.value[league.value] ?? []);
 
-      try {
-        const matches = await matchesService.fetchMatches(targetLeague, 5);
+  const fetchMatches = async (targetLeague: LeagueCode) => {
+    status.value = "loading";
+    error.value = null;
 
-        setState((prev) => ({
-          ...prev,
-          matchesCache: {
-            ...prev.matchesCache,
-            [targetLeague]: matches,
-          },
-          status: "success",
-          error: null,
-        }));
-      } catch (error) {
-        const errorMessage = error instanceof ApiError ? error.message : t.predictions.errors.fetchMatchesFailed;
+    try {
+      const fetched = await matchesService.fetchMatches(targetLeague, 5);
 
-        setState((prev) => ({
-          ...prev,
-          status: "error",
-          error: errorMessage,
-        }));
-      }
-    },
-    [t]
-  );
+      matchesCache.value[targetLeague] = fetched;
+      status.value = "success";
+      error.value = null;
+    } catch (err) {
+      const errorMessage = err instanceof ApiError ? err.message : t.value.predictions.errors.fetchMatchesFailed;
 
-  const changeLeague = useCallback((newLeague: LeagueCode) => {
-    setState((prev) => ({
-      ...prev,
-      league: newLeague,
-    }));
-  }, []);
-
-  const refetch = useCallback(() => {
-    fetchMatches(state.league);
-  }, [state.league, fetchMatches]);
-
-  useEffect(() => {
-    if (state.matchesCache[state.league] === null && state.status !== "loading") {
-      fetchMatches(state.league);
+      status.value = "error";
+      error.value = errorMessage;
     }
-  }, [fetchMatches, state.league, state.matchesCache, state.status]);
+  };
+
+  const changeLeague = (newLeague: LeagueCode) => {
+    league.value = newLeague;
+  };
+
+  const refetch = () => {
+    fetchMatches(league.value);
+  };
+
+  // TODO(human): trigger fetching matches reactively.
+  //
+  // The React version used a useEffect that ran on every state change and called
+  // fetchMatches(league) when matchesCache[league] === null && status !== "loading".
+  // That effect once caused an infinite refetch loop (fixed in commit fb1e5da).
+  //
+  // Implement the Vue equivalent here so that:
+  //  - matches are fetched for the initial league when the component mounts (also on
+  //    the very first render — this composable is only used client-side),
+  //  - switching to a league that has not been fetched yet (cache is null) triggers a fetch,
+  //  - switching back to an already-fetched league does NOT refetch (cache hit),
+  //  - a league whose fetch failed can be retried via the existing refetch().
 
   return {
-    league: state.league,
-    matches: state.matchesCache[state.league] ?? [],
-    status: state.status,
-    error: state.error,
+    league,
+    matches,
+    status,
+    error,
     changeLeague,
     refetch,
   };

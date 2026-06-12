@@ -164,6 +164,26 @@
   --hig-token-shadow: var(--hig-shadow);
 }
 
+/* tw-animate-css defines these keyframes against Radix's --radix-accordion-content-height;
+   reka-ui exposes --reka-accordion-content-height instead, so redefine them. */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--reka-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--reka-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
