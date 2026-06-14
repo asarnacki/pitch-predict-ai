@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from "vue";
 import { cn } from "@/lib/utils";
-
-type Padding = "none" | "normal" | "compact";
+import type { Padding } from "./types";
 
 interface Props {
   padding?: Padding;
-  class?: HTMLAttributes["class"];
+  class?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -24,9 +22,9 @@ const PADDING_STYLES: Record<Padding, string> = {
   <form
     :class="
       cn(
-        'flex w-full flex-col rounded-[var(--hig-token-radius)] bg-[color:var(--hig-color-surface)]',
-        'ring-1 ring-[color:var(--hig-color-separator)] shadow-[var(--hig-token-shadow)]',
-        'text-[color:var(--hig-color-label-primary)]',
+        'bg-hig-surface flex w-full flex-col rounded-[var(--hig-token-radius)]',
+        'ring-hig-separator shadow-[var(--hig-token-shadow)] ring-1',
+        'text-hig-label-primary',
         PADDING_STYLES[props.padding],
         props.class
       )

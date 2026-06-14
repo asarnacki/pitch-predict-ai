@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from "vue";
 import { cn } from "@/lib/utils";
 import { TONE_PILL, type FeedbackTone } from "./feedback-tones";
 
 interface Props {
   tone?: FeedbackTone;
-  class?: HTMLAttributes["class"];
+  class?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -18,7 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
     :class="
       cn(
         'inline-flex items-center gap-1 rounded-full px-3 py-1 text-[0.8rem] font-medium',
-        'tracking-[0.06em] uppercase text-[color:var(--hig-color-tint-foreground)]',
+        'text-hig-tint-foreground tracking-[0.06em] uppercase',
         TONE_PILL[props.tone],
         props.class
       )

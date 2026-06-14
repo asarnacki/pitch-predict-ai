@@ -1,17 +1,14 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from "vue";
 import { cn } from "@/lib/utils";
-
-type ButtonVariant = "prominent" | "standard" | "plain" | "destructive";
-type ButtonSize = "sm" | "md" | "lg";
+import type { ButtonVariant, ButtonSize, IconPosition } from "./types";
 
 interface Props {
-  iconPosition?: "leading" | "trailing";
+  iconPosition?: IconPosition;
   loading?: boolean;
   size?: ButtonSize;
   variant?: ButtonVariant;
   disabled?: boolean;
-  class?: HTMLAttributes["class"];
+  class?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -29,13 +26,13 @@ const SIZE_STYLES: Record<ButtonSize, string> = {
 
 const VARIANT_STYLES: Record<ButtonVariant, string> = {
   prominent:
-    "bg-[color:var(--hig-color-tint)] text-[color:var(--hig-color-tint-foreground)] shadow-[var(--hig-token-shadow)] hover:bg-[color:color-mix(in_oklch,var(--hig-color-tint)_92%,white)] active:bg-[color:color-mix(in_oklch,var(--hig-color-tint)_88%,black)] disabled:bg-[color:var(--hig-color-tint-muted)]",
+    "bg-hig-tint text-hig-tint-foreground shadow-[var(--hig-token-shadow)] hover:bg-[color:color-mix(in_oklch,var(--color-hig-tint)_92%,white)] active:bg-[color:color-mix(in_oklch,var(--color-hig-tint)_88%,black)] disabled:bg-hig-tint-muted",
   standard:
-    "bg-[color:var(--hig-color-surface-contrast)] text-[color:var(--hig-color-label-primary)] ring-1 ring-inset ring-[color:var(--hig-color-separator)] hover:bg-[color:color-mix(in_oklch,var(--hig-color-surface-contrast)_94%,var(--hig-color-tint)_6%)] active:bg-[color:color-mix(in_oklch,var(--hig-color-surface-contrast)_90%,black)]",
+    "bg-hig-surface-contrast text-hig-label-primary ring-1 ring-inset ring-hig-separator hover:bg-[color:color-mix(in_oklch,var(--color-hig-surface-contrast)_94%,var(--color-hig-tint)_6%)] active:bg-[color:color-mix(in_oklch,var(--color-hig-surface-contrast)_90%,black)]",
   plain:
-    "bg-transparent text-[color:var(--hig-color-tint)] hover:bg-[color:color-mix(in_oklch,var(--hig-color-tint)_8%,transparent)] active:bg-[color:color-mix(in_oklch,var(--hig-color-tint)_12%,transparent)]",
+    "bg-transparent text-hig-tint hover:bg-[color:color-mix(in_oklch,var(--color-hig-tint)_8%,transparent)] active:bg-[color:color-mix(in_oklch,var(--color-hig-tint)_12%,transparent)]",
   destructive:
-    "bg-[color:var(--hig-color-danger)] text-[color:var(--hig-color-tint-foreground)] shadow-[var(--hig-token-shadow)] hover:bg-[color:color-mix(in_oklch,var(--hig-color-danger)_92%,white)] active:bg-[color:color-mix(in_oklch,var(--hig-color-danger)_88%,black)] disabled:bg-[color:color-mix(in_oklch,var(--hig-color-danger)_60%,white)]",
+    "bg-hig-danger text-hig-tint-foreground shadow-[var(--hig-token-shadow)] hover:bg-[color:color-mix(in_oklch,var(--color-hig-danger)_92%,white)] active:bg-[color:color-mix(in_oklch,var(--color-hig-danger)_88%,black)] disabled:bg-[color:color-mix(in_oklch,var(--color-hig-danger)_60%,white)]",
 };
 </script>
 
@@ -45,8 +42,8 @@ const VARIANT_STYLES: Record<ButtonVariant, string> = {
       cn(
         'font-medium tracking-[0.01em] transition-[background,box-shadow,transform] duration-150 ease-out',
         'inline-flex items-center justify-center gap-2 rounded-[var(--hig-token-radius-sm)]',
-        'text-[color:var(--hig-color-label-primary)] disabled:opacity-60 disabled:cursor-not-allowed',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--hig-color-tint)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--hig-color-surface)]',
+        'text-hig-label-primary disabled:cursor-not-allowed disabled:opacity-60',
+        'focus-visible:ring-hig-tint focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-hig-surface)] focus-visible:outline-none',
         'active:translate-y-[1px]',
         SIZE_STYLES[props.size],
         VARIANT_STYLES[props.variant],
@@ -68,7 +65,7 @@ const VARIANT_STYLES: Record<ButtonVariant, string> = {
 
     <span
       v-if="loading"
-      class="absolute inline-flex h-5 w-5 animate-spin items-center justify-center rounded-full border-[1.5px] border-[color:color-mix(in_oklch,var(--hig-color-tint)_60%,transparent)] border-t-[color:var(--hig-color-tint-foreground)]"
+      class="absolute inline-flex h-5 w-5 animate-spin items-center justify-center rounded-full border-[1.5px] border-[color:color-mix(in_oklch,var(--color-hig-tint)_60%,transparent)] border-t-[color:var(--color-hig-tint-foreground)]"
       aria-hidden="true"
     />
 

@@ -1,21 +1,7 @@
 <script setup lang="ts">
-import { computed, type HTMLAttributes } from "vue";
+import { computed } from "vue";
 import { cn } from "@/lib/utils";
-
-type HIGTypographyVariant =
-  | "largeTitle"
-  | "title1"
-  | "title2"
-  | "title3"
-  | "headline"
-  | "subheadline"
-  | "callout"
-  | "body"
-  | "footnote"
-  | "caption1"
-  | "caption2";
-
-type HIGTone = "primary" | "secondary" | "tertiary";
+import type { HIGTypographyVariant, HIGTone } from "./types";
 
 interface Props {
   align?: "start" | "center" | "end" | "justify";
@@ -23,7 +9,7 @@ interface Props {
   tone?: HIGTone;
   variant?: HIGTypographyVariant;
   weight?: "regular" | "medium" | "semibold" | "bold";
-  class?: HTMLAttributes["class"];
+  class?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -56,9 +42,9 @@ const WEIGHT_STYLES: Record<NonNullable<Props["weight"]>, string> = {
 };
 
 const TONE_STYLES: Record<HIGTone, string> = {
-  primary: "text-[color:var(--hig-color-label-primary)]",
-  secondary: "text-[color:var(--hig-color-label-secondary)]",
-  tertiary: "text-[color:var(--hig-color-label-tertiary)]",
+  primary: "text-hig-label-primary",
+  secondary: "text-hig-label-secondary",
+  tertiary: "text-hig-label-tertiary",
 };
 
 const DEFAULT_ELEMENT: Record<HIGTypographyVariant, string> = {

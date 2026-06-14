@@ -12,9 +12,18 @@ export { default as HIGList } from "./HIGList.vue";
 export { default as HIGListSection } from "./HIGListSection.vue";
 export { default as HIGListItem } from "./HIGListItem.vue";
 export { default as HIGModal } from "./HIGModal.vue";
-export type { HIGModalAction } from "./HIGModal.vue";
 export { default as HIGNavigationBar } from "./HIGNavigationBar.vue";
 export { default as HIGTabBar } from "./HIGTabBar.vue";
-export type { HIGTabBarItem } from "./HIGTabBar.vue";
 export { default as HIGTypography } from "./HIGTypography.vue";
 export { TONE_TO_COLOR, TONE_PILL, type FeedbackTone } from "./feedback-tones";
+export type {
+  ButtonVariant,
+  ButtonSize,
+  IconPosition,
+  HIGTypographyVariant,
+  HIGTone,
+  Padding,
+  ViewWidth,
+  HIGModalAction,
+  HIGTabBarItem,
+} from "./types";

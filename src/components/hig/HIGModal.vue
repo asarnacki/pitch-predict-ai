@@ -3,13 +3,7 @@ import { onUnmounted, ref, watch } from "vue";
 import { cn } from "@/lib/utils";
 import HIGButton from "./HIGButton.vue";
 import { useTranslation } from "@/lib/i18n";
-
-export interface HIGModalAction {
-  label: string;
-  onPress: () => void;
-  destructive?: boolean;
-  loading?: boolean;
-}
+import type { HIGModalAction } from "./types";
 
 interface Props {
   actions?: {
@@ -116,7 +110,7 @@ const actionVariant = (action: HIGModalAction, priority: "primary" | "secondary"
   <Teleport to="body">
     <div v-if="open" class="fixed inset-0 z-[60] flex items-center justify-center px-4" role="presentation">
       <div
-        class="absolute inset-0 bg-[color:color-mix(in_oklch,var(--hig-color-surface)_70%,black)]/40 backdrop-blur-[length:var(--hig-token-blur)]"
+        class="absolute inset-0 bg-[color:color-mix(in_oklch,var(--color-hig-surface)_70%,black)]/40 backdrop-blur-[length:var(--hig-token-blur)]"
         role="button"
         :tabindex="dismissible ? 0 : -1"
         :aria-label="t.common.closeModalOverlayAria"
@@ -130,29 +124,26 @@ const actionVariant = (action: HIGModalAction, priority: "primary" | "secondary"
         :class="
           cn(
             'relative z-[1] flex w-full flex-col gap-4 rounded-[var(--hig-token-radius-lg)]',
-            'bg-[color:var(--hig-color-surface)] px-6 py-5 text-[color:var(--hig-color-label-primary)]',
-            'shadow-[var(--hig-token-shadow)] ring-1 ring-[color:var(--hig-color-separator)]',
+            'bg-hig-surface text-hig-label-primary px-6 py-5',
+            'ring-hig-separator shadow-[var(--hig-token-shadow)] ring-1',
             WIDTH_STYLES[width]
           )
         "
       >
         <button
           v-if="dismissible"
-          class="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--hig-color-label-tertiary)] transition hover:bg-[color:color-mix(in_oklch,var(--hig-color-label-tertiary)_10%,transparent)]"
+          class="text-hig-label-tertiary absolute top-4 right-4 inline-flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-[color:color-mix(in_oklch,var(--color-hig-label-tertiary)_10%,transparent)]"
           :aria-label="t.common.closeAria"
           @click="emit('close')"
         >
           <span class="text-[1.1rem] leading-none">×</span>
         </button>
 
-        <div
-          v-if="$slots.title"
-          class="pr-8 text-[1.35rem] font-semibold leading-tight text-[color:var(--hig-color-label-primary)]"
-        >
+        <div v-if="$slots.title" class="text-hig-label-primary pr-8 text-[1.35rem] leading-tight font-semibold">
           <slot name="title" />
         </div>
 
-        <div v-if="$slots.description" class="text-[0.95rem] text-[color:var(--hig-color-label-secondary)]">
+        <div v-if="$slots.description" class="text-hig-label-secondary text-[0.95rem]">
           <slot name="description" />
         </div>
 

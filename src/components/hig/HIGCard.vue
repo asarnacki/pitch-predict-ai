@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from "vue";
 import { cn } from "@/lib/utils";
 
 interface Props {
   variant?: "translucent" | "solid";
-  class?: HTMLAttributes["class"];
+  class?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -17,11 +16,11 @@ const props = withDefaults(defineProps<Props>(), {
     :class="
       cn(
         'group relative isolate overflow-hidden rounded-[var(--hig-token-radius)]',
-        'ring-1 ring-inset ring-[color:var(--hig-color-separator)]',
+        'ring-hig-separator ring-1 ring-inset',
         'shadow-[var(--hig-token-shadow)]',
         props.variant === 'translucent'
-          ? 'bg-[color:color-mix(in_oklch,var(--hig-color-surface-elevated)_60%,transparent)] backdrop-blur-[length:var(--hig-token-blur)]'
-          : 'bg-[color:var(--hig-color-surface)]',
+          ? 'bg-[color:color-mix(in_oklch,var(--color-hig-surface-elevated)_60%,transparent)] backdrop-blur-[length:var(--hig-token-blur)]'
+          : 'bg-hig-surface',
         'transition-transform duration-200 ease-out hover:-translate-y-[2px]',
         props.class
       )
@@ -34,13 +33,13 @@ const props = withDefaults(defineProps<Props>(), {
       />
     </div>
 
-    <div class="flex flex-col gap-3 px-5 py-5 text-[color:var(--hig-color-label-primary)]">
-      <div v-if="$slots.title" class="text-[1.25rem] font-semibold leading-tight"><slot name="title" /></div>
-      <div v-if="$slots.subtitle" class="text-[0.95rem] text-[color:var(--hig-color-label-secondary)]">
+    <div class="text-hig-label-primary flex flex-col gap-3 px-5 py-5">
+      <div v-if="$slots.title" class="text-[1.25rem] leading-tight font-semibold"><slot name="title" /></div>
+      <div v-if="$slots.subtitle" class="text-hig-label-secondary text-[0.95rem]">
         <slot name="subtitle" />
       </div>
-      <div v-if="$slots.default" class="text-[1rem] text-[color:var(--hig-color-label-primary)]"><slot /></div>
-      <div v-if="$slots.actions" class="flex flex-wrap gap-2 pt-1 text-[color:var(--hig-color-label-primary)]">
+      <div v-if="$slots.default" class="text-hig-label-primary text-[1rem]"><slot /></div>
+      <div v-if="$slots.actions" class="text-hig-label-primary flex flex-wrap gap-2 pt-1">
         <slot name="actions" />
       </div>
     </div>

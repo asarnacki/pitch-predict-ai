@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from "vue";
 import { cn } from "@/lib/utils";
 
 interface Props {
   interactive?: boolean;
-  class?: HTMLAttributes["class"];
+  class?: string;
 }
 
 const props = defineProps<Props>();
@@ -18,36 +17,33 @@ const props = defineProps<Props>();
       cn(
         'group flex w-full items-center gap-3 bg-transparent px-4 py-3 text-left',
         props.interactive &&
-          'transition-colors duration-150 ease-out hover:bg-[color:color-mix(in_oklch,var(--hig-color-surface-contrast)_80%,transparent)] focus-visible:outline-none focus-visible:bg-[color:color-mix(in_oklch,var(--hig-color-tint)_12%,transparent)]',
+          'transition-colors duration-150 ease-out hover:bg-[color:color-mix(in_oklch,var(--color-hig-surface-contrast)_80%,transparent)] focus-visible:bg-[color:color-mix(in_oklch,var(--color-hig-tint)_12%,transparent)] focus-visible:outline-none',
         props.class
       )
     "
   >
     <span
       v-if="$slots.avatar"
-      class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[color:var(--hig-color-surface-contrast)]"
+      class="bg-hig-surface-contrast flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full"
     >
       <slot name="avatar" />
     </span>
     <div class="flex min-w-0 flex-1 flex-col">
-      <span v-if="$slots.label" class="truncate text-[1rem] font-medium text-[color:var(--hig-color-label-primary)]">
+      <span v-if="$slots.label" class="text-hig-label-primary truncate text-[1rem] font-medium">
         <slot name="label" />
       </span>
-      <span v-if="$slots.subtitle" class="truncate text-[0.9rem] text-[color:var(--hig-color-label-secondary)]">
+      <span v-if="$slots.subtitle" class="text-hig-label-secondary truncate text-[0.9rem]">
         <slot name="subtitle" />
       </span>
-      <span v-if="$slots.context" class="truncate text-[0.78rem] text-[color:var(--hig-color-label-tertiary)]">
+      <span v-if="$slots.context" class="text-hig-label-tertiary truncate text-[0.78rem]">
         <slot name="context" />
       </span>
       <slot />
     </div>
-    <div
-      v-if="$slots.detail"
-      class="ml-auto flex items-center gap-2 text-[0.9rem] text-[color:var(--hig-color-label-secondary)]"
-    >
+    <div v-if="$slots.detail" class="text-hig-label-secondary ml-auto flex items-center gap-2 text-[0.9rem]">
       <slot name="detail" />
     </div>
-    <div v-if="$slots.accessory" class="ml-2 text-[color:var(--hig-color-label-tertiary)]">
+    <div v-if="$slots.accessory" class="text-hig-label-tertiary ml-2">
       <slot name="accessory" />
     </div>
   </component>

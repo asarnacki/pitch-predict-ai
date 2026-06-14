@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from "vue";
 import { cn } from "@/lib/utils";
 import { TONE_TO_COLOR, TONE_PILL, type FeedbackTone } from "./feedback-tones";
 
 interface Props {
   tone?: FeedbackTone;
-  class?: HTMLAttributes["class"];
+  class?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -18,7 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
     :class="
       cn(
         'flex w-full flex-col gap-3 rounded-[var(--hig-token-radius)] px-4 py-3',
-        'ring-1 ring-[color:var(--hig-color-separator)] shadow-[var(--hig-token-shadow)]',
+        'ring-hig-separator shadow-[var(--hig-token-shadow)] ring-1',
         TONE_TO_COLOR[props.tone].base,
         props.class
       )
@@ -37,9 +36,9 @@ const props = withDefaults(defineProps<Props>(), {
       >
         <slot name="icon" />
       </span>
-      <div class="flex min-w-0 flex-1 flex-col gap-1 text-[color:var(--hig-color-label-primary)]">
+      <div class="text-hig-label-primary flex min-w-0 flex-1 flex-col gap-1">
         <div v-if="$slots.title" class="text-[1.05rem] font-semibold"><slot name="title" /></div>
-        <p v-if="$slots.description" class="text-[0.95rem] text-[color:var(--hig-color-label-secondary)]">
+        <p v-if="$slots.description" class="text-hig-label-secondary text-[0.95rem]">
           <slot name="description" />
         </p>
       </div>

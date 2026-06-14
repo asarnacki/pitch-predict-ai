@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from "vue";
 import { cn } from "@/lib/utils";
-
-type ViewWidth = "compact" | "comfortable" | "expanded";
+import type { ViewWidth } from "./types";
 
 interface Props {
   width?: ViewWidth;
-  class?: HTMLAttributes["class"];
+  class?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -21,7 +19,7 @@ const WIDTH_CLASS: Record<ViewWidth, string> = {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col bg-[color:var(--hig-color-surface)]">
+  <div class="bg-hig-surface flex min-h-screen flex-col">
     <slot name="navigationBar" />
     <div class="mx-auto flex w-full flex-1 flex-col gap-8 px-4 py-8 sm:px-6">
       <div
@@ -36,15 +34,15 @@ const WIDTH_CLASS: Record<ViewWidth, string> = {
       >
         <aside
           v-if="$slots.sidebar"
-          class="sticky top-[5.5rem] hidden h-fit min-w-[16rem] shrink-0 rounded-[var(--hig-token-radius)] bg-[color:var(--hig-color-surface-elevated)] p-4 text-[color:var(--hig-color-label-secondary)] shadow-[var(--hig-token-shadow)] ring-1 ring-[color:var(--hig-color-separator)] lg:flex lg:flex-col lg:gap-4"
+          class="bg-hig-surface-elevated text-hig-label-secondary ring-hig-separator sticky top-[5.5rem] hidden h-fit min-w-[16rem] shrink-0 rounded-[var(--hig-token-radius)] p-4 shadow-[var(--hig-token-shadow)] ring-1 lg:flex lg:flex-col lg:gap-4"
         >
           <slot name="sidebar" />
         </aside>
         <main
           :class="
             cn(
-              'flex flex-1 flex-col gap-6 rounded-[var(--hig-token-radius)] bg-[color:var(--hig-color-surface)]',
-              'ring-1 ring-[color:var(--hig-color-separator)] shadow-[var(--hig-token-shadow)]',
+              'bg-hig-surface flex flex-1 flex-col gap-6 rounded-[var(--hig-token-radius)]',
+              'ring-hig-separator shadow-[var(--hig-token-shadow)] ring-1',
               'p-6',
               props.class
             )
@@ -56,7 +54,7 @@ const WIDTH_CLASS: Record<ViewWidth, string> = {
     </div>
     <div
       v-if="$slots.bottomBar"
-      class="sticky bottom-0 flex w-full justify-center bg-[color:color-mix(in_oklch,var(--hig-color-surface)_72%,transparent)] px-4 py-3 backdrop-blur-[length:calc(var(--hig-token-blur)/1.8)]"
+      class="sticky bottom-0 flex w-full justify-center bg-[color:color-mix(in_oklch,var(--color-hig-surface)_72%,transparent)] px-4 py-3 backdrop-blur-[length:calc(var(--hig-token-blur)/1.8)]"
     >
       <div :class="cn('w-full', WIDTH_CLASS[props.width])"><slot name="bottomBar" /></div>
     </div>
