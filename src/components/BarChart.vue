@@ -15,7 +15,6 @@ const props = withDefaults(defineProps<Props>(), {
   interactive: false,
   selectedChoice: null,
 });
-
 const emit = defineEmits<{ choiceSelect: [choice: UserChoice] }>();
 
 const t = useTranslation();
@@ -38,7 +37,6 @@ const getBarClasses = (choice: UserChoice, baseColor: string) => {
   const baseClasses = `h-full transition-all duration-150 ease-out rounded-full`;
 
   if (!props.interactive && !props.selectedChoice) {
-    // Display mode without selection - normal bars
     return `${baseClasses} ${baseColor}`;
   }
 
@@ -121,14 +119,14 @@ const rows = computed(() => [
     <div
       v-for="row in rows"
       :key="row.choice"
-      :class="`space-y-2 p-2 -mx-2 my-4 ${getRowClasses(row.choice)}`"
+      :class="`-mx-2 my-4 space-y-2 p-2 ${getRowClasses(row.choice)}`"
       :role="interactive ? 'button' : undefined"
       :tabindex="interactive ? 0 : undefined"
       @click="handleBarClick(row.choice)"
       @keydown="handleBarKeyDown($event, row.choice)"
     >
       <div class="flex items-center justify-between gap-2">
-        <span :class="`${getLabelClasses(row.choice)}${row.truncate ? ' truncate' : ''}`">{{ row.label }}</span>
+        <span :class="`${getLabelClasses(row.choice)}${row.truncate ? 'truncate' : ''}`">{{ row.label }}</span>
         <span :class="getPercentageClasses(row.choice, row.percentColor)">{{ row.percent }}%</span>
       </div>
       <div :class="containerClasses">

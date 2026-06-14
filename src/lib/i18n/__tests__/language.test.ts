@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { useLanguage, __testing } from "../language";
+import { useLanguage, testing } from "../language";
 
 describe("language singleton", () => {
   beforeEach(() => {
@@ -8,7 +8,7 @@ describe("language singleton", () => {
     // Reset HTML lang attribute
     document.documentElement.lang = "en";
     // Reset singleton
-    __testing.resetLanguage("pl");
+    testing.resetLanguage("pl");
   });
 
   afterEach(() => {

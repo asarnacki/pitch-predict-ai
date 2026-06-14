@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/vue";
 import LanguageSwitcher from "../LanguageSwitcher.vue";
-import { __testing } from "@/lib/i18n";
+import { testing } from "@/lib/i18n";
 
 describe("LanguageSwitcher", () => {
   beforeEach(() => {
     localStorage.clear();
-    __testing.resetLanguage("pl");
+    testing.resetLanguage("pl");
   });
 
   it("should render the language switcher button", () => {

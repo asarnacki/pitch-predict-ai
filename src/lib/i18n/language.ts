@@ -59,7 +59,7 @@ export function useLanguage() {
  * Test-only helpers.
  * The language state is module-level (singleton), so unit tests must be able to reset it.
  */
-export const __testing = {
+export const testing = {
   resetLanguage(lang: Language = "pl") {
     language.value = lang;
 

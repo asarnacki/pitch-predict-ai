@@ -73,16 +73,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="w-full max-w-md mx-auto" data-testid="auth-form" :data-hydrated="hydrated ? 'true' : 'false'">
-    <div class="bg-card border rounded-lg shadow-lg p-6 sm:p-8 space-y-6">
+  <div class="mx-auto w-full max-w-md" data-testid="auth-form" :data-hydrated="hydrated ? 'true' : 'false'">
+    <div class="bg-card space-y-6 rounded-lg border p-6 shadow-lg sm:p-8">
       <div class="space-y-2 text-center">
-        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight" data-testid="auth-form-heading">
+        <h1 class="text-2xl font-bold tracking-tight sm:text-3xl" data-testid="auth-form-heading">
           {{ config.title }}
         </h1>
-        <p v-if="mode === 'reset-password'" class="text-sm text-muted-foreground">
+        <p v-if="mode === 'reset-password'" class="text-muted-foreground text-sm">
           {{ t.auth.resetPassword.description }}
         </p>
-        <p v-if="mode === 'update-password'" class="text-sm text-muted-foreground">
+        <p v-if="mode === 'update-password'" class="text-muted-foreground text-sm">
           {{ t.auth.updatePassword.description }}
         </p>
       </div>
@@ -101,7 +101,7 @@ onMounted(() => {
             :aria-invalid="!!errors.email"
             :data-testid="`${mode}-email-input`"
           />
-          <p v-if="errors.email" class="text-xs text-destructive">{{ errors.email }}</p>
+          <p v-if="errors.email" class="text-destructive text-xs">{{ errors.email }}</p>
         </div>
 
         <!-- Password field -->
@@ -111,7 +111,7 @@ onMounted(() => {
             <a
               v-if="mode === 'login'"
               href="/reset-password"
-              class="text-xs text-primary hover:underline"
+              class="text-primary text-xs hover:underline"
               data-testid="auth-reset-password-link"
             >
               {{ t.auth.login.forgotPassword }}
@@ -127,7 +127,7 @@ onMounted(() => {
             :aria-invalid="!!errors.password"
             :data-testid="`${mode}-password-input`"
           />
-          <p v-if="errors.password" class="text-xs text-destructive">{{ errors.password }}</p>
+          <p v-if="errors.password" class="text-destructive text-xs">{{ errors.password }}</p>
         </div>
 
         <!-- Confirm Password field -->
@@ -143,13 +143,13 @@ onMounted(() => {
             :aria-invalid="!!errors.confirmPassword"
             :data-testid="`${mode}-confirm-password-input`"
           />
-          <p v-if="errors.confirmPassword" class="text-xs text-destructive">{{ errors.confirmPassword }}</p>
+          <p v-if="errors.confirmPassword" class="text-destructive text-xs">{{ errors.confirmPassword }}</p>
         </div>
 
         <!-- API Error -->
         <div
           v-if="apiError"
-          class="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md"
+          class="text-destructive bg-destructive/10 border-destructive/20 rounded-md border p-3 text-sm"
           data-testid="auth-form-error"
         >
           {{ apiError }}
@@ -162,22 +162,22 @@ onMounted(() => {
       </form>
 
       <!-- Additional links -->
-      <div class="text-center space-y-2">
-        <p v-if="mode === 'login'" class="text-sm text-muted-foreground">
+      <div class="space-y-2 text-center">
+        <p v-if="mode === 'login'" class="text-muted-foreground text-sm">
           {{ t.auth.login.noAccount }}
-          <a href="/register" class="text-primary hover:underline font-medium" data-testid="auth-register-link">
+          <a href="/register" class="text-primary font-medium hover:underline" data-testid="auth-register-link">
             {{ t.auth.login.registerLink }}
           </a>
         </p>
-        <p v-if="mode === 'register'" class="text-sm text-muted-foreground">
+        <p v-if="mode === 'register'" class="text-muted-foreground text-sm">
           {{ t.auth.register.hasAccount }}
-          <a href="/login" class="text-primary hover:underline font-medium" data-testid="auth-login-link">
+          <a href="/login" class="text-primary font-medium hover:underline" data-testid="auth-login-link">
             {{ t.auth.register.loginLink }}
           </a>
         </p>
-        <p v-if="mode === 'reset-password'" class="text-sm text-muted-foreground">
+        <p v-if="mode === 'reset-password'" class="text-muted-foreground text-sm">
           {{ t.auth.resetPassword.rememberPassword }}
-          <a href="/login" class="text-primary hover:underline font-medium" data-testid="auth-login-link">
+          <a href="/login" class="text-primary font-medium hover:underline" data-testid="auth-login-link">
             {{ t.auth.resetPassword.loginLink }}
           </a>
         </p>
