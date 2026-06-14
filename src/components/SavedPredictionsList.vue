@@ -6,7 +6,6 @@ import Spinner from "@/components/Spinner.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -14,13 +13,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trash2, ChevronLeft, ChevronRight, CheckCircle2, TrendingUp, Home, Minus, Plane } from "lucide-vue-next";
+import {
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
+  TrendingUp,
+  Home,
+  Minus,
+  Plane,
+  RefreshCw,
+  Trophy,
+  XCircle,
+} from "lucide-vue-next";
 import { toast } from "vue-sonner";
 import type {
   PredictionDTO,
   ApiSuccessResponse,
   PaginatedPredictionsResponseDTO,
   PredictionProbabilities,
+  UserChoice,
 } from "@/types";
 import { isPredictionProbabilities } from "@/types";
 import { useLanguage, useTranslation } from "@/lib/i18n";
@@ -35,6 +47,8 @@ const hasMore = ref(false);
 const total = ref(0);
 const deleteDialogOpen = ref(false);
 const predictionToDelete = ref<PredictionDTO | null>(null);
+const isDeleting = ref(false);
+const fetchingResultId = ref<number | null>(null);
 const t = useTranslation();
 const { language } = useLanguage();
 
@@ -71,8 +85,9 @@ const handleDeleteClick = (prediction: PredictionDTO) => {
 };
 
 const handleDeleteConfirm = async () => {
-  if (!predictionToDelete.value) return;
+  if (!predictionToDelete.value || isDeleting.value) return;
 
+  isDeleting.value = true;
   try {
     const response = await fetch(`/api/predictions/${predictionToDelete.value.id}`, {
       method: "DELETE",
@@ -84,11 +99,11 @@ const handleDeleteConfirm = async () => {
     }
 
     toast.success(t.value.predictions.toasts.deletedSuccess);
-    deleteDialogOpen.value = false;
-    predictionToDelete.value = null;
     fetchPredictions(offset.value);
   } catch (err) {
     toast.error(err instanceof Error ? err.message : t.value.predictions.toasts.deletedError);
+  } finally {
+    isDeleting.value = false;
     deleteDialogOpen.value = false;
     predictionToDelete.value = null;
   }
@@ -100,6 +115,40 @@ const handlePrevPage = () => {
 
 const handleNextPage = () => {
   fetchPredictions(offset.value + LIMIT);
+};
+
+const handleCheckResult = async (prediction: PredictionDTO) => {
+  if (fetchingResultId.value !== null) return;
+
+  fetchingResultId.value = prediction.id;
+  try {
+    const response = await fetch(`/api/predictions/${prediction.id}/fetch-result`, {
+      method: "POST",
+    });
+    const result = await response.json();
+
+    if (!response.ok) {
+      // 409 when the match (incl. the API's 3h buffer) hasn't finished yet — not a real error.
+      if (result.error?.code === "MATCH_NOT_FINISHED") {
+        toast.info(t.value.predictions.toasts.matchNotFinished);
+      } else {
+        toast.error(result.error?.message || t.value.predictions.toasts.resultFetchError);
+      }
+      return;
+    }
+
+    // Swap in the API's version (now carrying home_score / away_score) so the result renders.
+    const updated = result.data as PredictionDTO;
+    const index = predictions.value.findIndex((p) => p.id === updated.id);
+    if (index !== -1) {
+      predictions.value[index] = updated;
+    }
+    toast.success(t.value.predictions.toasts.resultFetchedSuccess);
+  } catch (err) {
+    toast.error(err instanceof Error ? err.message : t.value.predictions.toasts.resultFetchError);
+  } finally {
+    fetchingResultId.value = null;
+  }
 };
 
 onMounted(() => {
@@ -141,6 +190,27 @@ const getUserChoicePercentage = (
   return Math.round(predictionResult.away * 100);
 };
 
+const isMatchFinished = (prediction: PredictionDTO): boolean => new Date(prediction.match_date).getTime() < Date.now();
+
+const hasResult = (prediction: PredictionDTO): boolean =>
+  prediction.home_score !== null && prediction.away_score !== null;
+
+// Derive the real 1X2 outcome from the final score.
+const actualOutcome = (prediction: PredictionDTO): UserChoice | null => {
+  if (prediction.home_score === null || prediction.away_score === null) return null;
+  if (prediction.home_score > prediction.away_score) return "home";
+  if (prediction.home_score < prediction.away_score) return "away";
+  return "draw";
+};
+
+// null = no verdict to render (user made no pick, or result not fetched yet).
+const isChoiceCorrect = (prediction: PredictionDTO): boolean | null => {
+  if (!prediction.user_choice) return null;
+  const outcome = actualOutcome(prediction);
+  if (outcome === null) return null;
+  return prediction.user_choice === outcome;
+};
+
 const formatMatchDate = (prediction: PredictionDTO) =>
   new Date(prediction.match_date).toLocaleDateString(locale.value, {
     day: "numeric",
@@ -165,10 +235,10 @@ const formatCreatedDate = (prediction: PredictionDTO) =>
 <template>
   <div
     v-if="status === 'loading' && predictions.length === 0"
-    class="py-12 flex flex-col items-center justify-center gap-4"
+    class="flex flex-col items-center justify-center gap-4 py-12"
   >
-    <Spinner class="h-10 w-10 text-primary" />
-    <p class="text-base text-muted-foreground">{{ t.predictions.ui.loadingList }}</p>
+    <Spinner class="text-primary h-10 w-10" />
+    <p class="text-muted-foreground text-base">{{ t.predictions.ui.loadingList }}</p>
   </div>
 
   <EmptyState
@@ -192,83 +262,122 @@ const formatCreatedDate = (prediction: PredictionDTO) =>
       <div
         v-for="prediction in predictions"
         :key="prediction.id"
-        class="border rounded-lg bg-card transition-all duration-150 hover:shadow-md"
+        class="bg-card rounded-lg border transition-all duration-150 hover:shadow-md"
       >
-        <div class="px-4 py-3 border-b bg-accent/5">
-          <div class="flex items-start justify-between gap-3 mb-2">
+        <div class="bg-accent/5 border-b px-4 py-3">
+          <div class="mb-2 flex items-start justify-between gap-3">
             <Badge variant="secondary" class="text-xs font-medium">
               {{ prediction.league }}
             </Badge>
             <Button
               variant="ghost"
               size="sm"
-              class="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-150 flex-shrink-0"
+              class="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8 flex-shrink-0 p-0 transition-all duration-150"
               @click="handleDeleteClick(prediction)"
             >
               <Trash2 class="h-4 w-4" />
             </Button>
           </div>
-          <div class="font-semibold text-sm sm:text-base">{{ prediction.home_team }} vs {{ prediction.away_team }}</div>
-          <div class="text-xs text-muted-foreground mt-1">
+          <div class="text-sm font-semibold sm:text-base">{{ prediction.home_team }} vs {{ prediction.away_team }}</div>
+          <div class="text-muted-foreground mt-1 text-xs">
             {{ formatMatchDate(prediction) }} {{ formatMatchTime(prediction) }}
           </div>
         </div>
 
-        <div class="p-4 space-y-3">
+        <div class="space-y-3 p-4">
           <div v-if="prediction.user_choice" class="flex items-start gap-3">
-            <CheckCircle2 class="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-            <div class="flex-1 min-w-0">
-              <div class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+            <CheckCircle2 class="text-primary mt-0.5 h-5 w-5 flex-shrink-0" />
+            <div class="min-w-0 flex-1">
+              <div class="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
                 {{ t.predictions.ui.yourChoice }}
               </div>
-              <div class="flex items-baseline gap-2 flex-wrap">
-                <span class="font-bold text-base text-primary">{{ getUserChoiceLabel(prediction) }}</span>
+              <div class="flex flex-wrap items-baseline gap-2">
+                <span class="text-primary text-base font-bold">{{ getUserChoiceLabel(prediction) }}</span>
                 <Badge v-if="getPredictionResult(prediction)" variant="secondary" class="text-xs font-medium">
-                  <TrendingUp class="h-3 w-3 mr-1" />
+                  <TrendingUp class="mr-1 h-3 w-3" />
                   AI: {{ getUserChoicePercentage(prediction, getPredictionResult(prediction)) }}%
                 </Badge>
               </div>
             </div>
           </div>
-          <div v-else class="text-sm text-muted-foreground italic">{{ t.predictions.ui.noChoice }}</div>
+          <div v-else class="text-muted-foreground text-sm italic">{{ t.predictions.ui.noChoice }}</div>
 
-          <div v-if="getPredictionResult(prediction)" class="pt-3 border-t space-y-2">
-            <div class="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          <div v-if="getPredictionResult(prediction)" class="space-y-2 border-t pt-3">
+            <div class="text-muted-foreground text-xs font-medium tracking-wide uppercase">
               {{ t.predictions.ui.aiTitle }}
             </div>
             <div class="grid grid-cols-3 gap-2 text-xs">
-              <div class="text-center p-2.5 rounded bg-muted/50 space-y-1">
-                <Home class="h-4 w-4 mx-auto text-muted-foreground" />
-                <div class="font-medium text-muted-foreground text-[10px] leading-tight">
+              <div class="bg-muted/50 space-y-1 rounded p-2.5 text-center">
+                <Home class="text-muted-foreground mx-auto h-4 w-4" />
+                <div class="text-muted-foreground text-[10px] leading-tight font-medium">
                   {{ t.predictions.ui.chart.home }}
                 </div>
-                <div class="font-bold text-sm">{{ Math.round(getPredictionResult(prediction)!.home * 100) }}%</div>
+                <div class="text-sm font-bold">{{ Math.round(getPredictionResult(prediction)!.home * 100) }}%</div>
               </div>
-              <div class="text-center p-2.5 rounded bg-muted/50 space-y-1">
-                <Minus class="h-4 w-4 mx-auto text-muted-foreground" />
-                <div class="font-medium text-muted-foreground text-[10px] leading-tight">
+              <div class="bg-muted/50 space-y-1 rounded p-2.5 text-center">
+                <Minus class="text-muted-foreground mx-auto h-4 w-4" />
+                <div class="text-muted-foreground text-[10px] leading-tight font-medium">
                   {{ t.predictions.ui.chart.draw }}
                 </div>
-                <div class="font-bold text-sm">{{ Math.round(getPredictionResult(prediction)!.draw * 100) }}%</div>
+                <div class="text-sm font-bold">{{ Math.round(getPredictionResult(prediction)!.draw * 100) }}%</div>
               </div>
-              <div class="text-center p-2.5 rounded bg-muted/50 space-y-1">
-                <Plane class="h-4 w-4 mx-auto text-muted-foreground" />
-                <div class="font-medium text-muted-foreground text-[10px] leading-tight">
+              <div class="bg-muted/50 space-y-1 rounded p-2.5 text-center">
+                <Plane class="text-muted-foreground mx-auto h-4 w-4" />
+                <div class="text-muted-foreground text-[10px] leading-tight font-medium">
                   {{ t.predictions.ui.chart.away }}
                 </div>
-                <div class="font-bold text-sm">{{ Math.round(getPredictionResult(prediction)!.away * 100) }}%</div>
+                <div class="text-sm font-bold">{{ Math.round(getPredictionResult(prediction)!.away * 100) }}%</div>
               </div>
             </div>
           </div>
 
-          <div v-if="prediction.note" class="pt-3 border-t">
-            <div class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-              {{ t.predictions.ui.note }}
+          <div v-if="hasResult(prediction)" class="space-y-2 border-t pt-3">
+            <div class="text-muted-foreground flex items-center gap-1.5 text-xs font-medium tracking-wide uppercase">
+              <Trophy class="h-3.5 w-3.5" />
+              {{ t.predictions.ui.matchResult }}
             </div>
-            <p class="text-sm text-foreground">{{ prediction.note }}</p>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="text-2xl font-bold tabular-nums">
+                {{ prediction.home_score }} : {{ prediction.away_score }}
+              </div>
+              <span
+                v-if="isChoiceCorrect(prediction) !== null"
+                :class="[
+                  'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold',
+                  isChoiceCorrect(prediction)
+                    ? 'bg-green-600/10 text-green-700 dark:text-green-400'
+                    : 'bg-destructive/10 text-destructive',
+                ]"
+              >
+                <CheckCircle2 v-if="isChoiceCorrect(prediction)" class="h-4 w-4" />
+                <XCircle v-else class="h-4 w-4" />
+                {{ isChoiceCorrect(prediction) ? t.predictions.ui.correct : t.predictions.ui.incorrect }}
+              </span>
+            </div>
           </div>
 
-          <div class="pt-2 text-xs text-muted-foreground">
+          <div v-else-if="isMatchFinished(prediction)" class="border-t pt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              class="w-full sm:w-auto"
+              :disabled="fetchingResultId === prediction.id"
+              @click="handleCheckResult(prediction)"
+            >
+              <Spinner v-if="fetchingResultId === prediction.id" class="mr-2 h-4 w-4" />
+              <RefreshCw v-else class="mr-2 h-4 w-4" />
+              {{ fetchingResultId === prediction.id ? t.predictions.ui.checking : t.predictions.ui.checkResult }}
+            </Button>
+          </div>
+
+          <div v-if="prediction.note" class="border-t pt-3">
+            <div class="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
+              {{ t.predictions.ui.note }}
+            </div>
+            <p class="text-foreground text-sm">{{ prediction.note }}</p>
+          </div>
+
+          <div class="text-muted-foreground pt-2 text-xs">
             {{ t.predictions.ui.savedAt }} {{ formatCreatedDate(prediction) }}
           </div>
         </div>
@@ -278,17 +387,17 @@ const formatCreatedDate = (prediction: PredictionDTO) =>
     <!-- Pagination -->
     <div v-if="totalPages > 1" class="flex items-center justify-center gap-4 pt-2">
       <Button variant="outline" size="sm" :disabled="offset === 0 || status === 'loading'" @click="handlePrevPage">
-        <ChevronLeft class="h-4 w-4 mr-1" />
+        <ChevronLeft class="mr-1 h-4 w-4" />
         {{ t.predictions.ui.previous }}
       </Button>
 
-      <span class="text-sm text-muted-foreground">
+      <span class="text-muted-foreground text-sm">
         {{ t.predictions.ui.page }} {{ currentPage }} {{ t.predictions.ui.of }} {{ totalPages }}
       </span>
 
       <Button variant="outline" size="sm" :disabled="!hasMore || status === 'loading'" @click="handleNextPage">
         {{ t.predictions.ui.next }}
-        <ChevronRight class="h-4 w-4 ml-1" />
+        <ChevronRight class="ml-1 h-4 w-4" />
       </Button>
     </div>
 
@@ -307,18 +416,20 @@ const formatCreatedDate = (prediction: PredictionDTO) =>
               <div class="text-muted-foreground">
                 {{ formatMatchDate(predictionToDelete) }}
               </div>
-              <div class="mt-3 font-medium text-foreground">{{ t.predictions.ui.deleteCannotUndo }}</div>
+              <div class="text-foreground mt-3 font-medium">{{ t.predictions.ui.deleteCannotUndo }}</div>
             </template>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{{ t.common.cancel }}</AlertDialogCancel>
-          <AlertDialogAction
+          <AlertDialogCancel :disabled="isDeleting">{{ t.common.cancel }}</AlertDialogCancel>
+          <Button
             class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            :disabled="isDeleting"
             @click="handleDeleteConfirm"
           >
+            <Spinner v-if="isDeleting" class="mr-2 h-4 w-4" />
             {{ t.common.delete }}
-          </AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
