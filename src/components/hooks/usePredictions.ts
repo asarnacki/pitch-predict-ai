@@ -1,25 +1,13 @@
 import { ref } from "vue";
 import { predictionsService } from "@/services/api/predictions.service";
-import type { MatchDTO, UserChoice } from "@/types";
+import type { GeneratePredictionResponseDTO, MatchDTO, UserChoice } from "@/types";
 import { ApiError } from "@/services/api/client";
 import { getLeagueCodeFromName } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
 
 export interface PredictionState {
   status: "idle" | "loading" | "success" | "error";
-  data: {
-    match_id: string;
-    home_team: string;
-    away_team: string;
-    league: string;
-    match_date: string;
-    prediction: {
-      home_win: number;
-      draw: number;
-      away_win: number;
-    };
-    generated_at: string;
-  } | null;
+  data: GeneratePredictionResponseDTO | null;
   saveStatus: "idle" | "saving" | "saved" | "error";
   error: string | null;
 }
