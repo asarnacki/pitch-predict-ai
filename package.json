@@ -22,7 +22,7 @@
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/sitemap": "^3.5.1",
-    "@astrojs/vue": "^6.0.1",
+    "@astrojs/vue": "^5.1.4",
     "@supabase/supabase-js": "^2.76.1",
     "@tailwindcss/vite": "^4.1.13",
     "@vee-validate/zod": "^4.15.1",
@@ -63,6 +63,7 @@
     "jsdom": "^27.2.0",
     "lint-staged": "15.5.0",
     "prettier-plugin-astro": "0.14.1",
+    "prettier-plugin-tailwindcss": "^0.6.11",
     "typescript": "^5.8.3",
     "typescript-eslint": "8.28.0",
     "vitest": "^4.0.15",
