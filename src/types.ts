@@ -62,11 +62,12 @@ export interface GetMatchesQueryParams {
  * AI-generated prediction probabilities for match outcomes
  * Maps to the JSON structure stored in predictions.prediction_result
  */
-export interface PredictionProbabilities {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type PredictionProbabilities = {
   home: number; // 0-1, probability of home win
   draw: number; // 0-1, probability of draw
   away: number; // 0-1, probability of away win
-}
+};
 
 /**
  * User's prediction choice - which team they think will win
@@ -129,7 +130,10 @@ export type PredictionDTO = Tables<"predictions">;
  * - created_at (auto-generated)
  * - user_id (set from authenticated session)
  */
-export type CreatePredictionDTO = Omit<TablesInsert<"predictions">, "id" | "created_at" | "user_id"> & {
+export type CreatePredictionDTO = Omit<
+  TablesInsert<"predictions">,
+  "id" | "created_at" | "user_id" | "prediction_result"
+> & {
   // Override prediction_result type from Json to PredictionProbabilities for type safety
   prediction_result: PredictionProbabilities;
 };

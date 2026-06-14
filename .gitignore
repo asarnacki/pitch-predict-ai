@@ -36,6 +36,7 @@ test-results/
 
 #playwright report
 playwright-report/
+.playwright-mcp/
 
 #project progress (internal)
 pitch-predict-ai-progress.md

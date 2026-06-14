@@ -99,7 +99,10 @@
       "savedSuccess": "Prediction saved successfully!",
       "savedError": "Failed to save prediction",
       "deletedSuccess": "Prediction deleted successfully",
-      "deletedError": "Failed to delete prediction"
+      "deletedError": "Failed to delete prediction",
+      "resultFetchedSuccess": "Match result fetched",
+      "matchNotFinished": "The match hasn't finished yet – try again later",
+      "resultFetchError": "Failed to fetch match result"
     },
     "ui": {
       "clickToGenerate": "Click to generate AI prediction",
@@ -123,6 +126,11 @@
       "next": "Next",
       "deleteTitle": "Delete prediction?",
       "deleteCannotUndo": "This action cannot be undone.",
+      "checkResult": "Check result",
+      "checking": "Checking...",
+      "matchResult": "Match result",
+      "correct": "Correct prediction",
+      "incorrect": "Incorrect prediction",
       "chart": {
         "homeWin": "Home win",
         "draw": "Draw",

@@ -28,7 +28,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  context.locals.user = user ?? null;
+  context.locals.user = user ?? undefined;
 
   const pathname = new URL(context.request.url).pathname;
 

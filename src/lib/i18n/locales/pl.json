@@ -99,7 +99,10 @@
       "savedSuccess": "Predykcja zapisana pomyślnie!",
       "savedError": "Nie udało się zapisać predykcji",
       "deletedSuccess": "Predykcja usunięta pomyślnie",
-      "deletedError": "Nie udało się usunąć predykcji"
+      "deletedError": "Nie udało się usunąć predykcji",
+      "resultFetchedSuccess": "Wynik meczu pobrany",
+      "matchNotFinished": "Mecz jeszcze się nie zakończył – spróbuj później",
+      "resultFetchError": "Nie udało się pobrać wyniku meczu"
     },
     "ui": {
       "clickToGenerate": "Kliknij, aby wygenerować predykcję AI",
@@ -123,6 +126,11 @@
       "next": "Następna",
       "deleteTitle": "Usuń predykcję?",
       "deleteCannotUndo": "Tej operacji nie można cofnąć.",
+      "checkResult": "Sprawdź wynik",
+      "checking": "Sprawdzanie...",
+      "matchResult": "Wynik meczu",
+      "correct": "Trafiona predykcja",
+      "incorrect": "Nietrafiona predykcja",
       "chart": {
         "homeWin": "Wygrana gospodarzy",
         "draw": "Remis",
