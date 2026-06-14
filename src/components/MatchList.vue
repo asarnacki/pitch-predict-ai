@@ -40,17 +40,17 @@ const handleAccordionChange = (value: string | string[] | undefined) => {
 
 <template>
   <div v-if="isLoading" class="space-y-4">
-    <div v-for="index in 5" :key="index" class="border rounded-lg bg-card p-4 sm:p-6">
+    <div v-for="index in 5" :key="index" class="bg-card rounded-lg border p-4 sm:p-6">
       <div class="flex flex-col gap-3">
-        <Skeleton class="h-4 w-40 mx-auto" />
+        <Skeleton class="mx-auto h-4 w-40" />
         <div class="flex items-center justify-center gap-4">
           <Skeleton class="h-5 w-24 sm:w-32" />
-          <Skeleton class="h-6 w-6 sm:h-8 sm:w-8 rounded-full" />
+          <Skeleton class="h-6 w-6 rounded-full sm:h-8 sm:w-8" />
           <Skeleton class="h-3 w-8" />
-          <Skeleton class="h-6 w-6 sm:h-8 sm:w-8 rounded-full" />
+          <Skeleton class="h-6 w-6 rounded-full sm:h-8 sm:w-8" />
           <Skeleton class="h-5 w-24 sm:w-32" />
         </div>
-        <Skeleton class="h-3 w-32 mx-auto" />
+        <Skeleton class="mx-auto h-3 w-32" />
       </div>
     </div>
   </div>

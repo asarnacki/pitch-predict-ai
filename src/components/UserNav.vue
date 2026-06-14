@@ -41,13 +41,13 @@ const handleLogout = async () => {
   <nav v-if="!user" class="flex items-center gap-2 sm:gap-3">
     <Button variant="ghost" size="sm" as-child class="text-xs sm:text-sm">
       <a href="/login" data-testid="nav-login-link">
-        <LogIn class="sm:mr-2 size-4" />
+        <LogIn class="size-4 sm:mr-2" />
         <span class="hidden sm:inline">{{ t.nav.login }}</span>
       </a>
     </Button>
     <Button variant="default" size="sm" as-child class="text-xs sm:text-sm">
       <a href="/register" data-testid="nav-register-link">
-        <UserPlus class="sm:mr-2 size-4" />
+        <UserPlus class="size-4 sm:mr-2" />
         <span class="hidden sm:inline">{{ t.nav.register }}</span>
       </a>
     </Button>
@@ -57,13 +57,13 @@ const handleLogout = async () => {
   <nav v-else class="flex items-center gap-2 sm:gap-3">
     <Button variant="ghost" size="sm" as-child class="text-xs sm:text-sm">
       <a href="/predictions" data-testid="nav-predictions-link">
-        <Bookmark class="sm:mr-2 size-4" />
+        <Bookmark class="size-4 sm:mr-2" />
         <span class="hidden sm:inline">{{ t.nav.saved }}</span>
       </a>
     </Button>
-    <div class="flex items-center gap-2 px-3 py-1.5 bg-accent/50 rounded-md" data-testid="nav-user-email">
-      <UserIcon class="size-4 text-muted-foreground" />
-      <span class="text-xs sm:text-sm font-medium truncate max-w-[100px] sm:max-w-[150px]">{{ user.email }}</span>
+    <div class="bg-accent/50 flex items-center gap-2 rounded-md px-3 py-1.5" data-testid="nav-user-email">
+      <UserIcon class="text-muted-foreground size-4" />
+      <span class="max-w-[100px] truncate text-xs font-medium sm:max-w-[150px] sm:text-sm">{{ user.email }}</span>
     </div>
     <Button
       variant="outline"
@@ -73,7 +73,7 @@ const handleLogout = async () => {
       data-testid="nav-logout-button"
       @click="handleLogout"
     >
-      <LogOut class="sm:mr-2 size-4" />
+      <LogOut class="size-4 sm:mr-2" />
       <span class="hidden sm:inline">{{ isLoggingOut ? t.nav.logoutProcessing : t.nav.logout }}</span>
     </Button>
   </nav>

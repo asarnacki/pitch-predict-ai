@@ -27,9 +27,9 @@ const user = Astro.locals.user ?? null;
     </script>
   </head>
   <body>
-    <header class="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
-      <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-        <a href="/" class="text-xl sm:text-2xl font-bold tracking-tight" data-testid="nav-logo"> PitchPredict AI </a>
+    <header class="bg-background/80 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-md">
+      <div class="container mx-auto flex items-center justify-between px-4 py-3">
+        <a href="/" class="text-xl font-bold tracking-tight sm:text-2xl" data-testid="nav-logo"> PitchPredict AI </a>
         <div class="flex items-center gap-3 sm:gap-4">
           <UserNav client:load user={user} />
           <LanguageSwitcher client:load />

@@ -29,11 +29,11 @@ const hasMatches = computed(() => matches.value.length > 0);
 </script>
 
 <template>
-  <div class="min-h-screen bg-background">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 max-w-7xl">
-      <header class="mb-8 sm:mb-12 text-center space-y-3">
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">{{ t.predictions.title }}</h1>
-        <p class="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">{{ t.predictions.subtitle }}</p>
+  <div class="bg-background min-h-screen">
+    <div class="container mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
+      <header class="mb-8 space-y-3 text-center sm:mb-12">
+        <h1 class="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">{{ t.predictions.title }}</h1>
+        <p class="text-muted-foreground mx-auto max-w-2xl text-base sm:text-lg">{{ t.predictions.subtitle }}</p>
       </header>
 
       <LeagueSelector :selected-league="league" @league-change="changeLeague" />

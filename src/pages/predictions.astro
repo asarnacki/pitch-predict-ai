@@ -13,11 +13,11 @@ if (!user) {
 ---
 
 <Layout title="Zapisane Predykcje - PitchPredict AI">
-  <div class="min-h-screen bg-background">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 max-w-7xl">
-      <header class="mb-8 sm:mb-12 space-y-2">
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">Twoje Predykcje</h1>
-        <p class="text-base sm:text-lg text-muted-foreground">Przeglądaj swoje zapisane predykcje meczów</p>
+  <div class="bg-background min-h-screen">
+    <div class="container mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
+      <header class="mb-8 space-y-2 sm:mb-12">
+        <h1 class="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Twoje Predykcje</h1>
+        <p class="text-muted-foreground text-base sm:text-lg">Przeglądaj swoje zapisane predykcje meczów</p>
       </header>
 
       <SavedPredictionsList client:load />

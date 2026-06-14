@@ -26,7 +26,7 @@ const handleChange = (value: string | number | undefined) => {
 <template>
   <div class="mb-8 sm:mb-12">
     <Tabs :model-value="selectedLeague" @update:model-value="handleChange">
-      <TabsList class="grid w-full grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-0">
+      <TabsList class="grid w-full grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-0">
         <TabsTrigger v-for="league in leagues" :key="league" :value="league" class="text-sm sm:text-base">
           {{ LEAGUE_LABELS[league] }}
         </TabsTrigger>

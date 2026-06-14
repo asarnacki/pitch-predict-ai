@@ -54,13 +54,13 @@ const handleLanguageChange = (code: Language) => {
       @click="isOpen = !isOpen"
     >
       <span class="text-base">{{ currentLanguage.flag }}</span>
-      <span class="hidden sm:inline-block text-sm font-medium">{{ currentLanguage.label }}</span>
+      <span class="hidden text-sm font-medium sm:inline-block">{{ currentLanguage.label }}</span>
       <ChevronDown :class="cn('h-4 w-4 transition-transform duration-200', isOpen && 'rotate-180')" />
     </Button>
 
     <div
       v-if="isOpen"
-      class="absolute right-0 top-full mt-2 w-40 rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95 z-50"
+      class="bg-popover text-popover-foreground animate-in fade-in-0 zoom-in-95 absolute top-full right-0 z-50 mt-2 w-40 rounded-md border p-1 shadow-md outline-none"
     >
       <div role="listbox" class="flex flex-col gap-1">
         <button
@@ -68,7 +68,7 @@ const handleLanguageChange = (code: Language) => {
           :key="lang.code"
           :class="
             cn(
-              'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+              'hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-default items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
               language === lang.code && 'bg-accent text-accent-foreground'
             )
           "

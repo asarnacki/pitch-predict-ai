@@ -68,10 +68,10 @@ const isDisabled = computed(() => isSaving.value || isSaved.value || isAuthDisab
 </script>
 
 <template>
-  <form class="mt-6 pt-6 border-t space-y-4" @submit="onSubmit">
+  <form class="mt-6 space-y-4 border-t pt-6" @submit="onSubmit">
     <div
       v-if="isAuthDisabled"
-      class="rounded-md border border-dashed border-muted-foreground/40 bg-muted/50 px-3 py-2 text-xs sm:text-sm text-muted-foreground"
+      class="border-muted-foreground/40 bg-muted/50 text-muted-foreground rounded-md border border-dashed px-3 py-2 text-xs sm:text-sm"
     >
       {{ t.predictions.ui.saveForm.loginRequiredPrefix }}
       <a href="/login" class="underline underline-offset-4">{{ t.nav.login }}</a>
@@ -81,7 +81,7 @@ const isDisabled = computed(() => isSaving.value || isSaved.value || isAuthDisab
     </div>
 
     <div class="space-y-2">
-      <label :for="`note-${matchId}`" class="text-xs sm:text-sm font-medium block">
+      <label :for="`note-${matchId}`" class="block text-xs font-medium sm:text-sm">
         {{ t.predictions.ui.saveForm.addNoteLabel }}
       </label>
       <Textarea
@@ -96,8 +96,8 @@ const isDisabled = computed(() => isSaving.value || isSaved.value || isAuthDisab
         } ${isAuthDisabled ? 'bg-muted text-muted-foreground' : ''}`"
         :rows="3"
       />
-      <p v-if="errors.note" class="text-xs text-destructive">{{ errors.note }}</p>
-      <div class="flex justify-end items-center text-xs text-muted-foreground">
+      <p v-if="errors.note" class="text-destructive text-xs">{{ errors.note }}</p>
+      <div class="text-muted-foreground flex items-center justify-end text-xs">
         <span> {{ noteValue.length }}/{{ BUSINESS_RULES.MAX_NOTE_LENGTH }} {{ t.common.characters }} </span>
       </div>
     </div>
@@ -105,8 +105,8 @@ const isDisabled = computed(() => isSaving.value || isSaved.value || isAuthDisab
     <Button
       type="submit"
       :disabled="isDisabled"
-      :class="`w-full text-sm sm:text-base cursor-pointer disabled:cursor-not-allowed disabled:pointer-events-auto ${
-        isAuthDisabled ? 'border border-dashed bg-muted text-muted-foreground' : ''
+      :class="`w-full cursor-pointer text-sm disabled:pointer-events-auto disabled:cursor-not-allowed sm:text-base ${
+        isAuthDisabled ? 'bg-muted text-muted-foreground border border-dashed' : ''
       }`"
       :variant="isSaved ? 'secondary' : 'default'"
     >
