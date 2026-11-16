@@ -90,6 +90,31 @@ export interface GeneratePredictionRequestDTO {
   match_date: string; // ISO 8601 timestamp
 }
 
+// ============================================================================
+// ODDS & VALUE TYPES
+// ============================================================================
+
+/** Decimal odds for each match outcome (e.g. 2.10 = win pays 2.10× stake) */
+export interface OutcomeOdds {
+  home: number;
+  draw: number;
+  away: number;
+}
+
+/** Bookmaker odds plus their implied probability after removing overround */
+export interface BookmakerInfo {
+  odds: OutcomeOdds;
+  impliedProbability: PredictionProbabilities;
+  bookmaker?: string;
+}
+
+/** Expected value per outcome: p_model * odds_book − 1 (positive = value bet) */
+export interface OutcomeValue {
+  home: number;
+  draw: number;
+  away: number;
+}
+
 /**
  * Response from AI prediction generation
  * POST /api/predictions/generate
@@ -102,6 +127,9 @@ export interface GeneratePredictionResponseDTO {
   match_date: string; // ISO 8601 timestamp
   prediction: PredictionProbabilities;
   generated_at: string; // ISO 8601 timestamp
+  modelOdds: OutcomeOdds;
+  bookmaker?: BookmakerInfo | null;
+  value?: OutcomeValue | null;
 }
 
 // ============================================================================
